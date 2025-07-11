@@ -59,5 +59,13 @@ class User extends Authenticatable
     {
         return $this->hasMany(Payment::class);
     }
+    public function isAdmin()
+    {
+        return $this->role === UserRole::ADMIN;
+    }
+    public function isCustomer()
+    {
+        return $this->role === UserRole::CUSTOMER;
+    }
 }
 

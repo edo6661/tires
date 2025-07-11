@@ -6,9 +6,8 @@ use App\Models\User;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Carbon\Carbon;
-use UserRepositoryInterface;
-
-class UserRepository implements UserRepositoryInterface
+use App\Repositories\UserRepositoryInterface;   
+class UserRepository implements UserRepositoryInterface 
 {
     protected $model;
 

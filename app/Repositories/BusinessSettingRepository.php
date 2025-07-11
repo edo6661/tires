@@ -17,6 +17,7 @@ class BusinessSettingRepository implements BusinessSettingRepositoryInterface
     {
         return $this->model->first();
     }
+    
 
     public function updateSettings(array $data): BusinessSetting
     {

@@ -35,7 +35,7 @@ class TireStorageService implements TireStorageServiceInterface
 
     public function createTireStorage(array $data): TireStorage
     {
-        // Validasi tanggal
+        
         if (isset($data['storage_start_date']) && isset($data['planned_end_date'])) {
             $startDate = Carbon::parse($data['storage_start_date']);
             $endDate = Carbon::parse($data['planned_end_date']);
@@ -45,12 +45,12 @@ class TireStorageService implements TireStorageServiceInterface
             }
         }
 
-        // Set status default jika belum ada
+        
         if (!isset($data['status'])) {
             $data['status'] = 'active';
         }
 
-        // Hitung biaya penyimpanan otomatis jika belum ada
+        
         if (!isset($data['storage_fee'])) {
             $data['storage_fee'] = $this->calculateStorageFeeForNewStorage($data);
         }
@@ -65,7 +65,7 @@ class TireStorageService implements TireStorageServiceInterface
             return null;
         }
 
-        // Validasi tanggal jika ada perubahan
+        
         if (isset($data['storage_start_date']) || isset($data['planned_end_date'])) {
             $startDate = Carbon::parse($data['storage_start_date'] ?? $tireStorage->storage_start_date);
             $endDate = Carbon::parse($data['planned_end_date'] ?? $tireStorage->planned_end_date);
@@ -75,7 +75,7 @@ class TireStorageService implements TireStorageServiceInterface
             }
         }
 
-        // Hitung ulang biaya penyimpanan jika ada perubahan tanggal
+        
         if (isset($data['storage_start_date']) || isset($data['planned_end_date'])) {
             $updatedData = array_merge($tireStorage->toArray(), $data);
             $data['storage_fee'] = $this->calculateStorageFeeForNewStorage($updatedData);
@@ -91,7 +91,7 @@ class TireStorageService implements TireStorageServiceInterface
             return false;
         }
 
-        // Hanya bisa hapus jika belum aktif atau sudah selesai
+        
         if ($tireStorage->status === 'active') {
             throw new \Exception('Tidak bisa menghapus penyimpanan ban yang masih aktif');
         }
@@ -177,11 +177,11 @@ class TireStorageService implements TireStorageServiceInterface
         
         $months = $startDate->diffInMonths($endDate);
         if ($months < 1) {
-            $months = 1; // Minimal 1 bulan
+            $months = 1; 
         }
 
-        // Tarif per bulan (bisa disesuaikan atau diambil dari setting)
-        $monthlyRate = 50000; // Rp 50.000 per bulan
+        
+        $monthlyRate = 50000; 
         
         return $months * $monthlyRate;
     }
@@ -198,11 +198,11 @@ class TireStorageService implements TireStorageServiceInterface
         
         $months = $startDate->diffInMonths($endDate);
         if ($months < 1) {
-            $months = 1; // Minimal 1 bulan
+            $months = 1; 
         }
 
-        // Tarif per bulan (bisa disesuaikan atau diambil dari setting)
-        $monthlyRate = 50000; // Rp 50.000 per bulan
+        
+        $monthlyRate = 50000; 
         
         return $months * $monthlyRate;
     }

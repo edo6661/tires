@@ -18,7 +18,7 @@ return new class extends Migration
             $table->foreignId('menu_id')->constrained()->onDelete('cascade');
             $table->datetime('reservation_datetime');
             $table->integer('number_of_people')->default(1);
-            $table->decimal('amount', 10, 2);
+            $table->decimal('amount', 10, places: 2);
             $table->enum('status', ['pending', 'confirmed', 'completed', 'cancelled'])->default('pending');
             $table->text('notes')->nullable();
             $table->timestamps();
