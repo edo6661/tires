@@ -2,13 +2,155 @@
 
 namespace App\Repositories;
 
-class ReservationRepository
+use App\Models\Reservation;
+use App\Repositories\ReservationRepositoryInterface;
+use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Pagination\LengthAwarePaginator;
+use Carbon\Carbon;
+
+class ReservationRepository implements ReservationRepositoryInterface
 {
-    /**
-     * Create a new class instance.
-     */
-    public function __construct()
+    protected $model;
+
+    public function __construct(Reservation $model, protected BlockedPeriodRepositoryInterface $blockedPeriodRepo)
     {
-        //
+        $this->model = $model;
+    }
+
+    public function getAll(): Collection
+    {
+        return $this->model->with(['user', 'menu'])
+            ->orderBy('reservation_datetime', 'desc')
+            ->get();
+    }
+
+    public function getPaginated(int $perPage = 15): LengthAwarePaginator
+    {
+        return $this->model->with(['user', 'menu'])
+            ->orderBy('reservation_datetime', 'desc')
+            ->paginate($perPage);
+    }
+
+    public function findById(int $id): ?Reservation
+    {
+        return $this->model->with(['user', 'menu', 'questionnaire', 'payments'])->find($id);
+    }
+
+    public function create(array $data): Reservation
+    {
+        return $this->model->create($data);
+    }
+
+    public function update(int $id, array $data): ?Reservation
+    {
+        $reservation = $this->findById($id);
+        if ($reservation) {
+            $reservation->update($data);
+            return $reservation;
+        }
+        return null;
+    }
+
+    public function delete(int $id): bool
+    {
+        $reservation = $this->findById($id);
+        if ($reservation) {
+            return $reservation->delete();
+        }
+        return false;
+    }
+
+    public function getByUserId(int $userId): Collection
+    {
+        return $this->model->with('menu')
+            ->where('user_id', $userId)
+            ->orderBy('reservation_datetime', 'desc')
+            ->get();
+    }
+
+    public function getByMenuId(int $menuId): Collection
+    {
+        return $this->model->with('user')
+            ->where('menu_id', $menuId)
+            ->orderBy('reservation_datetime', 'desc')
+            ->get();
+    }
+
+    public function getByStatus(string $status): Collection
+    {
+        return $this->model->with(['user', 'menu'])
+            ->where('status', $status)
+            ->orderBy('reservation_datetime', 'desc')
+            ->get();
+    }
+
+    public function getByDateRange(string $startDate, string $endDate): Collection
+    {
+        return $this->model->with(['user', 'menu'])
+            ->whereBetween('reservation_datetime', [$startDate, $endDate])
+            ->orderBy('reservation_datetime')
+            ->get();
+    }
+
+    public function getUpcoming(): Collection
+    {
+        return $this->model->with(['user', 'menu'])
+            ->where('reservation_datetime', '>=', Carbon::now())
+            ->whereIn('status', ['pending', 'confirmed'])
+            ->orderBy('reservation_datetime')
+            ->get();
+    }
+
+    public function getCompleted(): Collection
+    {
+        return $this->getByStatus('completed');
+    }
+
+    public function getCancelled(): Collection
+    {
+        return $this->getByStatus('cancelled');
+    }
+
+    public function getTodayReservations(): Collection
+    {
+        return $this->model->with(['user', 'menu'])
+            ->whereDate('reservation_datetime', Carbon::today())
+            ->orderBy('reservation_datetime')
+            ->get();
+    }
+
+    public function checkAvailability(int $menuId, string $datetime): bool
+    {
+        $menu = \App\Models\Menu::find($menuId);
+        if (!$menu) {
+            return false;
+        }
+
+        $reservationTime = Carbon::parse($datetime);
+        $endTime = $reservationTime->copy()->addMinutes($menu->required_time);
+
+        // Check for conflicting reservations
+        $conflictingReservations = $this->model->where('menu_id', $menuId)
+            ->where(function ($query) use ($reservationTime, $endTime) {
+                $query->whereBetween('reservation_datetime', [$reservationTime, $endTime])
+                    ->orWhere(function ($q) use ($reservationTime, $endTime) {
+                        $q->where('reservation_datetime', '<=', $reservationTime)
+                            ->whereRaw('DATE_ADD(reservation_datetime, INTERVAL menus.required_time MINUTE) > ?', [$reservationTime]);
+                    });
+            })
+            ->join('menus', 'reservations.menu_id', '=', 'menus.id')
+            ->whereIn('reservations.status', ['pending', 'confirmed'])
+            ->exists();
+
+        if ($conflictingReservations) {
+            return false;
+        }
+
+        return !$this->blockedPeriodRepo->checkConflict($menuId, $reservationTime->format('Y-m-d H:i:s'), $endTime->format('Y-m-d H:i:s'));
+    }
+
+    public function bulkUpdateStatus(array $ids, string $status): bool
+    {
+        return $this->model->whereIn('id', $ids)->update(['status' => $status]) > 0;
     }
 }
