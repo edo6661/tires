@@ -1,17 +1,23 @@
 <?php
-
 namespace Database\Seeders;
 
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
+use App\Models\BlockedPeriod;
+use App\Models\Menu;
 
 class BlockedPeriodSeeder extends Seeder
 {
-    /**
-     * Run the database seeds.
-     */
     public function run(): void
     {
-        //
+        $menus = Menu::all();
+
+        BlockedPeriod::factory(10)->create();
+
+        if ($menus->count() > 0) {
+            BlockedPeriod::factory(5)->create([
+                'menu_id' => $menus->random()->id,
+                'all_menus' => false,
+            ]);
+        }
     }
 }

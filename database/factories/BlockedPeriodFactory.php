@@ -8,15 +8,17 @@ class BlockedPeriodFactory extends Factory
 {
     public function definition(): array
     {
-        $startDate = fake()->dateTimeBetween('now', '+3 months');
-        $endDate = fake()->dateTimeBetween($startDate, '+1 day');
-        
+        $startDate = fake()->dateTimeBetween('now', '+2 months');
+        $endDate = (clone $startDate)->modify('+' . fake()->numberBetween(1, 8) . ' hours');
+
+        $allMenus = fake()->boolean(30);
+
         return [
-            'menu_id' => fake()->optional()->randomElement([null, Menu::factory()]),
+            'menu_id' => $allMenus ? null : Menu::inRandomOrder()->value('id') ?? Menu::factory(),
             'start_datetime' => $startDate,
             'end_datetime' => $endDate,
             'reason' => fake()->sentence(),
-            'all_menus' => fake()->boolean(30),
+            'all_menus' => $allMenus,
         ];
     }
 }
