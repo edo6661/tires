@@ -1,3 +1,5 @@
-<div>
-    <!-- We must ship. - Taylor Otwell -->
-</div>
+<x-layouts.app>
+    <p>
+        customer dashboard
+    </p>
+</x-layouts.app>

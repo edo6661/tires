@@ -1,3 +1,5 @@
-<div>
-    <!-- When there is no desire, all things are at peace. - Laozi -->
-</div>
+<x-layouts.app>
+    <p>
+        admin dashboard
+    </p>
+</x-layouts.app>

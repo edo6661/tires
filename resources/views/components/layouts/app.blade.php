@@ -44,13 +44,23 @@
                     href="/settings"
                     activePath="settings*"
                 />
-                <x-shared.link-hint-icon 
-                    label="Login" 
-                    icon="fa-solid fa-user" 
-                    position="bottom"
-                    href="/login"
-                    activePath="login*"
-                />
+                @guest
+                    <x-shared.link-hint-icon 
+                        label="Login" 
+                        icon="fa-solid fa-user" 
+                        position="bottom"
+                        href="/login"
+                        activePath="login*"
+                    />
+                @endguest
+                @auth
+                     <x-shared.form-hint-icon
+                        label="Logout"
+                        icon="fa-solid fa-right-from-bracket"  
+                        position="bottom"
+                        action="{{ route('logout') }}"
+                    />
+                @endauth
             </nav>
         </div>
     </header>
