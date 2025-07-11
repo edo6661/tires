@@ -3,11 +3,11 @@
 namespace App\Services;
 
 use App\Models\User;
+use App\Repositories\UserRepositoryInterface;
 use App\Services\UserServiceInterface;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\Hash;
-use UserRepositoryInterface;
 
 class UserService implements UserServiceInterface
 {

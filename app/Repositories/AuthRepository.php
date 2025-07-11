@@ -3,7 +3,6 @@
 namespace App\Repositories;
 
 use App\Models\User;
-use App\Repositories\Interfaces\AuthRepositoryInterface;
 use Illuminate\Support\Facades\Auth;
 class AuthRepository implements AuthRepositoryInterface
 {
