@@ -10,8 +10,18 @@ Route::get('/inquiry', function () {
 require __DIR__ . '/auth.php';
 
 Route::middleware(['auth'])->group(function () {
+    
+    Route::name('customer.')->group(function () {
+        Route::get('/dashboard', function () {
+            return view('customer.dashboard');
+        })->name('dashboard');
+    });
     Route::middleware('admin')->group(function () {
         Route::name('admin.')->prefix('admin')->group(function () {
+            Route::get('/dashboard', function () {
+                return view('admin.dashboard');
+            })->name('dashboard');
+
             require __DIR__ . '/admin/announcement.php';
             require __DIR__ . '/admin/blocked-period.php';
             require __DIR__ . '/admin/business-setting.php';
