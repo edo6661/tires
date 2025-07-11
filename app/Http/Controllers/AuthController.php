@@ -5,10 +5,13 @@ namespace App\Http\Controllers;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\LoginRequest;
 use App\Http\Requests\UserRequest;
+use App\Http\Requests\ForgotPasswordRequest;
+use App\Http\Requests\ResetPasswordRequest;
 use App\Services\AuthServiceInterface;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\View\View;
 use Illuminate\Http\Request;
+
 class AuthController extends Controller
 {
     public function __construct(
@@ -55,15 +58,44 @@ class AuthController extends Controller
         
         return redirect()->route('customer.dashboard');
     }
-    public function showResetPasswordForm(): View
+
+    public function showForgotPasswordForm(): View
     {
-        return view('auth.reset-password');
+        return view('auth.forgot-password');
     }
 
-    public function resetPassword(Request $request): RedirectResponse
+    public function sendResetLink(ForgotPasswordRequest $request): RedirectResponse
     {
+        $sent = $this->authService->sendPasswordResetLink($request->email);
         
-        return redirect()->route('reset-password')->with('status', 'Password reset link sent to your email.');
+        if ($sent) {
+            return back()->with('status', 'Link reset password telah dikirim ke email Anda.');
+        }
+        
+        return back()->withErrors(['email' => 'Terjadi kesalahan saat mengirim email reset password.']);
+    }
+
+    public function showResetPasswordForm(Request $request, string $token): View
+    {
+        return view('auth.reset-password', [
+            'token' => $token,
+            'email' => $request->email
+        ]);
+    }
+
+    public function resetPassword(ResetPasswordRequest $request): RedirectResponse
+    {
+        $reset = $this->authService->resetPassword(
+            $request->email,
+            $request->token,
+            $request->password
+        );
+
+        if ($reset) {
+            return redirect()->route('login')->with('status', 'Password Anda berhasil direset. Silakan login dengan password baru.');
+        }
+
+        return back()->withErrors(['email' => 'Token reset password tidak valid atau sudah kedaluwarsa.']);
     }
 
     public function logout(): RedirectResponse

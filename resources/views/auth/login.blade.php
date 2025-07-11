@@ -5,6 +5,11 @@
                 <h1 class="text-2xl font-bold text-gray-800">RESERVATION ID</h1>
                 <h2 class="text-xl font-semibold text-gray-700 mt-2">Member Login</h2>
             </div>
+            @if(session('status'))
+                <div class="bg-green-100 text-green-800 p-4 rounded mb-4">
+                    {{ session('status') }}
+                </div>
+            @endif
 
             <form method="POST" action="{{ route('login') }}" class="space-y-6">
                 @csrf
@@ -71,7 +76,7 @@
                            Remember me
                         </label>
                     </div>
-                    <a href="{{ route('reset-password') }}" class="text-sm text-primary hover:text-green-800 transition">
+                    <a href="{{ route('forgot-password') }}" class="text-sm text-primary hover:text-green-800 transition">
                         Forgot your password?
                     </a>
                 </div>

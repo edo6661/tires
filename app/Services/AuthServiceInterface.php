@@ -13,4 +13,6 @@ interface AuthServiceInterface
     public function logout(): void;
     public function getCurrentUser(): ?User;
     public function isAuthenticated(): bool;
+    public function sendPasswordResetLink(string $email): bool;
+    public function resetPassword(string $email, string $token, string $password): bool;
 }
