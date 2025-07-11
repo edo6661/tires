@@ -22,7 +22,7 @@ interface ReservationServiceInterface
     public function getCompletedReservations(): Collection;
     public function getCancelledReservations(): Collection;
     public function getTodayReservations(): Collection;
-    public function checkAvailability(int $menuId, string $datetime): bool;
+    public function checkAvailability(int $menuId, string $datetime, ?int $excludeReservationId = null): bool;
     public function confirmReservation(int $id): bool;
     public function cancelReservation(int $id): bool;
     public function completeReservation(int $id): bool;

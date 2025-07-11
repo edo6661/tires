@@ -2,6 +2,7 @@
 
 namespace App\Repositories;
 
+use App\Models\Menu;
 use App\Models\Reservation;
 use App\Repositories\ReservationRepositoryInterface;
 use Illuminate\Database\Eloquent\Collection;
@@ -119,34 +120,43 @@ class ReservationRepository implements ReservationRepositoryInterface
             ->get();
     }
 
-    public function checkAvailability(int $menuId, string $datetime): bool
+    public function checkAvailability(int $menuId, string $datetime, ?int $excludeReservationId = null): bool
     {
-        $menu = \App\Models\Menu::find($menuId);
+        $menu = Menu::find($menuId);
         if (!$menu) {
             return false;
         }
 
         $reservationTime = Carbon::parse($datetime);
+        
         $endTime = $reservationTime->copy()->addMinutes($menu->required_time);
 
-        // Check for conflicting reservations
-        $conflictingReservations = $this->model->where('menu_id', $menuId)
+        $conflictingReservations = $this->model
+            ->where('menu_id', $menuId)
+            ->when($excludeReservationId, function ($query) use ($excludeReservationId) {
+                return $query->where('reservations.id', '!=', $excludeReservationId);
+            })
             ->where(function ($query) use ($reservationTime, $endTime) {
                 $query->whereBetween('reservation_datetime', [$reservationTime, $endTime])
-                    ->orWhere(function ($q) use ($reservationTime, $endTime) {
+                    ->orWhere(function ($q) use ($reservationTime) {
                         $q->where('reservation_datetime', '<=', $reservationTime)
-                            ->whereRaw('DATE_ADD(reservation_datetime, INTERVAL menus.required_time MINUTE) > ?', [$reservationTime]);
+                          ->whereRaw('DATE_ADD(reservation_datetime, INTERVAL menus.required_time MINUTE) > ?', [$reservationTime]);
                     });
             })
             ->join('menus', 'reservations.menu_id', '=', 'menus.id')
             ->whereIn('reservations.status', ['pending', 'confirmed'])
-            ->exists();
+            ->exists(); 
 
         if ($conflictingReservations) {
-            return false;
+            return false; 
         }
 
-        return !$this->blockedPeriodRepo->checkConflict($menuId, $reservationTime->format('Y-m-d H:i:s'), $endTime->format('Y-m-d H:i:s'));
+        
+        return !$this->blockedPeriodRepo->checkConflict(
+            $menuId,
+            $reservationTime->format('Y-m-d H:i:s'),
+            $endTime->format('Y-m-d H:i:s')
+        );
     }
 
     public function bulkUpdateStatus(array $ids, string $status): bool
