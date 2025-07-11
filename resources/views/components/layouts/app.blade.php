@@ -27,8 +27,8 @@
                     label="Calendar" 
                     icon="fa-solid fa-calendar-days" 
                     position="bottom"
-                    href="/calendar"
-                    activePath="calendar*"
+                    href="/"
+                    activePath="/"
                 />
                 <x-shared.link-hint-icon 
                     label="Inquiry" 
@@ -36,13 +36,6 @@
                     position="bottom"
                     href="/inquiry"
                     activePath="inquiry*"
-                />
-                <x-shared.link-hint-icon 
-                    label="Settings" 
-                    icon="fa-solid fa-gear" 
-                    position="bottom"
-                    href="/settings"
-                    activePath="settings*"
                 />
                 @guest
                     <x-shared.link-hint-icon 
