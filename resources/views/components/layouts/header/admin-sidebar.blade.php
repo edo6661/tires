@@ -18,124 +18,144 @@
 
                 <nav class="flex-1 space-y-2">
                     <div class="space-y-1">
-                        <div x-data="dropdown()" class="relative">
-                            <button 
-                                @click="isExpanded ? toggle() : null"
-                                class="w-full flex items-center justify-between px-3 py-2 text-sm hover:bg-gray-100 rounded-md transition-colors duration-200 group"
-                                :class="{ 'bg-gray-100': isOpen }"
-                            >
-                                <div class="flex items-center gap-3">
-                                    <i class="fas fa-calendar-alt text-gray-500 w-4 text-center flex-shrink-0"></i>
-                                    <span class="whitespace-nowrap overflow-hidden transition-all duration-300" 
-                                            :class="isExpanded ? 'opacity-100 w-auto' : 'opacity-0 w-0'">Reservation Management</span>
-                                </div>
-                                <i class="fas fa-chevron-down text-xs transition-transform duration-400 flex-shrink-0" 
-                                    :class="{ 'rotate-180': isOpen }"
-                                    x-show="isExpanded"></i>
-                            </button>
-                            
-                            <div 
-                                x-show="isOpen && isExpanded" 
-                                x-transition:enter="transition-all ease-in-out duration-300"
-                                x-transition:enter-start="max-h-0"
-                                x-transition:enter-end="max-h-96"
-                                x-transition:leave="transition-all ease-in-out duration-300"
-                                x-transition:leave-start="max-h-96"
-                                x-transition:leave-end="max-h-0"
-                                class="mt-1 space-y-1 ml-4 border-l-2 border-gray-200 pl-4 overflow-hidden"
-                            >
-                                <template x-for="item in items" :key="item.id">
-                                    <a :href="item.url" class="block px-3 py-2 text-sm text-gray-600 hover:bg-gray-50 hover:text-gray-800 rounded-md transition-colors duration-150">
-                                        <i :class="item.icon" class="text-xs mr-2 text-gray-400"></i>
-                                        <span x-text="item.name"></span>
-                                    </a>
-                                </template>
-                            </div>
-                        </div>
+                        <x-layouts.header.admin-dropdown-menu
+                            type="reservation" 
+                            icon="fas fa-calendar-alt" 
+                            title="Reservation Management"
+                            :is-active="request()->routeIs('admin.reservation.*')"
+                        />
 
-                        <div x-data="dropdown('customer')" class="relative">
-                            <button 
-                                @click="isExpanded ? toggle() : null"
-                                class="w-full flex items-center justify-between px-3 py-2 text-sm hover:bg-gray-100 rounded-md transition-colors duration-200 font-medium text-green-600 bg-green-50"
-                                :class="{ 'bg-green-100': isOpen }"
-                            >
-                                <div class="flex items-center gap-3">
-                                    <i class="fas fa-headset text-green-600 w-4 text-center flex-shrink-0"></i>
-                                    <span class="whitespace-nowrap overflow-hidden transition-all duration-300" 
-                                            :class="isExpanded ? 'opacity-100 w-auto' : 'opacity-0 w-0'">Customer Support</span>
-                                </div>
-                                <i class="fas fa-chevron-down text-xs transition-transform duration-400 flex-shrink-0" 
-                                    :class="{ 'rotate-180': isOpen }"
-                                    x-show="isExpanded"></i>
-                            </button>
-                            
-                            <div 
-                                x-show="isOpen && isExpanded" 
-                                x-transition:enter="transition-all ease-in-out duration-300"
-                                x-transition:enter-start="max-h-0"
-                                x-transition:enter-end="max-h-96"
-                                x-transition:leave="transition-all ease-in-out duration-300"
-                                x-transition:leave-start="max-h-96"
-                                x-transition:leave-end="max-h-0"
-                                class="mt-1 space-y-1 ml-4 border-l-2 border-gray-200 pl-4 overflow-hidden"
-                            >
-                                <template x-for="item in items" :key="item.id">
-                                    <a :href="item.url" class="block px-3 py-2 text-sm text-gray-600 hover:bg-gray-50 hover:text-gray-800 rounded-md transition-colors duration-150">
-                                        <i :class="item.icon" class="text-xs mr-2 text-gray-400"></i>
-                                        <span x-text="item.name"></span>
-                                    </a>
-                                </template>
-                            </div>
-                        </div>
+                        <x-layouts.header.admin-dropdown-menu
+                            type="customer" 
+                            icon="fas fa-headset" 
+                            title="Customer Support"
+                            :is-active="request()->routeIs('admin.customer.*')"
+                        />
 
-                        <div x-data="dropdown('settings')" class="relative">
-                            <button 
-                                @click="isExpanded ? toggle() : null"
-                                class="w-full flex items-center justify-between px-3 py-2 text-sm hover:bg-gray-100 rounded-md transition-colors duration-200"
-                                :class="{ 'bg-gray-100': isOpen }"
-                            >
-                                <div class="flex items-center gap-3">
-                                    <i class="fas fa-cog text-gray-500 w-4 text-center flex-shrink-0"></i>
-                                    <span class="whitespace-nowrap overflow-hidden transition-all duration-300" 
-                                            :class="isExpanded ? 'opacity-100 w-auto' : 'opacity-0 w-0'">Settings</span>
-                                </div>
-                                <i class="fas fa-chevron-down text-xs transition-transform duration-400 flex-shrink-0" 
-                                    :class="{ 'rotate-180': isOpen }"
-                                    x-show="isExpanded"></i>
-                            </button>
-                            
-                            <div 
-                                x-show="isOpen && isExpanded" 
-                                x-transition:enter="transition-all ease-in-out duration-300"
-                                x-transition:enter-start="max-h-0"
-                                x-transition:enter-end="max-h-96"
-                                x-transition:leave="transition-all ease-in-out duration-300"
-                                x-transition:leave-start="max-h-96"
-                                x-transition:leave-end="max-h-0"
-                                class="mt-1 space-y-1 ml-4 border-l-2 border-gray-200 pl-4 overflow-hidden"
-                            >
-                                <template x-for="item in items" :key="item.id">
-                                    <a :href="item.url" class="block px-3 py-2 text-sm text-gray-600 hover:bg-gray-50 hover:text-gray-800 rounded-md transition-colors duration-150">
-                                        <i :class="item.icon" class="text-xs mr-2 text-gray-400"></i>
-                                        <span x-text="item.name"></span>
-                                    </a>
-                                </template>
-                            </div>
-                        </div>
+                        <x-layouts.header.admin-dropdown-menu
+                            type="settings" 
+                            icon="fas fa-cog" 
+                            title="Settings"
+                            :is-active="request()->routeIs('admin.settings.*')"
+                        />
 
-                        <a href="#" class="flex items-center gap-3 px-3 py-2 text-sm hover:bg-gray-100 rounded-md font-medium transition-colors duration-200">
-                            <i class="fas fa-users text-gray-500 w-4 text-center flex-shrink-0"></i>
-                            <span class="whitespace-nowrap overflow-hidden transition-all duration-300" 
-                                    :class="isExpanded ? 'opacity-100 w-auto' : 'opacity-0 w-0'">Customer List</span>
-                        </a>
-                        <a href="#" class="flex items-center gap-3 px-3 py-2 text-sm hover:bg-gray-100 rounded-md font-medium transition-colors duration-200">
-                            <i class="fas fa-chart-bar text-gray-500 w-4 text-center flex-shrink-0"></i>
-                            <span class="whitespace-nowrap overflow-hidden transition-all duration-300" 
-                                    :class="isExpanded ? 'opacity-100 w-auto' : 'opacity-0 w-0'">Aggregation / Analysis</span>
-                        </a>
+                        <x-layouts.header.admin-dropdown-menu-item
+                            icon="fas fa-users" 
+                            title="Customer List"
+                            href="#"
+                            :is-active="request()->routeIs('admin.customers')"
+                        />
+
+                        <x-layouts.header.admin-dropdown-menu-item
+                            icon="fas fa-chart-bar" 
+                            title="Aggregation / Analysis"
+                            href="#"
+                            :is-active="request()->routeIs('admin.analytics')"
+                        />
                     </div>
                 </nav>
             </div>
         </div>
     @endif
 @endauth
+<script>
+    function sidebar() {
+    return {
+        isExpanded: true,
+        
+        toggle() {
+            this.isExpanded = !this.isExpanded;
+            if (!this.isExpanded) {
+                document.querySelectorAll('[x-data*="dropdown"]').forEach(el => {
+                    if (el.__x) {
+                        el.__x.$data.isOpen = false;
+                    }
+                });
+            }
+        }
+    }
+}
+
+function dropdown(type = 'reservation') {
+    return {
+        isOpen: false,
+        items: [],
+        
+        init() {
+            this.setItems(type);
+        },
+        
+        toggle() {
+            this.isOpen = !this.isOpen;
+        },
+        
+        close() {
+            this.isOpen = false;
+        },
+        
+        setItems(type) {
+            const currentRoute = window.location.pathname;
+            
+            const dropdownItems = {
+                reservation: [
+                    { 
+                        id: 1, 
+                        name: 'Calendar', 
+                        icon: 'fas fa-calendar-alt', 
+                        url: '{{ route('admin.reservation.calendar') }}',
+                        isActive: currentRoute.includes('admin/reservation/calendar')
+                    },
+                    { 
+                        id: 3, 
+                        name: 'Blocked', 
+                        icon: 'fas fa-ban', 
+                        url: '{{ route('admin.reservation.block') }}',
+                        isActive: currentRoute.includes('admin/reservation/block')
+                    },
+                    { 
+                        id: 4, 
+                        name: 'Availability', 
+                        icon: 'fas fa-check-circle', 
+                        url: '{{ route('admin.reservation.availability') }}',
+                        isActive: currentRoute.includes('admin/reservation/availability')
+                    }
+                ],
+                customer: [
+                    { 
+                        id: 1, 
+                        name: 'Contact', 
+                        icon: 'fa-solid fa-address-book', 
+                        url: '#customer-list',
+                        isActive: currentRoute.includes('customer-list')
+                    },
+                    { 
+                        id: 2, 
+                        name: 'Announcement', 
+                        icon: 'fas fa-bullhorn', 
+                        url: '#announcements',
+                        isActive: currentRoute.includes('announcements')
+                    },
+                ],
+                settings: [
+                    { 
+                        id: 1, 
+                        name: 'Business Information', 
+                        icon: 'fa-solid fa-store', 
+                        url: '#business-info',
+                        isActive: currentRoute.includes('business-info')
+                    },
+                    { 
+                        id: 2, 
+                        name: 'Menu', 
+                        icon: 'fa-solid fa-book-open', 
+                        url: '#menu-registration',
+                        isActive: currentRoute.includes('menu-registration')
+                    }
+                ]
+            };
+            
+            this.items = dropdownItems[type] || [];
+        }
+    }
+}
+</script>

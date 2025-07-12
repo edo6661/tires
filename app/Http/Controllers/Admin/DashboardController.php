@@ -12,18 +12,12 @@ use Illuminate\Http\Request;
 
 class DashboardController extends Controller
 {
-    protected $announcementService;
-    protected $reservationService;
-    protected $contactService;
 
     public function __construct(
-        AnnouncementServiceInterface $announcementService,
-        ReservationServiceInterface $reservationService,
-        ContactServiceInterface $contactService
+        protected AnnouncementServiceInterface $announcementService,
+        protected ReservationServiceInterface $reservationService,
+        protected ContactServiceInterface $contactService
     ) {
-        $this->announcementService = $announcementService;
-        $this->reservationService = $reservationService;
-        $this->contactService = $contactService;
     }
 
     public function index()

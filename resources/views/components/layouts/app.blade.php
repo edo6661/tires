@@ -23,63 +23,6 @@
         </div>
     </div>
 
-    <script>
-        function sidebar() {
-            return {
-                isExpanded: true,
-                
-                toggle() {
-                    this.isExpanded = !this.isExpanded;
-                    if (!this.isExpanded) {
-                        document.querySelectorAll('[x-data*="dropdown"]').forEach(el => {
-                            if (el.__x) {
-                                el.__x.$data.isOpen = false;
-                            }
-                        });
-                    }
-                }
-            }
-        }
-
-        function dropdown(type = 'reservation') {
-            return {
-                isOpen: false,
-                items: [],
-                
-                init() {
-                    this.setItems(type);
-                },
-                
-                toggle() {
-                    this.isOpen = !this.isOpen;
-                },
-                
-                close() {
-                    this.isOpen = false;
-                },
-                
-                setItems(type) {
-                    const dropdownItems = {
-                        reservation: [
-                            { id: 1, name: 'Calendar', icon: 'fas fa-calendar-alt', url: '#calendar' },
-                            { id: 2, name: 'List', icon: 'fas fa-list', url: '#list' },
-                            { id: 3, name: 'Blocked', icon: 'fas fa-ban', url: '#block' },
-                            { id: 4, name: 'Availability', icon: 'fas fa-check-circle', url: '#availability' }
-                        ],
-                        customer: [
-                            { id: 1, name: 'Contact', icon: 'fa-solid fa-address-book', url: '#customer-list' },
-                            { id: 2, name: 'Announcement', icon: 'fas fa-bullhorn', url: '#announcements' },
-                        ],
-                        settings: [
-                            { id: 1, name: 'Business Information', icon: 'fa-solid fa-store', url: '#business-info' },
-                            { id: 2, name: 'Menu', icon: 'fa-solid fa-book-open', url: '#menu-registration' }
-                        ]
-                    };
-                    
-                    this.items = dropdownItems[type] || [];
-                }
-            }
-        }
-    </script>
+    
 </body>
 </html>
