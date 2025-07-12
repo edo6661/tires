@@ -1,12 +1,15 @@
 <?php
 
+use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\HomeController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', [HomeController::class, 'index'])->name('home');
+
 Route::get('/inquiry', function () {
     return view('inquiry');
 })->name('inquiry');
+
 require __DIR__ . '/auth.php';
 
 Route::middleware(['auth'])->group(function () {
@@ -16,12 +19,10 @@ Route::middleware(['auth'])->group(function () {
             return view('customer.dashboard');
         })->name('dashboard');
     });
+    
     Route::middleware('admin')->group(function () {
         Route::name('admin.')->prefix('admin')->group(function () {
-            Route::get('/dashboard', function () {
-                return view('admin.dashboard');
-            })->name('dashboard');
-
+            Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
             require __DIR__ . '/admin/announcement.php';
             require __DIR__ . '/admin/blocked-period.php';
             require __DIR__ . '/admin/business-setting.php';

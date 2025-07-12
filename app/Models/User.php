@@ -67,5 +67,9 @@ class User extends Authenticatable
     {
         return $this->role === UserRole::CUSTOMER;
     }
+    public function isCustomerOrGuest()
+    {
+        return !auth()->check() || $this->role === UserRole::CUSTOMER;
+    }
 }
 

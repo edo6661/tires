@@ -24,3 +24,21 @@
         @apply bg-white p-6 rounded-lg shadow-sm border border-gray-200;
     }
 }
+.dropdown-enter {
+    opacity: 0;
+    transform: translateY(-10px);
+}
+.dropdown-enter-active {
+    opacity: 1;
+    transform: translateY(0);
+    transition: all 0.3s ease-out;
+}
+.dropdown-leave {
+    opacity: 1;
+    transform: translateY(0);
+}
+.dropdown-leave-active {
+    opacity: 0;
+    transform: translateY(-10px);
+    transition: all 0.2s ease-in;
+}
