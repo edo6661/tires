@@ -1,6 +1,6 @@
 @auth
     @if(auth()->user()->isAdmin())
-        <div x-data="sidebar()" class="bg-white border-r border-gray-200 flex flex-col sticky top-0 h-screen transition-all duration-300 ease-in-out" :class="isExpanded ? 'w-72' : 'w-20'">
+        <div x-data="sidebar()" class="bg-white border-r border-gray-200 flex flex-col sm:sticky absolute top-0 bottom-0 transition-all duration-300 ease-in-out z-50" :class="isExpanded ? 'w-72' : 'w-16'">
             <div class="p-4 border-b border-gray-200">
                 <button @click="toggle()" class="w-full flex items-center justify-center p-2 text-gray-600 hover:bg-gray-100 rounded-md transition-colors duration-200">
                     <i class="fas fa-bars text-lg"></i>
@@ -10,7 +10,7 @@
             <div class="p-4 overflow-y-auto flex-1">
                 <div class="mb-4">
                     <a href="{{ route('admin.dashboard') }}" class="flex items-center gap-3 text-gray-700 hover:bg-gray-50 p-2 rounded-md transition-colors duration-200">
-                        <img src="{{ asset('images/logo.jpg') }}" alt="Admin Logo" class="object-contain w-8 h-8 rounded flex-shrink-0" />
+                        <img src="{{ asset('images/logo.jpg') }}" alt="Admin Logo" class="object-contain w-8 h-8 rounded flex-shrink-0 sm:block hidden" />
                         <span class="text-base font-semibold whitespace-nowrap overflow-hidden transition-all duration-300" 
                                 :class="isExpanded ? 'opacity-100 w-auto' : 'opacity-0 w-0'">Dashboard</span>
                     </a>
@@ -60,102 +60,102 @@
 @endauth
 <script>
     function sidebar() {
-    return {
-        isExpanded: true,
-        
-        toggle() {
-            this.isExpanded = !this.isExpanded;
-            if (!this.isExpanded) {
-                document.querySelectorAll('[x-data*="dropdown"]').forEach(el => {
-                    if (el.__x) {
-                        el.__x.$data.isOpen = false;
-                    }
-                });
+        return {
+            isExpanded: false,
+            
+            toggle() {
+                this.isExpanded = !this.isExpanded;
+                if (!this.isExpanded) {
+                    document.querySelectorAll('[x-data*="dropdown"]').forEach(el => {
+                        if (el.__x) {
+                            el.__x.$data.isOpen = false;
+                        }
+                    });
+                }
             }
         }
     }
-}
 
-function dropdown(type = 'reservation') {
-    return {
-        isOpen: false,
-        items: [],
-        
-        init() {
-            this.setItems(type);
-        },
-        
-        toggle() {
-            this.isOpen = !this.isOpen;
-        },
-        
-        close() {
-            this.isOpen = false;
-        },
-        
-        setItems(type) {
-            const currentRoute = window.location.pathname;
+    function dropdown(type = 'reservation') {
+        return {
+            isOpen: false,
+            items: [],
             
-            const dropdownItems = {
-                reservation: [
-                    { 
-                        id: 1, 
-                        name: 'Calendar', 
-                        icon: 'fas fa-calendar-alt', 
-                        url: '{{ route('admin.reservation.calendar') }}',
-                        isActive: currentRoute.includes('admin/reservation/calendar')
-                    },
-                    { 
-                        id: 3, 
-                        name: 'Blocked', 
-                        icon: 'fas fa-ban', 
-                        url: '{{ route('admin.reservation.block') }}',
-                        isActive: currentRoute.includes('admin/reservation/block')
-                    },
-                    { 
-                        id: 4, 
-                        name: 'Availability', 
-                        icon: 'fas fa-check-circle', 
-                        url: '{{ route('admin.reservation.availability') }}',
-                        isActive: currentRoute.includes('admin/reservation/availability')
-                    }
-                ],
-                customer: [
-                    { 
-                        id: 1, 
-                        name: 'Contact', 
-                        icon: 'fa-solid fa-address-book', 
-                        url: '#customer-list',
-                        isActive: currentRoute.includes('customer-list')
-                    },
-                    { 
-                        id: 2, 
-                        name: 'Announcement', 
-                        icon: 'fas fa-bullhorn', 
-                        url: '#announcements',
-                        isActive: currentRoute.includes('announcements')
-                    },
-                ],
-                settings: [
-                    { 
-                        id: 1, 
-                        name: 'Business Information', 
-                        icon: 'fa-solid fa-store', 
-                        url: '#business-info',
-                        isActive: currentRoute.includes('business-info')
-                    },
-                    { 
-                        id: 2, 
-                        name: 'Menu', 
-                        icon: 'fa-solid fa-book-open', 
-                        url: '#menu-registration',
-                        isActive: currentRoute.includes('menu-registration')
-                    }
-                ]
-            };
+            init() {
+                this.setItems(type);
+            },
             
-            this.items = dropdownItems[type] || [];
+            toggle() {
+                this.isOpen = !this.isOpen;
+            },
+            
+            close() {
+                this.isOpen = false;
+            },
+            
+            setItems(type) {
+                const currentRoute = window.location.pathname;
+                
+                const dropdownItems = {
+                    reservation: [
+                        { 
+                            id: 1, 
+                            name: 'Calendar', 
+                            icon: 'fas fa-calendar-alt', 
+                            url: '{{ route('admin.reservation.calendar') }}',
+                            isActive: currentRoute.includes('admin/reservation/calendar')
+                        },
+                        { 
+                            id: 3, 
+                            name: 'Blocked', 
+                            icon: 'fas fa-ban', 
+                            url: '{{ route('admin.reservation.block') }}',
+                            isActive: currentRoute.includes('admin/reservation/block')
+                        },
+                        { 
+                            id: 4, 
+                            name: 'Availability', 
+                            icon: 'fas fa-check-circle', 
+                            url: '{{ route('admin.reservation.availability') }}',
+                            isActive: currentRoute.includes('admin/reservation/availability')
+                        }
+                    ],
+                    customer: [
+                        { 
+                            id: 1, 
+                            name: 'Contact', 
+                            icon: 'fa-solid fa-address-book', 
+                            url: '#customer-list',
+                            isActive: currentRoute.includes('customer-list')
+                        },
+                        { 
+                            id: 2, 
+                            name: 'Announcement', 
+                            icon: 'fas fa-bullhorn', 
+                            url: '#announcements',
+                            isActive: currentRoute.includes('announcements')
+                        },
+                    ],
+                    settings: [
+                        { 
+                            id: 1, 
+                            name: 'Business Information', 
+                            icon: 'fa-solid fa-store', 
+                            url: '#business-info',
+                            isActive: currentRoute.includes('business-info')
+                        },
+                        { 
+                            id: 2, 
+                            name: 'Menu', 
+                            icon: 'fa-solid fa-book-open', 
+                            url: '#menu-registration',
+                            isActive: currentRoute.includes('menu-registration')
+                        }
+                    ]
+                };
+                
+                this.items = dropdownItems[type] || [];
+            }
         }
     }
-}
 </script>

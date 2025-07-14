@@ -1,19 +1,26 @@
 <x-layouts.app>
     <div class="max-w-7xl mx-auto space-y-6">
-        @if($customersUntilLimit <= 10)
-            <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
-                <div class="flex items-center">
-                    <div class="flex-shrink-0">
-                        <i class="fas fa-exclamation-triangle text-yellow-600"></i>
-                    </div>
-                    <div class="ml-3">
-                        <p class="text-sm text-yellow-800">
-                            Only {{ $customersUntilLimit }} customers left until the upper limit. Please upgrade your plan.
-                        </p>
-                    </div>
-                </div>
+       <div class="bg-white rounded-lg shadow-sm p-6">
+            <div class="space-y-3">
+                @foreach ($announcements as $announcement)
+                    <div class="flex items-start gap-3">
+                        <i class="fa-solid fa-circle-exclamation text-red-500 flex-shrink-0 mt-1"></i>
+                        <div class="flex-1 min-w-0">
+                            <div class="flex items-center justify-between mb-1">
+                                <span class="font-semibold text-sm">[{{ $announcement->title }}]</span>
+                                <div class="flex items-center gap-2">
+                                    <span class="text-xs text-gray-500">{{ $announcement->created_at->format('Y-m-d H:i') }}</span>
+                                    <i class="fa-solid fa-xmark cursor-pointer text-sm"></i>
+                                </div>
+                            </div>
+                            <p class="text-sm text-gray-700 line-clamp-2 break-words">
+                                {{ $announcement->content }}
+                            </p>
+                        </div>
+                    </div>                                
+                @endforeach
             </div>
-        @endif
+        </div>
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
             <div class="space-y-6">
                 <div class="bg-white rounded-lg shadow-sm p-6">
@@ -38,7 +45,7 @@
                 <div class="bg-white rounded-lg shadow-sm p-6">
                     <div class="flex items-center justify-between mb-4">
                         <h2 class="text-lg font-semibold text-gray-900">Contact</h2>
-                        <span class=" text-sm">></span>
+                        <span class=" text-sm"></span>
                     </div>
                     <div class="overflow-x-auto">
                         <table class="w-full text-sm">
@@ -75,7 +82,7 @@
                 <div class="bg-white rounded-lg shadow-sm p-6">
                     <div class="flex items-center justify-between mb-4">
                         <h2 class="text-lg font-semibold text-gray-900">Today's Reservations</h2>
-                        <span class=" text-sm">></span>
+                        <span class=" text-sm"></span>
                     </div>
                     <div class="overflow-x-auto">
                         <table class="w-full text-sm">
@@ -91,7 +98,7 @@
                                     <tr class="hover:bg-gray-50">
                                         <td class="px-4 py-2 text-gray-900">{{ $reservation->reservation_datetime->format('m/d H:i') }}</td>
                                         <td class="px-4 py-2 text-gray-700">{{ $reservation->menu->name ?? 'Service' }}</td>
-                                        <td class="px-4 py-2 text-gray-900">{{ $reservation->user->name }}</td>
+                                        <td class="px-4 py-2 text-gray-900">{{ $reservation->user->full_name }}</td>
                                     </tr>
                                 @empty
                                     <tr>

@@ -12,11 +12,11 @@
     @endif
 </head>
 <body class="bg-gray-50 font-sans">
-    <div class="flex min-h-screen">
+    <div class="flex min-h-screen relative">
         <x-layouts.header.admin-sidebar/>
         <div class="flex-1 flex flex-col">
             <x-layouts.header.customer-nav />
-            <main class="flex-1 max-w-7xl mx-auto px-6 md:px-12 py-8 min-h-[200vh]">
+            <main class="flex-1 w-full mx-auto px-2 md:px-4 py-8">
                 {{ $slot }}
             </main>
             <x-layouts.footer.customer-footer />
