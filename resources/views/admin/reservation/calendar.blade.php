@@ -200,12 +200,10 @@
                                                         </div>
                                                     </div>
                                                     <div class="flex items-center space-x-3">
-                                                        <div class="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center">
-                                                            <i class="fas fa-utensils text-gray-600 text-xs"></i>
-                                                        </div>
+                                                        
                                                         <div>
                                                             <div class="font-medium text-gray-900">{{ $reservation->menu->name }}</div>
-                                                            <div class="text-gray-600 text-xs">{{ Str::limit($reservation->menu->description ?? '', 50) }}</div>
+                                                            
                                                         </div>
                                                     </div>
                                                     <div class="grid grid-cols-2 gap-3">
@@ -337,12 +335,10 @@
                                                         </div>
                                                     </div>
                                                     <div class="flex items-center space-x-3">
-                                                        <div class="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center">
-                                                            <i class="fas fa-utensils text-gray-600 text-xs"></i>
-                                                        </div>
+                                                        
                                                         <div>
                                                             <div class="font-medium text-gray-900">{{ $reservation->menu->name }}</div>
-                                                            <div class="text-gray-600 text-xs">{{ Str::limit($reservation->menu->description ?? '', 50) }}</div>
+                                                            
                                                         </div>
                                                     </div>
                                                     <div class="grid grid-cols-2 gap-3">
@@ -468,7 +464,7 @@
                                                             </div>
                                                             <div>
                                                                 <div class="font-medium text-gray-900">{{ $reservation->menu->name }}</div>
-                                                                <div class="text-gray-600 text-xs">{{ Str::limit($reservation->menu->description ?? '', 50) }}</div>
+                                                                
                                                             </div>
                                                         </div>
                                                         <div class="grid grid-cols-2 gap-3">
