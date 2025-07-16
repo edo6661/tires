@@ -48,7 +48,7 @@ class BlockedPeriod extends Model
         $hours = $this->getDurationInHours();
         
         if ($hours < 1) {
-            return $this->getDurationInMinutes() . ' menit';
+            return $this->getDurationInMinutes() . ' minute';
         } elseif ($hours < 24) {
             return number_format($hours, 1) . ' jam';
         } else {

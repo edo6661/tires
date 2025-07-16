@@ -89,7 +89,7 @@
             <div class="url-box">
                 {{ $resetUrl }}
             </div>
-            <p><strong>Catatan:</strong> Link reset password ini akan kedaluwarsa dalam 60 menit.</p>
+            <p><strong>Catatan:</strong> Link reset password ini akan kedaluwarsa dalam 60 minute.</p>
             <p>Jika Anda tidak meminta reset password, abaikan email ini. Password akun Anda tidak akan berubah.</p>
         </div>
         <div class="footer">

@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('menus', function (Blueprint $table) {
             $table->id();
             $table->string('name');
-            $table->integer('required_time'); // menit ya bang
+            $table->integer('required_time'); // minute ya bang
             $table->decimal('price', 10, 2)->nullable();
             $table->string('color', 7)->default('#3B82F6'); 
 

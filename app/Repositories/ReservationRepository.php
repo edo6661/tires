@@ -88,7 +88,10 @@ class ReservationRepository implements ReservationRepositoryInterface
     public function getByDateRange(string $startDate, string $endDate): Collection
     {
         return $this->model->with(['user', 'menu'])
-            ->whereBetween('reservation_datetime', [$startDate, $endDate])
+            ->whereBetween('reservation_datetime', [
+                Carbon::parse($startDate)->startOfDay(), 
+                Carbon::parse($endDate)->endOfDay()      
+            ])
             ->orderBy('reservation_datetime')
             ->get();
     }
