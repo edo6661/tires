@@ -12,17 +12,126 @@
     @endif
 </head>
 <body class="bg-gray-50 font-sans">
-    <div class="flex min-h-screen relative">
-        <x-layouts.header.admin-sidebar/>
-        <div class="flex-1 flex flex-col">
+    
+    <div class="min-h-screen relative" x-data="{ sidebarOpen: false }">
+        
+        <!-- Header Navigation -->
+        @auth
+            @if(auth()->user()->isAdmin())
+                <x-layouts.header.admin-nav />
+            @else
+                <x-layouts.header.customer-nav />
+            @endif
+        @endauth
+
+        @guest
             <x-layouts.header.customer-nav />
+        @endguest
+
+        <!-- Admin Sidebar -->
+        @auth
+            @if(auth()->user()->isAdmin())
+                <x-layouts.sidebar.admin-sidebar />
+            @endif
+        @endauth
+
+        <!-- Main Content -->
+        <div class="flex-1 flex flex-col">
             <main class="flex-1 w-full mx-auto px-2 md:px-4 py-8">
                 {{ $slot }}
             </main>
             <x-layouts.footer.customer-footer />
         </div>
     </div>
-
     
+    <script>
+        // Pastikan Alpine.js sudah dimuat sebelum inisialisasi
+        document.addEventListener('alpine:init', () => {
+            console.log('Alpine.js telah dimuat');
+        });
+
+        function dropdown(type = 'reservation') {
+            return {
+                isOpen: false,
+                items: [],
+                
+                init() {
+                    this.setItems(type);
+                },
+                
+                toggle() {
+                    this.isOpen = !this.isOpen;
+                },
+                
+                close() {
+                    this.isOpen = false;
+                },
+                
+                setItems(type) {
+                    const currentRoute = window.location.pathname;
+                    
+                    const dropdownItems = {
+                        reservation: [
+                            { 
+                                id: 1, 
+                                name: 'Calendar', 
+                                icon: 'fas fa-calendar-alt', 
+                                url: '{{ route('admin.reservation.calendar') }}',
+                                isActive: currentRoute.includes('admin/reservation/calendar')
+                            },
+                            { 
+                                id: 3, 
+                                name: 'Blocked', 
+                                icon: 'fas fa-ban', 
+                                url: '{{ route('admin.reservation.block') }}',
+                                isActive: currentRoute.includes('admin/reservation/block')
+                            },
+                            { 
+                                id: 4, 
+                                name: 'Availability', 
+                                icon: 'fas fa-check-circle', 
+                                url: '{{ route('admin.reservation.availability') }}',
+                                isActive: currentRoute.includes('admin/reservation/availability')
+                            }
+                        ],
+                        customer: [
+                            { 
+                                id: 1, 
+                                name: 'Contact', 
+                                icon: 'fa-solid fa-address-book', 
+                                url: '#customer-list',
+                                isActive: currentRoute.includes('customer-list')
+                            },
+                            { 
+                                id: 2, 
+                                name: 'Announcement', 
+                                icon: 'fas fa-bullhorn', 
+                                url: '#announcements',
+                                isActive: currentRoute.includes('announcements')
+                            },
+                        ],
+                        settings: [
+                            { 
+                                id: 1, 
+                                name: 'Business Information', 
+                                icon: 'fa-solid fa-store', 
+                                url: '#business-info',
+                                isActive: currentRoute.includes('business-info')
+                            },
+                            { 
+                                id: 2, 
+                                name: 'Menu', 
+                                icon: 'fa-solid fa-book-open', 
+                                url: '#menu-registration',
+                                isActive: currentRoute.includes('menu-registration')
+                            }
+                        ]
+                    };
+                    
+                    this.items = dropdownItems[type] || [];
+                }
+            }
+        }
+    </script>
 </body>
 </html>

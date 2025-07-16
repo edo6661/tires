@@ -2,22 +2,20 @@
 
 <div x-data="dropdown('{{ $type }}')" class="relative">
     <button 
-        @click="isExpanded ? toggle() : null"
+        @click="toggle()"
         class="w-full flex items-center justify-between px-3 py-2 text-sm hover:bg-gray-100 rounded-md transition-colors duration-200 {{ $isActive ? 'font-medium text-green-600 bg-green-50' : '' }}"
         :class="{ '{{ $isActive ? 'bg-green-100' : 'bg-gray-100' }}': isOpen }"
     >
         <div class="flex items-center gap-3">
             <i class="{{ $icon }} {{ $isActive ? 'text-green-600' : 'text-gray-500' }} w-4 text-center flex-shrink-0"></i>
-            <span class="whitespace-nowrap overflow-hidden transition-all duration-300" 
-                    :class="isExpanded ? 'opacity-100 w-auto' : 'opacity-0 w-0'">{{ $title }}</span>
+            <span class="whitespace-nowrap">{{ $title }}</span>
         </div>
         <i class="fas fa-chevron-down text-xs transition-transform duration-400 flex-shrink-0" 
-            :class="{ 'rotate-180': isOpen }"
-            x-show="isExpanded"></i>
+            :class="{ 'rotate-180': isOpen }"></i>
     </button>
     
     <div 
-        x-show="isOpen && isExpanded" 
+        x-show="isOpen" 
         x-transition:enter="transition-all ease-in-out duration-300"
         x-transition:enter-start="max-h-0"
         x-transition:enter-end="max-h-96"
