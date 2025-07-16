@@ -1,5 +1,5 @@
 <x-layouts.app>
-    <div class="flex flex-col md:flex-row gap-8">
+    <div class="flex flex-col md:flex-row gap-4">
         <div class="w-full md:w-1/3 lg:w-1/4 bg-white p-6 rounded-lg shadow-sm border border-gray-200">
             <div class="space-y-6">
                 <h2 class="text-xl font-semibold text-gray-800">Takanawa Gateway City</h2>

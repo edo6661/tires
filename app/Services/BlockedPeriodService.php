@@ -75,4 +75,20 @@ class BlockedPeriodService implements BlockedPeriodServiceInterface
     {
         return $this->blockedPeriodRepository->checkConflict($menuId, $startDatetime, $endDatetime);
     }
+    public function getBlockedPeriodsByDate(string $date): Collection
+    {   
+        return $this->blockedPeriodRepository->getByDate($date);
+    }
+    public function getBlockedDatesInRange(string $startDate, string $endDate): array
+    {
+        return $this->blockedPeriodRepository->getBlockedDatesInRange($startDate, $endDate);
+    }
+    public function getBlockedHoursInRange(string $startDate, string $endDate): array
+    {
+        return $this->blockedPeriodRepository->getBlockedHoursInRange($startDate, $endDate);
+    }
+    public function getByDateRange(string $startDate, string $endDate): Collection
+    {
+        return $this->blockedPeriodRepository->getByDateRange($startDate, $endDate);
+    }
 }

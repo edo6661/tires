@@ -1,7 +1,7 @@
 
 <x-layouts.app>
     <section aria-label="Main Image and Introduction" class="mb-8 rounded-lg overflow-hidden shadow-lg">
-        <img src="{{ asset('images/hero.bmp') }}" alt="Close-up of a car wheel illuminated by the sunset" class="w-full h-auto object-cover object-center"/>
+        <img src="{{ asset('images/hero.jpg') }}" alt="Close-up of a car wheel illuminated by the sunset" class="w-full h-auto object-cover object-center"/>
     </section>
 
     <div class="grid md:grid-cols-[250px_1fr] gap-10">
@@ -38,7 +38,7 @@
                         <h2 class="text-base font-semibold text-gray-900 mb-1">{{ $menu->name }}</h2>
                         <p class="text-xs text-gray-500">{{ $menu->required_time }} min</p>
                     </div>
-                    <div class="flex flex-col justify-between items-end gap-8">
+                    <div class="flex flex-col justify-between items-end gap-4">
                         <button aria-label="View Details" class="text-gray-400 hover:text-[#4abaa7] transition" title="View Details">
                            <i class="fa-solid fa-circle-info" aria-hidden="true"></i>
                         </button>
@@ -54,7 +54,7 @@
                         <h2 class="text-base font-semibold text-gray-900 mb-1">Standard Tire Change</h2>
                         <p class="text-xs text-gray-500">60 min</p>
                     </div>
-                    <div class="flex flex-col justify-between items-end gap-8">
+                    <div class="flex flex-col justify-between items-end gap-4">
                         <button aria-label="View Details" class="text-gray-400 hover:text-[#4abaa7] transition" title="View Details">
                            <i class="fa-solid fa-circle-info" aria-hidden="true"></i>
                         </button>
@@ -68,7 +68,7 @@
                         <h2 class="text-base font-semibold text-gray-900 mb-1">Tire Rotation</h2>
                         <p class="text-xs text-gray-500">30 min</p>
                     </div>
-                    <div class="flex flex-col justify-between items-end gap-8">
+                    <div class="flex flex-col justify-between items-end gap-4">
                         <button aria-label="View Details" class="text-gray-400 hover:text-[#4abaa7] transition" title="View Details">
                            <i class="fa-solid fa-circle-info" aria-hidden="true"></i>
                         </button>

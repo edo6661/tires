@@ -8,7 +8,6 @@ use App\Repositories\MenuRepositoryInterface;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Carbon\Carbon;
-
 class MenuService implements MenuServiceInterface
 {
     protected $menuRepository;
@@ -40,9 +39,13 @@ class MenuService implements MenuServiceInterface
 
     public function createMenu(array $data): Menu
     {
-        // Set default is_active if not provided
+        
         if (!isset($data['is_active'])) {
             $data['is_active'] = true;
+        }
+        
+        if (!isset($data['color'])) {
+            $data['color'] = '#3B82F6'; 
         }
 
         return $this->menuRepository->create($data);
@@ -84,5 +87,13 @@ class MenuService implements MenuServiceInterface
         $endDateTime = $startDateTime->copy()->addMinutes($menu->required_time);
 
         return $endDateTime->format('Y-m-d H:i:s');
+    }
+
+    
+    public function getMenuColorsMapping(): array
+    {
+        return $this->menuRepository->getAll()
+            ->pluck('color', 'id')
+            ->toArray();
     }
 }

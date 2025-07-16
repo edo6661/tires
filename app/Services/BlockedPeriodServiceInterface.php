@@ -18,4 +18,9 @@ interface BlockedPeriodServiceInterface
     public function getBlockedPeriodsByDateRange(string $startDate, string $endDate): Collection;
     public function getActiveBlockedPeriods(): Collection;
     public function checkScheduleConflict(int $menuId, string $startDatetime, string $endDatetime): bool;
+    public function getBlockedPeriodsByDate(string $date): Collection;
+    public function getBlockedDatesInRange(string $startDate, string $endDate): array;
+    public function getBlockedHoursInRange(string $startDate, string $endDate): array;
+    public function getByDateRange(string $startDate, string $endDate): Collection;
+
 }

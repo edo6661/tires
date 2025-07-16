@@ -10,14 +10,8 @@ class ReservationSeeder extends Seeder
 {
     public function run(): void
     {
-        $users = User::all();
-        $menus = Menu::all();
-
-        if ($users->count() > 0 && $menus->count() > 0) {
-            Reservation::factory(30)->create([
-                'user_id' => $users->random()->id,
-                'menu_id' => $menus->random()->id,
-            ]);
+        if (User::count() > 0 && Menu::count() > 0) {
+            Reservation::factory(30)->withValidMenuAndDateTime()->create();
         }
     }
 }

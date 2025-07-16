@@ -16,6 +16,8 @@ return new class extends Migration
             $table->string('name');
             $table->integer('required_time'); // menit ya bang
             $table->decimal('price', 10, 2)->nullable();
+            $table->string('color', 7)->default('#3B82F6'); 
+
             $table->text('description')->nullable();
             $table->string('photo_path')->nullable();
             $table->integer('display_order')->default(0);

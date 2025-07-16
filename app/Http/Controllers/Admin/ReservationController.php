@@ -3,6 +3,7 @@ namespace App\Http\Controllers\Admin;
 use Carbon\Carbon;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\ReservationRequest;
+use App\Services\BlockedPeriodService;
 use App\Services\ReservationServiceInterface;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
@@ -10,7 +11,10 @@ use Illuminate\View\View;
 use Illuminate\Http\RedirectResponse;
 class ReservationController extends Controller
 {
-    public function __construct(protected ReservationServiceInterface $reservationService)
+    public function __construct(
+        protected ReservationServiceInterface $reservationService,
+        protected BlockedPeriodService $blockedPeriodService,
+    )
     {
     }
      public function calendar(Request $request): View
@@ -47,8 +51,23 @@ class ReservationController extends Controller
             return $reservation->reservation_datetime->format('Y-m-d');
         });
         
-        $calendarDays = $this->generateCalendarDays($currentMonth, $reservationsByDate);
         
+        $blockedPeriods = $this->blockedPeriodService->getByDateRange(
+            
+            $startDate->format('Y-m-d H:i:s'),
+            $endDate->format('Y-m-d H:i:s')
+        );
+        $blockedDates = $this->blockedPeriodService->getBlockedDatesInRange(
+            $startDate->format('Y-m-d H:i:s'),
+            $endDate->format('Y-m-d H:i:s')
+        );
+
+        $blockedHours = $this->blockedPeriodService->getBlockedHoursInRange(
+            $startDate->format('Y-m-d H:i:s'),
+            $endDate->format('Y-m-d H:i:s')
+        );
+        $calendarDays = $this->generateCalendarDays($currentMonth, $reservationsByDate, $blockedDates, $blockedHours);
+
         $stats = [
             'pending' => $reservations->where('status', 'pending')->count(),
             'confirmed' => $reservations->where('status', 'confirmed')->count(),
@@ -82,6 +101,20 @@ class ReservationController extends Controller
         $reservationsByDate = $reservations->groupBy(function ($reservation) {
             return $reservation->reservation_datetime->format('Y-m-d');
         });
+        $blockedPeriods = $this->blockedPeriodService->getByDateRange(
+    $startOfWeek->format('Y-m-d H:i:s'),
+    $endOfWeek->format('Y-m-d H:i:s')
+        );
+
+        $blockedDates = $this->blockedPeriodService->getBlockedDatesInRange(
+            $startOfWeek->format('Y-m-d H:i:s'),
+            $endOfWeek->format('Y-m-d H:i:s')
+        );
+
+        $blockedHours = $this->blockedPeriodService->getBlockedHoursInRange(
+            $startOfWeek->format('Y-m-d H:i:s'),
+            $endOfWeek->format('Y-m-d H:i:s')
+        );
         
         $weekDays = [];
         for ($i = 0; $i < 7; $i++) {
@@ -91,6 +124,9 @@ class ReservationController extends Controller
             $weekDays[] = [
                 'date' => $day,
                 'isToday' => $dateString === Carbon::now()->format('Y-m-d'),
+                'isBlocked' => isset($blockedDates[$dateString]), 
+                'blockedPeriods' => $blockedDates[$dateString] ?? [], 
+                'blockedHours' => $blockedHours[$dateString] ?? [], 
                 'reservations' => $reservationsByDate->get($dateString, collect())
             ];
         }
@@ -101,6 +137,7 @@ class ReservationController extends Controller
             'completed' => $reservations->where('status', 'completed')->count(),
             'cancelled' => $reservations->where('status', 'cancelled')->count(),
         ];
+        
         
         return view('admin.reservation.calendar', compact(
             'weekDays',
@@ -130,6 +167,17 @@ class ReservationController extends Controller
         $reservationsByHour = $reservations->groupBy(function ($reservation) {
             return $reservation->reservation_datetime->format('H:00');
         });
+        $blockedPeriods = $this->blockedPeriodService->getBlockedPeriodsByDate($currentDate->format('Y-m-d'));
+
+        $blockedHours = [];
+        foreach ($blockedPeriods as $period) {
+            $hours = $period->getBlockedHours();
+            foreach ($hours as $hour) {
+                if ($hour['date'] === $currentDate->format('Y-m-d')) {
+                    $blockedHours[] = $hour['hour'];
+                }
+            }
+        }
         
         
         $hourlySlots = [];
@@ -149,16 +197,19 @@ class ReservationController extends Controller
         ];
         
         return view('admin.reservation.calendar', compact(
-            'currentDate',
-            'previousDay',
+  'currentDate',
+ 'previousDay',
             'nextDay',
             'hourlySlots',
             'reservations',
-            'stats'
+            'stats',
+            'blockedPeriods',  
+            'blockedHours'     
         ))->with('view', 'day');
+
     }
 
-    private function generateCalendarDays(Carbon $currentMonth, $reservationsByDate): array
+    private function generateCalendarDays(Carbon $currentMonth, $reservationsByDate, $blockedDates = null, $blockedHours = null): array
     {
         $calendarDays = [];
         $today = Carbon::now()->format('Y-m-d');
@@ -178,6 +229,9 @@ class ReservationController extends Controller
                 'date' => $date,
                 'isCurrentMonth' => $date->month === $currentMonth->month,
                 'isToday' => $dateString === $today,
+                'isBlocked' => $blockedDates && isset($blockedDates[$dateString]),
+                'blockedHours' => $blockedHours[$dateString] ?? [],
+                'blockedPeriods' => $blockedDates[$dateString] ?? [],
                 'reservations' => $reservationsByDate->get($dateString, collect())
             ];
         }

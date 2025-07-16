@@ -17,4 +17,8 @@ interface BlockedPeriodRepositoryInterface
     public function getByDateRange(string $startDate, string $endDate): Collection;
     public function getActiveBlocks(): Collection;
     public function checkConflict(int $menuId, string $startDatetime, string $endDatetime): bool;
+    public function getByDate(string $date): Collection;
+    public function getBlockedDatesInRange(string $startDate, string $endDate): array;
+    public function getBlockedHoursInRange(string $startDate, string $endDate): array;
+    
 }

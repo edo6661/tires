@@ -106,4 +106,49 @@ class BlockedPeriodRepository implements BlockedPeriodRepositoryInterface
             })
             ->exists();
     }
+    public function getByDate(string $date): Collection
+    {
+        return $this->model->with('menu')
+            ->where(function ($query) use ($date) {
+                $query->whereDate('start_datetime', '<=', $date)
+                    ->whereDate('end_datetime', '>=', $date);
+            })
+            ->get();
+    }
+    public function getBlockedDatesInRange(string $startDate, string $endDate): array
+    {
+        $blockedPeriods = $this->getByDateRange($startDate, $endDate);
+        $blockedDates = [];
+        
+        foreach ($blockedPeriods as $period) {
+            $affectedDates = $period->getAffectedDates();
+            foreach ($affectedDates as $date) {
+                if (!isset($blockedDates[$date])) {
+                    $blockedDates[$date] = [];
+                }
+                $blockedDates[$date][] = $period;
+            }
+        }
+        
+        return $blockedDates;
+    }
+
+    public function getBlockedHoursInRange(string $startDate, string $endDate): array
+    {
+        $blockedPeriods = $this->getByDateRange($startDate, $endDate);
+        $blockedHours = [];
+        
+        foreach ($blockedPeriods as $period) {
+            $hours = $period->getBlockedHours();
+            foreach ($hours as $hour) {
+                if (!isset($blockedHours[$hour['date']])) {
+                    $blockedHours[$hour['date']] = [];
+                }
+                $blockedHours[$hour['date']][] = $hour['hour'];
+            }
+        }
+        
+        return $blockedHours;
+    }
+
 }
