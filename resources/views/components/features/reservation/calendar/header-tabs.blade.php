@@ -15,34 +15,44 @@
             </div>
         </div>
         
-        <div class="flex space-x-1" role="tablist" aria-label="Tabs">
-            <a href="{{ route('admin.reservation.calendar', ['tab' => 'calendar'] + request()->query()) }}" 
-            class="group relative inline-flex items-center px-6 py-3 text-sm font-medium rounded-t-lg transition-all duration-200 ease-in-out
-                    {{ request('tab', 'calendar') === 'calendar' ? 'bg-white text-blue-600 shadow-sm border-t-2 border-blue-500' : 'text-gray-600 hover:text-blue-600 hover:bg-white/50' }}"
-            role="tab"
-            aria-selected="{{ request('tab', 'calendar') === 'calendar' ? 'true' : 'false' }}">
-                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
-                </svg>
-                Calendar View
-                @if(request('tab', 'calendar') === 'calendar')
-                    <span class="absolute bottom-0 left-0 right-0 h-0.5 bg-blue-500 rounded-t-full"></span>
-                @endif
-            </a>
-            
-            <a href="{{ route('admin.reservation.calendar', ['tab' => 'list'] + request()->query()) }}" 
-            class="group relative inline-flex items-center px-6 py-3 text-sm font-medium rounded-t-lg transition-all duration-200 ease-in-out
-                    {{ request('tab') === 'list' ? 'bg-white text-blue-600 shadow-sm border-t-2 border-blue-500' : 'text-gray-600 hover:text-blue-600 hover:bg-white/50' }}"
-            role="tab"
-            aria-selected="{{ request('tab') === 'list' ? 'true' : 'false' }}">
-                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 10h16M4 14h16M4 18h16"/>
-                </svg>
-                List View
-                @if(request('tab') === 'list')
-                    <span class="absolute bottom-0 left-0 right-0 h-0.5 bg-blue-500 rounded-t-full"></span>
-                @endif
-            </a>
+        <div class="flex justify-between gap-4 flex-wrap">
+            <div class="flex space-x-1" role="tablist" aria-label="Tabs">
+                <a href="{{ route('admin.reservation.calendar', ['tab' => 'calendar'] + request()->query()) }}" 
+                class="group relative inline-flex items-center px-6 py-3 text-sm font-medium rounded-t-lg transition-all duration-200 ease-in-out
+                        {{ request('tab', 'calendar') === 'calendar' ? 'bg-white text-blue-600 shadow-sm border-t-2 border-blue-500' : 'text-gray-600 hover:text-blue-600 hover:bg-white/50' }}"
+                role="tab"
+                aria-selected="{{ request('tab', 'calendar') === 'calendar' ? 'true' : 'false' }}">
+                    <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                    </svg>
+                    Calendar View
+                    @if(request('tab', 'calendar') === 'calendar')
+                        <span class="absolute bottom-0 left-0 right-0 h-0.5 bg-blue-500 rounded-t-full"></span>
+                    @endif
+                </a>
+                
+                <a href="{{ route('admin.reservation.calendar', ['tab' => 'list'] + request()->query()) }}" 
+                class="group relative inline-flex items-center px-6 py-3 text-sm font-medium rounded-t-lg transition-all duration-200 ease-in-out
+                        {{ request('tab') === 'list' ? 'bg-white text-blue-600 shadow-sm border-t-2 border-blue-500' : 'text-gray-600 hover:text-blue-600 hover:bg-white/50' }}"
+                role="tab"
+                aria-selected="{{ request('tab') === 'list' ? 'true' : 'false' }}">
+                    <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 10h16M4 14h16M4 18h16"/>
+                    </svg>
+                    List View
+                    @if(request('tab') === 'list')
+                        <span class="absolute bottom-0 left-0 right-0 h-0.5 bg-blue-500 rounded-t-full"></span>
+                    @endif
+                </a>
+            </div>
+            <div>
+                <a href="{{ route('admin.reservation.create') }}" class="inline-flex items-center px-4 py-2 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 rounded-lg shadow-sm transition-colors duration-200">
+                    <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+                    </svg>
+                    New Reservation
+                </a>
+            </div>
         </div>
     </div>
 </div>
