@@ -6,16 +6,12 @@
     <title>Reservation</title>
     <link rel="preconnect" href="https://fonts.bunny.net">
     <link href="https://fonts.bunny.net/css?family=instrument-sans:400,500,600" rel="stylesheet" />
-
     @if (file_exists(public_path('build/manifest.json')) || file_exists(public_path('hot')))
         @vite(['resources/css/app.css', 'resources/js/app.js'])
     @endif
 </head>
 <body class="bg-gray-50 font-sans">
-    
     <div class="min-h-screen relative" x-data="{ sidebarOpen: false }">
-        
-        <!-- Header Navigation -->
         @auth
             @if(auth()->user()->isAdmin())
                 <x-layouts.header.admin-nav />
@@ -23,19 +19,14 @@
                 <x-layouts.header.customer-nav />
             @endif
         @endauth
-
         @guest
             <x-layouts.header.customer-nav />
         @endguest
-
-        <!-- Admin Sidebar -->
         @auth
             @if(auth()->user()->isAdmin())
                 <x-layouts.sidebar.admin-sidebar />
             @endif
         @endauth
-
-        <!-- Main Content -->
         <div class="flex-1 flex flex-col">
             <main class="flex-1 w-full mx-auto px-2 md:px-4 py-8">
                 {{ $slot }}
@@ -43,33 +34,22 @@
             <x-layouts.footer.customer-footer />
         </div>
     </div>
-    
     <script>
-        // Pastikan Alpine.js sudah dimuat sebelum inisialisasi
-        document.addEventListener('alpine:init', () => {
-            console.log('Alpine.js telah dimuat');
-        });
-
         function dropdown(type = 'reservation') {
             return {
                 isOpen: false,
                 items: [],
-                
                 init() {
                     this.setItems(type);
                 },
-                
                 toggle() {
                     this.isOpen = !this.isOpen;
                 },
-                
                 close() {
                     this.isOpen = false;
                 },
-                
                 setItems(type) {
                     const currentRoute = window.location.pathname;
-                    
                     const dropdownItems = {
                         reservation: [
                             { 
@@ -127,7 +107,6 @@
                             }
                         ]
                     };
-                    
                     this.items = dropdownItems[type] || [];
                 }
             }

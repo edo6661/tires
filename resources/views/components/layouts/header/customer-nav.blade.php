@@ -1,13 +1,9 @@
-{{-- resources/views/components/layouts/header/customer-nav.blade.php --}}
 <header class="px-4 md:px-8 py-4 border-b border-gray-200 space-y-4 bg-white sticky top-0 z-10 w-full">
-    {{-- Location Button --}}
     <button class="border border-gray-300 rounded-md px-2 py-1 font-medium hover:bg-gray-100 transition text-sm">
         Takanawa Gateway City
     </button>
 
-    {{-- Main Navigation --}}
     <div class="flex flex-col md:flex-row justify-between">
-        {{-- Logo Section --}}
         <div class="flex flex-col md:flex-row md:items-center gap-4 md:gap-12 text-xs select-none whitespace-nowrap">
             <a href="{{ route('home') }}" class="flex items-center gap-3 text-gray-700 select-text">
                 <img src="{{ asset('images/logo.jpg') }}" alt="Logo for X Change Tire Installation Reservation" class="object-cover w-16" />
@@ -15,7 +11,6 @@
             </a>
         </div>
 
-        {{-- Navigation Links --}}
         <nav class="mt-4 md:mt-0 flex gap-6">
             <x-shared.link-hint-icon 
                 label="Calendar" 
