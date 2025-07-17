@@ -16,7 +16,9 @@
 >
     <div class="flex items-start flex-col gap-2">
         <div class="flex-1">
-            <div class="font-medium">{{ $reservation->user->full_name }}</div>
+            <div class="font-medium">
+                {{$reservation->getFullName() }}
+            </div>
         </div>
         <div class="flex items-start flex-col">
             <div class="text-gray-900">{{ $reservation->reservation_datetime->format('H:i') }}
@@ -91,7 +93,8 @@
                     <i class="fas fa-user text-gray-600 text-xs"></i>
                 </div>
                 <div>
-                    <div class="font-medium text-gray-900">{{ $reservation->user->full_name }}</div>
+                    <div class="font-medium text-gray-900">                                        {{$reservation->getFullName() }}
+</div>
                     <div class="text-gray-600 text-xs">{{ $reservation->user->email ?? 'Email not available' }}</div>
                 </div>
             </div>

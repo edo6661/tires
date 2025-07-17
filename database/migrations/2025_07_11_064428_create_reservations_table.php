@@ -14,7 +14,11 @@ return new class extends Migration
         Schema::create('reservations', function (Blueprint $table) {
             $table->id();
             $table->string('reservation_number')->unique();
-            $table->foreignId('user_id')->constrained()->onDelete('cascade');
+            $table->foreignId('user_id')->nullable()->constrained()->onDelete('set null');
+            $table->string('full_name')->nullable()->after('user_id');
+            $table->string('full_name_kana')->nullable()->after('full_name');
+            $table->string('email')->nullable()->after('full_name_kana');
+            $table->string('phone_number')->nullable()->after('email');
             $table->foreignId('menu_id')->constrained()->onDelete('cascade');
             $table->datetime('reservation_datetime');
             $table->integer('number_of_people')->default(1);

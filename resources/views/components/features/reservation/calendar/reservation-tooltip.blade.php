@@ -54,7 +54,8 @@
             <i class="fas fa-user text-gray-600 text-xs"></i>
         </div>
         <div>
-            <div class="font-medium text-gray-900">{{ $reservation->user->full_name }}</div>
+            <div class="font-medium text-gray-900">                                        {{$reservation->getFullName() }}
+</div>
             <div class="text-gray-600 text-xs">{{ $reservation->user->email ?? 'Email not available' }}</div>
         </div>
     </div>

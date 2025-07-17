@@ -62,12 +62,17 @@ class ReservationController extends Controller
             }
         }
         
-        if ($request->filled('search')) {
+         if ($request->filled('search')) {
             $search = $request->search;
             $query->where(function($q) use ($search) {
                 $q->where('reservation_number', 'like', "%{$search}%")
+                ->orWhere('full_name', 'like', "%{$search}%")
+                ->orWhere('email', 'like', "%{$search}%")
+                ->orWhere('phone_number', 'like', "%{$search}%")
                 ->orWhereHas('user', function($userQuery) use ($search) {
-                    $userQuery->where('full_name', 'like', "%{$search}%");
+                    $userQuery->where('full_name', 'like', "%{$search}%")
+                            ->orWhere('email', 'like', "%{$search}%")
+                            ->orWhere('phone_number', 'like', "%{$search}%");
                 });
             });
         }
@@ -122,12 +127,17 @@ class ReservationController extends Controller
                 }
             }
             
-            if ($request->filled('search')) {
+             if ($request->filled('search')) {
                 $search = $request->search;
                 $query->where(function($q) use ($search) {
                     $q->where('reservation_number', 'like', "%{$search}%")
+                    ->orWhere('full_name', 'like', "%{$search}%")
+                    ->orWhere('email', 'like', "%{$search}%")
+                    ->orWhere('phone_number', 'like', "%{$search}%")
                     ->orWhereHas('user', function($userQuery) use ($search) {
-                        $userQuery->where('full_name', 'like', "%{$search}%");
+                        $userQuery->where('full_name', 'like', "%{$search}%")
+                                ->orWhere('email', 'like', "%{$search}%")
+                                ->orWhere('phone_number', 'like', "%{$search}%");
                     });
                 });
             }
@@ -333,22 +343,23 @@ class ReservationController extends Controller
         if (!$reservation) {
             return response()->json(['error' => 'Reservasi tidak ditemukan'], 404);
         }
+
         return response()->json([
             'success' => true,
             'data' => [
                 'id' => $reservation->id,
                 'reservation_number' => $reservation->reservation_number,
-                'user_name' => $reservation->user->name,
-                'user_email' => $reservation->user->email,
-                'user_phone' => $reservation->user->phone ?? 'Tidak tersedia',
+                'user_name' => $reservation->getFullName(),
+                'user_email' => $reservation->getEmail(),
+                'user_phone' => $reservation->getPhoneNumber(),
                 'menu_name' => $reservation->menu->name,
                 'menu_description' => $reservation->menu->description,
                 'reservation_datetime' => $reservation->reservation_datetime->format('d/m/Y H:i'),
                 'number_of_people' => $reservation->number_of_people,
                 'amount' => number_format($reservation->amount, 0, ',', '.'),
-                'status' => $reservation->status->value,
-                'status_label' => $reservation->status->label(),
+                'status' => $reservation->status,
                 'notes' => $reservation->notes ?? 'Tidak ada catatan',
+                'is_guest' => $reservation->isGuestReservation(),
                 'created_at' => $reservation->created_at->format('d/m/Y H:i'),
                 'updated_at' => $reservation->updated_at->format('d/m/Y H:i'),
             ]

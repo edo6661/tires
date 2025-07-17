@@ -98,7 +98,9 @@
                                     <tr class="hover:bg-gray-50">
                                         <td class="px-4 py-2 text-gray-900">{{ $reservation->reservation_datetime->format('m/d H:i') }}</td>
                                         <td class="px-4 py-2 text-gray-700">{{ $reservation->menu->name ?? 'Service' }}</td>
-                                        <td class="px-4 py-2 text-gray-900">{{ $reservation->user->full_name }}</td>
+                                        <td class="px-4 py-2 text-gray-900">
+                                            {{ $reservation->getFullName() }}
+                                        </td>
                                     </tr>
                                 @empty
                                     <tr>

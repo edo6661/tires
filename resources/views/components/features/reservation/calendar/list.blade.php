@@ -196,10 +196,10 @@
                                 </div>
                                 <div class="ml-4">
                                     <div class="text-sm font-medium text-gray-900">
-                                        {{ $reservation->user->full_name }}
+                                        {{ $reservation->getFullName() }}
                                     </div>
                                     <div class="text-sm text-gray-500">
-                                        {{ $reservation->user->email }}
+                                        {{ $reservation->getPhoneNumber() }}
                                     </div>
                                 </div>
                             </div>
