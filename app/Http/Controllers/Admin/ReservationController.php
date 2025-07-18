@@ -3,7 +3,9 @@ namespace App\Http\Controllers\Admin;
 use Carbon\Carbon;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\ReservationRequest;
+use App\Models\BlockedPeriod;
 use App\Models\Menu;
+use App\Models\Reservation;
 use App\Services\BlockedPeriodService;
 use App\Services\MenuService;
 use App\Services\ReservationServiceInterface;
@@ -13,16 +15,13 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\View\View;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Log;
-
 class ReservationController extends Controller
 {
     public function __construct(
         protected ReservationServiceInterface $reservationService,
         protected BlockedPeriodService $blockedPeriodService,
-        
         protected MenuService $menuService,
         protected UserService $userService,
-        
     ){}
     public function calendar(Request $request): View
     {
@@ -44,28 +43,21 @@ class ReservationController extends Controller
     private function listView(Request $request): View
     {
         $query = $this->reservationService->getAllReservations()->toQuery();
-        
         if ($request->filled('menu_id')) {
             $query->where('menu_id', $request->menu_id);
         }
-        
         if ($request->filled('status')) {
             $query->where('status', $request->status);
         }
-        
-        // Perbaikan untuk date range - gunakan input HTML native
         if ($request->filled('start_date') && $request->filled('end_date')) {
             try {
                 $startDate = Carbon::parse($request->start_date)->startOfDay();
                 $endDate = Carbon::parse($request->end_date)->endOfDay();
-                
                 $query->whereBetween('reservation_datetime', [$startDate, $endDate]);
             } catch (\Exception $e) {
-                // Jika gagal parse, abaikan filter tanggal
                 Log::error('Error parsing date range: ' . $e->getMessage());
             }
         }
-        
          if ($request->filled('search')) {
             $search = $request->search;
             $query->where(function($q) use ($search) {
@@ -80,48 +72,38 @@ class ReservationController extends Controller
                 });
             });
         }
-        
         $reservations = $query->with(['user', 'menu'])
                             ->orderBy('reservation_datetime', 'desc')
                             ->paginate(15);
-        
         $menus = Menu::where('is_active', true)
                                 ->orderBy('name')
                                 ->get();
-        
         $statuses = [
             'pending' => 'Pending',
             'confirmed' => 'Confirmed', 
             'completed' => 'Completed',
             'cancelled' => 'Cancelled'
         ];
-        
         return view('admin.reservation.calendar', compact(
             'reservations',
             'menus',
             'statuses'
         ));
     }
-
     public function getFilteredReservations(Request $request): JsonResponse
     {
         try {
             $query = $this->reservationService->getAllReservations()->toQuery();
-            
             if ($request->filled('menu_id')) {
                 $query->where('menu_id', $request->menu_id);
             }
-            
             if ($request->filled('status')) {
                 $query->where('status', $request->status);
             }
-            
-            // Perbaikan untuk date range - gunakan input HTML native
             if ($request->filled('start_date') && $request->filled('end_date')) {
                 try {
                     $startDate = Carbon::parse($request->start_date)->startOfDay();
                     $endDate = Carbon::parse($request->end_date)->endOfDay();
-                    
                     $query->whereBetween('reservation_datetime', [$startDate, $endDate]);
                 } catch (\Exception $e) {
                     return response()->json([
@@ -130,7 +112,6 @@ class ReservationController extends Controller
                     ], 400);
                 }
             }
-            
              if ($request->filled('search')) {
                 $search = $request->search;
                 $query->where(function($q) use ($search) {
@@ -145,11 +126,9 @@ class ReservationController extends Controller
                     });
                 });
             }
-            
             $reservations = $query->with(['user', 'menu'])
                                 ->orderBy('reservation_datetime', 'desc')
                                 ->paginate(15);
-            
             return response()->json([
                 'success' => true,
                 'data' => $reservations->items(),
@@ -347,7 +326,6 @@ class ReservationController extends Controller
         if (!$reservation) {
             return response()->json(['error' => 'Reservasi tidak ditemukan'], 404);
         }
-
         return response()->json([
             'success' => true,
             'data' => [
@@ -429,9 +407,97 @@ class ReservationController extends Controller
     {
         return view('admin.reservation.block');
     }
-    public function availability(): View
+    public function availability(Request $request): JsonResponse
     {
-        return view('admin.reservation.availability');
+        try {
+            $request->validate([
+                'menu_id' => 'nullable|integer|exists:menus,id',
+                'start_date' => 'required|date',
+                'end_date' => 'required|date|after_or_equal:start_date'
+            ]);
+            $menuId = $request->menu_id;
+            $startDate = $request->start_date;
+            $endDate = $request->end_date;
+            $availabilityData = [];
+            $start = Carbon::parse($startDate);
+            $end = Carbon::parse($endDate);
+            $blockedPeriods = $this->blockedPeriodService->getByDateRange($startDate, $endDate);
+            $existingReservations = [];
+            if ($menuId) {
+                $existingReservations = $this->reservationService->getReservationsByDateRange($startDate, $endDate);
+            }
+            $current = $start->copy();
+            while ($current <= $end) {
+                $dateStr = $current->format('Y-m-d');
+                $isFullyBlocked = false;
+                $availableHours = [];
+                foreach ($blockedPeriods as $period) {
+                    if ($period->all_menus || ($menuId && $period->menu_id == $menuId)) {
+                        $startDateTime = Carbon::parse($period->start_datetime);
+                        $endDateTime = Carbon::parse($period->end_datetime);
+                        if ($startDateTime->format('Y-m-d') <= $dateStr && 
+                            $endDateTime->format('Y-m-d') >= $dateStr &&
+                            $startDateTime->format('H:i') == '00:00' && 
+                            $endDateTime->format('H:i') == '23:59') {
+                            $isFullyBlocked = true;
+                            break;
+                        }
+                    }
+                }
+                if (!$isFullyBlocked) {
+                    for ($hour = 8; $hour <= 20; $hour++) {
+                        $hourStr = str_pad($hour, 2, '0', STR_PAD_LEFT) . ':00';
+                        $isHourAvailable = true;
+                        foreach ($blockedPeriods as $period) {
+                            if ($period->all_menus || ($menuId && $period->menu_id == $menuId)) {
+                                $startDateTime = Carbon::parse($period->start_datetime);
+                                $endDateTime = Carbon::parse($period->end_datetime);
+                                $checkDateTime = Carbon::parse($dateStr . ' ' . $hourStr);
+                                if ($checkDateTime >= $startDateTime && $checkDateTime <= $endDateTime) {
+                                    $isHourAvailable = false;
+                                    break;
+                                }
+                            }
+                        }
+                        if ($isHourAvailable && $menuId) {
+                            foreach ($existingReservations as $reservation) {
+                                if ($reservation->menu_id == $menuId && 
+                                    in_array($reservation->status, ['pending', 'confirmed'])) {
+                                    $reservationDateTime = Carbon::parse($reservation->reservation_datetime);
+                                    $checkDateTime = Carbon::parse($dateStr . ' ' . $hourStr);
+                                    if ($reservationDateTime->format('Y-m-d H:i') == $checkDateTime->format('Y-m-d H:i')) {
+                                        $isHourAvailable = false;
+                                        break;
+                                    }
+                                }
+                            }
+                        }
+                        $availableHours[] = [
+                            'hour' => $hourStr,
+                            'available' => $isHourAvailable
+                        ];
+                    }
+                }
+                $availabilityData[] = [
+                    'date' => $dateStr,
+                    'is_blocked' => $isFullyBlocked,
+                    'available_hours' => $availableHours
+                ];
+                $current->addDay();
+            }
+            return response()->json([
+                'success' => true,
+                'data' => $availabilityData
+            ]);
+        } catch (\Exception $e) {
+            Log::error('Error getting availability data: ' . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'error' => 'Terjadi kesalahan saat mengambil data ketersediaan',
+                'message' => $e->getMessage(),
+                'data' => []
+            ], 500);
+        }
     }
     public function create(): View
     {
@@ -506,22 +572,17 @@ class ReservationController extends Controller
                 'reservation_datetime' => 'required|date|after:now',
                 'exclude_reservation_id' => 'nullable|integer|exists:reservations,id'
             ]);
-
             $available = $this->reservationService->checkAvailability(
                 $request->menu_id,
                 $request->reservation_datetime,
                 $request->exclude_reservation_id
             );
-
             return response()->json([
                 'available' => $available,
                 'message' => $available ? 'Waktu tersedia' : 'Waktu tidak tersedia'
             ]);
-
         } catch (\Exception $e) {
-            // Log error untuk debugging
             Log::error('Error checking availability: ' . $e->getMessage());
-            
             return response()->json([
                 'error' => 'Terjadi kesalahan saat mengecek ketersediaan',
                 'message' => $e->getMessage()
@@ -619,5 +680,176 @@ class ReservationController extends Controller
                 'message' => $e->getMessage()
             ], 400);
         }
+    }
+    public function getAvailabilityData(Request $request): JsonResponse
+    {
+        try {
+            $request->validate([
+                'menu_id' => 'nullable|integer|exists:menus,id',
+                'start_date' => 'required|date',
+                'end_date' => 'required|date|after_or_equal:start_date'
+            ]);
+            $menuId = $request->menu_id;
+            $startDate = $request->start_date;
+            $endDate = $request->end_date;
+            $availabilityData = [];
+            $currentDate = Carbon::parse($startDate);
+            $endDateCarbon = Carbon::parse($endDate);
+            while ($currentDate <= $endDateCarbon) {
+                $dateStr = $currentDate->format('Y-m-d');
+                $availableHours = [];
+                for ($hour = 8; $hour <= 20; $hour++) {
+                    $availableHours[] = [
+                        'hour' => sprintf('%02d:00', $hour),
+                        'available' => true
+                    ];
+                }
+                $availabilityData[$dateStr] = [
+                    'date' => $dateStr,
+                    'is_blocked' => false,
+                    'available_hours' => $availableHours
+                ];
+                $currentDate->addDay();
+            }
+            $blockedPeriods = BlockedPeriod::where(function ($query) use ($startDate, $endDate) {
+                $query->whereBetween('start_datetime', [
+                    Carbon::parse($startDate)->startOfDay(),
+                    Carbon::parse($endDate)->endOfDay()
+                ])
+                ->orWhereBetween('end_datetime', [
+                    Carbon::parse($startDate)->startOfDay(),
+                    Carbon::parse($endDate)->endOfDay()
+                ])
+                ->orWhere(function ($subQuery) use ($startDate, $endDate) {
+                    $subQuery->where('start_datetime', '<=', Carbon::parse($startDate)->startOfDay())
+                            ->where('end_datetime', '>=', Carbon::parse($endDate)->endOfDay());
+                });
+            })
+            ->where(function ($query) use ($menuId) {
+                $query->where('all_menus', true)
+                    ->orWhere('menu_id', $menuId);
+            })
+            ->get();
+            foreach ($blockedPeriods as $period) {
+                $startDateTime = Carbon::parse($period->start_datetime);
+                $endDateTime = Carbon::parse($period->end_datetime);
+                if ($period->all_menus || ($menuId && $period->menu_id == $menuId)) {
+                    $current = $startDateTime->copy();
+                    while ($current <= $endDateTime) {
+                        $dateStr = $current->format('Y-m-d');
+                        if (!isset($availabilityData[$dateStr])) {
+                            $current->addHour();
+                            continue;
+                        }
+                        if ($startDateTime->format('H:i') == '00:00' && $endDateTime->format('H:i') == '23:59') {
+                            $availabilityData[$dateStr]['is_blocked'] = true;
+                            foreach ($availabilityData[$dateStr]['available_hours'] as &$hourInfo) {
+                                $hourInfo['available'] = false;
+                            }
+                            $current->addDay()->startOfDay();
+                        } else {
+                            $hour = (int)$current->format('H');
+                            foreach ($availabilityData[$dateStr]['available_hours'] as &$hourInfo) {
+                                $hourInfoHour = (int)explode(':', $hourInfo['hour'])[0];
+                                if ($hourInfoHour == $hour) {
+                                    $hourInfo['available'] = false;
+                                    break;
+                                }
+                            }
+                            $current->addHour();
+                        }
+                    }
+                }
+            }
+            if ($menuId) {
+                $existingReservations = Reservation::where('menu_id', $menuId)
+                    ->whereIn('status', ['pending', 'confirmed'])
+                    ->whereBetween('reservation_datetime', [
+                        Carbon::parse($startDate)->startOfDay(),
+                        Carbon::parse($endDate)->endOfDay()
+                    ])
+                    ->get();
+                foreach ($existingReservations as $reservation) {
+                    $reservationDateTime = Carbon::parse($reservation->reservation_datetime);
+                    $dateStr = $reservationDateTime->format('Y-m-d');
+                    $hour = (int)$reservationDateTime->format('H');
+                    if (isset($availabilityData[$dateStr])) {
+                        foreach ($availabilityData[$dateStr]['available_hours'] as &$hourInfo) {
+                            $hourInfoHour = (int)explode(':', $hourInfo['hour'])[0];
+                            if ($hourInfoHour == $hour) {
+                                $hourInfo['available'] = false;
+                                break;
+                            }
+                        }
+                    }
+                }
+            }
+            foreach ($availabilityData as &$dateInfo) {
+                $availableCount = 0;
+                foreach ($dateInfo['available_hours'] as $hourInfo) {
+                    if ($hourInfo['available']) {
+                        $availableCount++;
+                    }
+                }
+                if ($availableCount == 0) {
+                    $dateInfo['is_blocked'] = true;
+                }
+            }
+            $responseData = array_values($availabilityData);
+            return response()->json([
+                'success' => true,
+                'data' => $responseData,
+                'message' => 'Availability data retrieved successfully'
+            ]);
+        } catch (\Exception $e) {
+            Log::error('Error getting availability data: ' . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'error' => 'Terjadi kesalahan saat mengambil data ketersediaan',
+                'message' => $e->getMessage(),
+                'data' => []
+            ], 500);
+        }
+    }
+    private function checkTimeSlotAvailability($menuId, $datetime, $requiredTime, $blockedPeriods, $existingReservations): bool
+    {
+        $startTime = Carbon::parse($datetime);
+        $endTime = $startTime->copy()->addMinutes($requiredTime);
+        foreach ($blockedPeriods as $dateKey => $periods) {
+            foreach ($periods as $period) {
+                if ($period->all_menus || $period->menu_id == $menuId) {
+                    $blockStart = Carbon::parse($period->start_datetime);
+                    $blockEnd = Carbon::parse($period->end_datetime);
+                    if ($startTime < $blockEnd && $endTime > $blockStart) {
+                        return false;
+                    }
+                }
+            }
+        }
+        foreach ($existingReservations as $reservation) {
+            $reservationStart = Carbon::parse($reservation->reservation_datetime);
+            $reservationEnd = $reservationStart->copy()->addMinutes($reservation->menu->required_time);
+            if ($startTime < $reservationEnd && $endTime > $reservationStart) {
+                return false;
+            }
+        }
+        return true;
+    }
+    private function isDateFullyBlocked(string $date, int $menuId, array $blockedPeriods): bool
+    {
+        $dayStart = Carbon::parse($date . ' 08:00:00');
+        $dayEnd = Carbon::parse($date . ' 20:00:00');
+        foreach ($blockedPeriods as $dateKey => $periods) {
+            foreach ($periods as $period) {
+                if ($period->all_menus || $period->menu_id == $menuId) {
+                    $blockStart = Carbon::parse($period->start_datetime);
+                    $blockEnd = Carbon::parse($period->end_datetime);
+                    if ($blockStart->lte($dayStart) && $blockEnd->gte($dayEnd)) {
+                        return true;
+                    }
+                }
+            }
+        }
+        return false;
     }
 }

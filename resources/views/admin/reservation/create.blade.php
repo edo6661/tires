@@ -112,6 +112,11 @@
                                    x-model="reservationDateTime" @change="checkAvailability()"
                                    value="{{ old('reservation_datetime') }}"
                                    class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" required>
+                            <button type="button" @click="openCalendarModal()"
+                            class="px-4 py-2 text-sm font-medium text-blue-600 bg-blue-50 border border-blue-300 rounded-md hover:bg-blue-100 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                <i class="fas fa-calendar-alt mr-2"></i>
+                                Select from Calendar
+                            </button>
                         </div>
                         <div>
                             <label for="number_of_people" class="block text-sm font-medium text-gray-700 mb-2">Number of People *</label>
@@ -158,12 +163,156 @@
                             Save Reservation
                         </button>
                     </div>
+                    <div x-show="showCalendarModal" 
+                        x-transition:enter="transition ease-out duration-300"
+                        x-transition:enter-start="opacity-0"
+                        x-transition:enter-end="opacity-100"
+                        x-transition:leave="transition ease-in duration-200"
+                        x-transition:leave-start="opacity-100"
+                        x-transition:leave-end="opacity-0"
+                        class="fixed inset-0 bg-black/50 flex items-center justify-center z-50" 
+                        style="display: none;">
+                        <div x-show="showCalendarModal"
+                            x-transition:enter="transition ease-out duration-300 transform"
+                            x-transition:enter-start="opacity-0 scale-95"
+                            x-transition:enter-end="opacity-100 scale-100"
+                            x-transition:leave="transition ease-in duration-200 transform"
+                            x-transition:leave-start="opacity-100 scale-100"
+                            x-transition:leave-end="opacity-0 scale-95"
+                            class="bg-white rounded-lg shadow-xl max-w-md w-full mx-4 max-h-[80vh] overflow-y-auto">
+                            <div class="px-6 py-4 border-b border-gray-200 flex justify-between items-center">
+                                <h3 class="text-lg font-semibold text-gray-900">Select the date you want to book</h3>
+                                <button @click="closeCalendarModal()" class="text-gray-400 hover:text-gray-600">
+                                    <i class="fas fa-times"></i>
+                                </button>
+                            </div>
+                            <div class="p-6">
+                                <div class="mb-6">
+                                    <label class="block text-sm font-medium text-gray-700 mb-3">Select Date</label>
+                                    <div class="grid grid-cols-7 gap-1 text-center text-sm">
+                                        <div class="font-medium text-gray-500 py-2">Sun</div>
+                                        <div class="font-medium text-gray-500 py-2">Mon</div>
+                                        <div class="font-medium text-gray-500 py-2">Tue</div>
+                                        <div class="font-medium text-gray-500 py-2">Wed</div>
+                                        <div class="font-medium text-gray-500 py-2">Thu</div>
+                                        <div class="font-medium text-gray-500 py-2">Fri</div>
+                                        <div class="font-medium text-gray-500 py-2">Sat</div>
+                                        <template x-for="day in calendarDays" :key="day.date">
+                                            <div class="relative">
+                                                <button type="button"
+                                                        @click="selectDate(day.date)"
+                                                        :disabled="day.disabled || day.isPast || day.isFullyBlocked"
+                                                        :class="{
+                                                            'bg-blue-500 text-white border-blue-500': selectedDate === day.date && !day.disabled && !day.isPast && !day.isFullyBlocked,
+                                                            'bg-gray-100 text-gray-400 cursor-not-allowed border-gray-200': day.disabled || day.isPast,
+                                                            'bg-red-50 border-red-300 text-red-400 cursor-not-allowed': day.isFullyBlocked && !day.isPast,
+                                                            'hover:bg-blue-100 border-blue-300': !day.disabled && !day.isPast && !day.isFullyBlocked && selectedDate !== day.date && day.hasAvailableTime,
+                                                            'hover:bg-gray-50 border-gray-300': !day.disabled && !day.isPast && !day.isFullyBlocked && selectedDate !== day.date && !day.hasAvailableTime,
+                                                            'text-gray-400': day.otherMonth,
+                                                            'border-gray-200': !day.disabled && !day.isPast && !day.isFullyBlocked && selectedDate !== day.date
+                                                        }"
+                                                        class="h-10 w-10 rounded-md border flex items-center justify-center text-sm transition-colors relative">
+                                                    <span x-text="day.day" :class="(day.isFullyBlocked || day.isPast) ? 'opacity-50' : ''"></span>
+                                                </button>
+                                                <div x-show="day.isFullyBlocked && !day.isPast" 
+                                                    class="absolute top-0 right-0 -mt-1 -mr-1 bg-red-500 text-white rounded-full w-4 h-4 flex items-center justify-center text-xs font-bold">
+                                                    ×
+                                                </div>
+                                                <div x-show="day.hasBlockedTimes && !day.isFullyBlocked && !day.isPast" 
+                                                    class="absolute top-0 right-0 -mt-1 -mr-1 w-3 h-3 bg-orange-400 rounded-full"></div>
+                                            </div>
+                                        </template>
+                                    </div>
+                                    <div class="flex justify-between items-center mt-4">
+                                        <button type="button" @click="previousMonth()" 
+                                                class="px-3 py-1 text-sm text-gray-600 hover:text-gray-800">
+                                            <i class="fas fa-chevron-left mr-1"></i>
+                                            Previous
+                                        </button>
+                                        <h4 class="text-lg font-medium text-gray-900" x-text="currentMonthYear"></h4>
+                                        <button type="button" @click="nextMonth()" 
+                                                class="px-3 py-1 text-sm text-gray-600 hover:text-gray-800">
+                                            Next
+                                            <i class="fas fa-chevron-right ml-1"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                                <div x-show="selectedDate && !isSelectedDateFullyBlocked" class="mb-6">
+                                    <label class="block text-sm font-medium text-gray-700 mb-3">Select Time</label>
+                                    <div class="grid grid-cols-3 gap-2">
+                                        <template x-for="time in availableTimes" :key="time.value">
+                                            <div class="relative">
+                                                <button type="button"
+                                                        @click="selectTime(time.value)"
+                                                        :disabled="time.disabled"
+                                                        :class="{
+                                                            'bg-blue-500 text-white border-blue-500': selectedTime === time.value && !time.disabled,
+                                                            'bg-gray-100 text-gray-400 cursor-not-allowed border-gray-200': time.disabled,
+                                                            'bg-red-50 border-red-300 text-red-400 cursor-not-allowed': time.disabled,
+                                                            'hover:bg-blue-100 border-blue-300': !time.disabled && selectedTime !== time.value,
+                                                            'border-gray-300': !time.disabled && selectedTime !== time.value
+                                                        }"
+                                                        class="px-3 py-2 text-sm border rounded-md transition-colors flex items-center justify-center w-full relative">
+                                                    <span x-text="time.label" :class="time.disabled ? 'opacity-50' : ''"></span>
+                                                </button>
+                                                <div x-show="time.disabled" 
+                                                    class="absolute top-0 right-0 -mt-1 -mr-1 bg-red-500 text-white rounded-full w-4 h-4 flex items-center justify-center text-xs font-bold">
+                                                    ×
+                                                </div>
+                                            </div>
+                                        </template>
+                                    </div>
+                                </div>
+                                <div x-show="selectedDate && isSelectedDateFullyBlocked" class="mb-6">
+                                    <div class="bg-red-50 border border-red-200 rounded-md p-4 text-center">
+                                        <i class="fas fa-exclamation-triangle text-red-500 mb-2"></i>
+                                        <p class="text-sm text-red-700">
+                                            This date is fully blocked and not available for reservations.
+                                        </p>
+                                    </div>
+                                </div>
+                                <div class="mb-4 p-3 bg-gray-50 rounded-md">
+                                    <h4 class="text-sm font-medium text-gray-700 mb-2">Legend:</h4>
+                                    <div class="flex flex-wrap gap-4 text-xs">
+                                        <div class="flex items-center">
+                                            <div class="w-4 h-4 bg-red-500 rounded-full mr-2 flex items-center justify-center text-white text-xs font-bold">×</div>
+                                            <span class="text-gray-600">Fully Blocked</span>
+                                        </div>
+                                        <div class="flex items-center">
+                                            <div class="w-3 h-3 bg-orange-400 rounded-full mr-2"></div>
+                                            <span class="text-gray-600">Partially Available</span>
+                                        </div>
+                                        <div class="flex items-center">
+                                            <div class="w-3 h-3 bg-blue-500 rounded-md mr-2"></div>
+                                            <span class="text-gray-600">Available</span>
+                                        </div>
+                                        <div class="flex items-center">
+                                            <div class="w-3 h-3 bg-gray-300 rounded-md mr-2"></div>
+                                            <span class="text-gray-600">Past Date</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="px-6 py-4 border-t border-gray-200 flex justify-end space-x-3">
+                                <button type="button" @click="closeCalendarModal()" 
+                                        class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50">
+                                    Cancel
+                                </button>
+                                <button type="button" @click="confirmSelection()" 
+                                        :disabled="!selectedDate || !selectedTime || isSelectedDateFullyBlocked"
+                                        :class="(!selectedDate || !selectedTime || isSelectedDateFullyBlocked) ? 'opacity-50 cursor-not-allowed' : ''"
+                                        class="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700">
+                                    Confirm
+                                </button>
+                            </div>
+                        </div>
+                    </div>
                 </form>
             </div>
         </div>
     </div>
     <script>
-       function reservationForm() {
+        function reservationForm() {
             return {
                 customerType: '{{ old('customer_type', 'existing') }}',
                 selectedMenu: '{{ old('menu_id') }}',
@@ -172,10 +321,20 @@
                 availabilityStatus: null,
                 availabilityMessage: '',
                 isFormValid: false,
+                showCalendarModal: false,
+                selectedDate: null,
+                selectedTime: null,
+                currentMonth: new Date().getMonth(),
+                currentYear: new Date().getFullYear(),
+                calendarDays: [],
+                availableTimes: [],
+                blockedDates: [],
+                blockedTimes: {},
+                availabilityData: [],
+                isSelectedDateFullyBlocked: false,
                 init() {
                     this.updateAmount();
                     this.validateForm();
-                    // Watch for changes to trigger validation
                     this.$watch('customerType', () => {
                         this.validateForm();
                     });
@@ -186,7 +345,6 @@
                     this.$watch('reservationDateTime', () => {
                         this.validateForm();
                     });
-                    // Set up event listeners for guest form fields
                     setTimeout(() => {
                         const guestFields = ['full_name', 'full_name_kana', 'email', 'phone_number'];
                         guestFields.forEach(fieldId => {
@@ -197,7 +355,6 @@
                                 });
                             }
                         });
-                        // User select for existing customer
                         const userSelect = document.getElementById('user_id');
                         if (userSelect) {
                             userSelect.addEventListener('change', () => {
@@ -233,7 +390,6 @@
                                         phoneNumber && phoneNumber.value.trim() !== '';
                     }
                     this.isFormValid = menuSelected && dateTimeSelected && customerInfoValid;
-                    // Debug log
                     console.log('Form validation:', {
                         menuSelected,
                         dateTimeSelected,
@@ -270,7 +426,6 @@
                             this.availabilityStatus = 'unavailable';
                             this.availabilityMessage = 'Time slot is not available - conflicts with blocked periods or other reservations';
                         }
-                        // Validate form after checking availability
                         this.validateForm();
                     } catch (error) {
                         console.error('Error checking availability:', error);
@@ -288,17 +443,226 @@
                             availabilityStatus: this.availabilityStatus
                         });
                     }
+                },
+                get currentMonthYear() {
+                    const months = ['January', 'February', 'March', 'April', 'May', 'June',
+                                'July', 'August', 'September', 'October', 'November', 'December'];
+                    return `${months[this.currentMonth]} ${this.currentYear}`;
+                },
+                openCalendarModal() {
+                    if (!this.selectedMenu) {
+                        alert('Please select a menu first');
+                        return;
+                    }
+                    this.showCalendarModal = true;
+                    this.selectedDate = null;
+                    this.selectedTime = null;
+                    this.availableTimes = [];
+                    this.loadBlockedDates().then(() => {
+                        this.generateCalendar();
+                    }).catch(error => {
+                        console.error('Error loading calendar data:', error);
+                        this.generateCalendar();
+                    });
+                },
+                closeCalendarModal() {
+                    this.showCalendarModal = false;
+                    this.selectedDate = null;
+                    this.selectedTime = null;
+                },
+                generateCalendar() {
+                    const firstDay = new Date(this.currentYear, this.currentMonth, 1);
+                    const lastDay = new Date(this.currentYear, this.currentMonth + 1, 0);
+                    const startDate = new Date(firstDay);
+                    startDate.setDate(startDate.getDate() - firstDay.getDay());
+                    const days = [];
+                    const today = new Date();
+                    today.setHours(0, 0, 0, 0);
+                    for (let i = 0; i < 42; i++) {
+                        const date = new Date(startDate);
+                        date.setDate(startDate.getDate() + i);
+                        const year = date.getFullYear();
+                        const month = String(date.getMonth() + 1).padStart(2, '0');
+                        const day = String(date.getDate()).padStart(2, '0');
+                        const dateStr = `${year}-${month}-${day}`;
+                        const isCurrentMonth = date.getMonth() === this.currentMonth;
+                        const isPast = date < today;
+                        const dateAvailability = this.availabilityData.find(item => item.date === dateStr);
+                        const isFullyBlocked = dateAvailability ? dateAvailability.is_blocked : false;
+                        let hasAvailableTime = false;
+                        let hasBlockedTimes = false;
+                        if (dateAvailability && dateAvailability.available_hours) {
+                            const availableCount = dateAvailability.available_hours.filter(hour => hour.available).length;
+                            const blockedCount = dateAvailability.available_hours.filter(hour => !hour.available).length;
+                            hasAvailableTime = availableCount > 0;
+                            hasBlockedTimes = blockedCount > 0;
+                        }
+                        days.push({
+                            date: dateStr,
+                            day: date.getDate(),
+                            otherMonth: !isCurrentMonth,
+                            isPast: isPast,
+                            isFullyBlocked: isFullyBlocked,
+                            hasBlockedTimes: hasBlockedTimes && !isFullyBlocked,
+                            hasAvailableTime: hasAvailableTime,
+                            disabled: isPast || isFullyBlocked
+                        });
+                    }
+                    this.calendarDays = days;
+                    console.log('Calendar generated with days:', days.length);
+                },
+                previousMonth() {
+                    if (this.currentMonth === 0) {
+                        this.currentMonth = 11;
+                        this.currentYear--;
+                    } else {
+                        this.currentMonth--;
+                    }
+                    this.loadBlockedDates().then(() => {
+                        this.generateCalendar();
+                    });
+                },
+                nextMonth() {
+                    if (this.currentMonth === 11) {
+                        this.currentMonth = 0;
+                        this.currentYear++;
+                    } else {
+                        this.currentMonth++;
+                    }
+                    this.loadBlockedDates().then(() => {
+                        this.generateCalendar();
+                    });
+                },
+                 selectDate(dateStr) {
+                    const dateAvailability = this.availabilityData.find(item => item.date === dateStr);
+                    this.isSelectedDateFullyBlocked = dateAvailability ? dateAvailability.is_blocked : false;
+                    if (!this.isSelectedDateFullyBlocked) {
+                        this.selectedDate = dateStr;
+                        this.selectedTime = null;
+                        this.generateAvailableTimes();
+                    }
+                    console.log('Selected date:', dateStr, 'Is blocked:', this.isSelectedDateFullyBlocked);
+                },
+                generateAvailableTimes() {
+                    const times = [];
+                    const dateAvailability = this.availabilityData.find(item => item.date === this.selectedDate);
+                    if (dateAvailability && dateAvailability.available_hours) {
+                        dateAvailability.available_hours.forEach(hourInfo => {
+                            const hour = parseInt(hourInfo.hour.split(':')[0]);
+                            const timeStr = hourInfo.hour;
+                            const displayTime = `${hour}:00`;
+                            times.push({
+                                value: timeStr,
+                                label: displayTime,
+                                disabled: !hourInfo.available
+                            });
+                        });
+                    } else {
+                        for (let hour = 8; hour <= 20; hour++) {
+                            const timeStr = `${hour.toString().padStart(2, '0')}:00`;
+                            times.push({
+                                value: timeStr,
+                                label: `${hour}:00`,
+                                disabled: false
+                            });
+                        }
+                    }
+                    this.availableTimes = times;
+                    console.log('Available times generated:', times);
+                },
+                selectTime(timeStr) {
+                    this.selectedTime = timeStr;
+                    console.log('Selected time:', timeStr); 
+                },
+                confirmSelection() {
+                    if (this.selectedDate && this.selectedTime && !this.isSelectedDateFullyBlocked) {
+                        const dateTimeStr = `${this.selectedDate}T${this.selectedTime}`;
+                        console.log('Confirming selection:', {
+                            selectedDate: this.selectedDate,
+                            selectedTime: this.selectedTime,
+                            dateTimeStr: dateTimeStr
+                        });
+                        this.reservationDateTime = dateTimeStr;
+                        const datetimeInput = document.getElementById('reservation_datetime');
+                        if (datetimeInput) {
+                            datetimeInput.value = dateTimeStr;
+                            datetimeInput.dispatchEvent(new Event('change'));
+                        }
+                        this.closeCalendarModal();
+                        this.checkAvailability();
+                    } else {
+                        if (this.isSelectedDateFullyBlocked) {
+                            alert('Selected date is fully blocked and not available for reservations.');
+                        } else {
+                            alert('Please select both date and time.');
+                        }
+                    }
+                },
+                async loadBlockedDates() {
+                    if (!this.selectedMenu) {
+                        console.log('No menu selected, cannot load blocked dates');
+                        return;
+                    }
+                    try {
+                        const response = await fetch('{{ route('admin.reservation.availability') }}', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                            },
+                            body: JSON.stringify({
+                                menu_id: this.selectedMenu,
+                                start_date: `${this.currentYear}-${(this.currentMonth + 1).toString().padStart(2, '0')}-01`,
+                                end_date: `${this.currentYear}-${(this.currentMonth + 1).toString().padStart(2, '0')}-31`
+                            })
+                        });
+                        const data = await response.json();
+                        console.log('Availability data received:', data);
+                        if (data.success && data.data) {
+                            this.availabilityData = data.data;
+                            this.blockedDates = [];
+                            this.blockedTimes = {};
+                            data.data.forEach(dateInfo => {
+                                if (dateInfo.is_blocked) {
+                                    this.blockedDates.push(dateInfo.date);
+                                }
+                                const unavailableHours = [];
+                                if (dateInfo.available_hours) {
+                                    dateInfo.available_hours.forEach(hourInfo => {
+                                        if (!hourInfo.available) {
+                                            const hour = parseInt(hourInfo.hour.split(':')[0]);
+                                            unavailableHours.push(hour);
+                                        }
+                                    });
+                                }
+                                if (unavailableHours.length > 0) {
+                                    this.blockedTimes[dateInfo.date] = unavailableHours;
+                                }
+                            });
+                            console.log('Processed availability data:', {
+                                availabilityData: this.availabilityData,
+                                blockedDates: this.blockedDates,
+                                blockedTimes: this.blockedTimes
+                            });
+                        } else {
+                            console.error('Failed to load availability data:', data.message || 'Unknown error');
+                            this.availabilityData = [];
+                        }
+                        this.generateCalendar();
+                    } catch (error) {
+                        console.error('Error loading blocked dates:', error);
+                        this.availabilityData = [];
+                        this.generateCalendar();
+                    }
                 }
             }
         }
-        // Add CSRF token to head if not exists
         if (!document.querySelector('meta[name="csrf-token"]')) {
             const meta = document.createElement('meta');
             meta.name = 'csrf-token';
             meta.content = '{{ csrf_token() }}';
             document.head.appendChild(meta);
         }
-        // Auto-update amount when menu changes
         document.addEventListener('DOMContentLoaded', function() {
             const menuSelect = document.getElementById('menu_id');
             if (menuSelect) {
