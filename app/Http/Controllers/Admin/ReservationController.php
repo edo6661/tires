@@ -5,7 +5,9 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\ReservationRequest;
 use App\Models\Menu;
 use App\Services\BlockedPeriodService;
+use App\Services\MenuService;
 use App\Services\ReservationServiceInterface;
+use App\Services\UserService;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 use Illuminate\View\View;
@@ -17,9 +19,11 @@ class ReservationController extends Controller
     public function __construct(
         protected ReservationServiceInterface $reservationService,
         protected BlockedPeriodService $blockedPeriodService,
-    )
-    {
-    }
+        
+        protected MenuService $menuService,
+        protected UserService $userService,
+        
+    ){}
     public function calendar(Request $request): View
     {
         $view = $request->get('view', 'month'); 
@@ -431,7 +435,9 @@ class ReservationController extends Controller
     }
     public function create(): View
     {
-        return view('admin.reservation.create');
+        $menus = $this->menuService->getActiveMenus();
+        $users = $this->userService->getCustomers();
+        return view('admin.reservation.create', compact('menus', 'users'));
     }
     public function store(ReservationRequest $request): RedirectResponse
     {
