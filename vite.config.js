@@ -23,4 +23,5 @@ export default defineConfig({
             },
         },
     },
+    base: process.env.NODE_ENV === 'production' ? 'https://tires-production.up.railway.app/' : '/',
 });
