@@ -69,14 +69,22 @@ class BlockedPeriodRepository implements BlockedPeriodRepositoryInterface
 
     public function getByDateRange(string $startDate, string $endDate): Collection
     {
-        return $this->model->with('menu')
+        return $this->model->with(['menu']) // Assuming you have menu relationship
             ->where(function ($query) use ($startDate, $endDate) {
-                $query->whereBetween('start_datetime', [$startDate, $endDate])
-                    ->orWhereBetween('end_datetime', [$startDate, $endDate])
-                    ->orWhere(function ($q) use ($startDate, $endDate) {
-                        $q->where('start_datetime', '<=', $startDate)
-                            ->where('end_datetime', '>=', $endDate);
-                    });
+                // Get periods that overlap with the date range
+                $query->whereBetween('start_datetime', [
+                    Carbon::parse($startDate)->startOfDay(),
+                    Carbon::parse($endDate)->endOfDay()
+                ])
+                ->orWhereBetween('end_datetime', [
+                    Carbon::parse($startDate)->startOfDay(),
+                    Carbon::parse($endDate)->endOfDay()
+                ])
+                ->orWhere(function ($subQuery) use ($startDate, $endDate) {
+                    // Include periods that completely encompass the date range
+                    $subQuery->where('start_datetime', '<=', Carbon::parse($startDate)->startOfDay())
+                            ->where('end_datetime', '>=', Carbon::parse($endDate)->endOfDay());
+                });
             })
             ->orderBy('start_datetime')
             ->get();

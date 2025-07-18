@@ -78,6 +78,7 @@ class ReservationRepository implements ReservationRepositoryInterface
                 Carbon::parse($startDate)->startOfDay(), 
                 Carbon::parse($endDate)->endOfDay()      
             ])
+            ->whereIn('status', ['pending', 'confirmed']) 
             ->orderBy('reservation_datetime')
             ->get();
     }

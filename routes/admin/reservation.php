@@ -13,8 +13,6 @@ Route::prefix('reservation')->group(function () {
             ->name('block');
         Route::post('availability', [ReservationController::class, 'availability'])
             ->name('availability');
-        Route::get('availability-data', [ReservationController::class, 'getAvailabilityData'])
-        ->name('availability-data');
     });
 });
 Route::resource('reservation', ReservationController::class);
