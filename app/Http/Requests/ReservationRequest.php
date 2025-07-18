@@ -15,7 +15,7 @@ class ReservationRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'reservation_number' => 'required|string|max:255|unique:reservations,reservation_number,' . $this->route('reservation'),
+            'reservation_number' => 'nullable|string|max:255|unique:reservations,reservation_number,' . $this->route('reservation'),
             'user_id' => 'nullable|exists:users,id',
             'menu_id' => 'required|exists:menus,id',
             'reservation_datetime' => 'required|date|after:now',
@@ -63,7 +63,6 @@ class ReservationRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'reservation_number.required' => 'The reservation number field is required.',
             'reservation_number.string' => 'The reservation number must be a string.',
             'reservation_number.max' => 'The reservation number may not be greater than 255 characters.',
             'reservation_number.unique' => 'The reservation number has already been taken.',

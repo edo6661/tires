@@ -5,11 +5,11 @@
             <i class="fas fa-bars text-lg"></i>
         </button>
         
-        <div class="flex flex-col md:flex-row md:items-center gap-4 md:gap-12 text-xs select-none whitespace-nowrap">
+        {{-- <div class="flex flex-col md:flex-row md:items-center gap-4 md:gap-12 text-xs select-none whitespace-nowrap">
             <a href="{{ route('admin.dashboard') }}" class="flex items-center gap-3 text-gray-700 select-text">
                 <img src="{{ asset('images/logo.jpg') }}" alt="Logo for X Change Tire Installation Reservation" class="object-cover w-16" />
             </a>
-        </div>
+        </div> --}}
 
         <x-shared.form-hint-icon
             label="Logout"

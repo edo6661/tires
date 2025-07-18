@@ -56,7 +56,7 @@
         <div>
             <div class="font-medium text-gray-900">                                        {{$reservation->getFullName() }}
 </div>
-            <div class="text-gray-600 text-xs">{{ $reservation->user->email ?? 'Email not available' }}</div>
+            <div class="text-gray-600 text-xs">{{ $reservation->getEmail() }}</div>
         </div>
     </div>
     

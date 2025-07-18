@@ -443,7 +443,7 @@ class ReservationController extends Controller
     {
         try {
             $this->reservationService->createReservation($request->validated());
-            return redirect()->route('admin.reservation.index')
+            return redirect()->route('admin.reservation.calendar')
                 ->with('success', 'Reservasi berhasil dibuat');
         } catch (\Exception $e) {
             return redirect()->back()
@@ -472,7 +472,7 @@ class ReservationController extends Controller
         try {
             $reservation = $this->reservationService->updateReservation($id, $request->validated());
             if (!$reservation) {
-                return redirect()->route('admin.reservation.index')
+                return redirect()->route('admin.reservation.calendar')
                     ->with('error', 'Reservasi tidak ditemukan');
             }
             return redirect()->route('admin.reservation.show', $id)
@@ -500,20 +500,33 @@ class ReservationController extends Controller
     }
     public function checkAvailability(Request $request): JsonResponse
     {
-        $request->validate([
-            'menu_id' => 'required|integer|exists:menus,id',
-            'reservation_datetime' => 'required|date|after:now',
-            'exclude_reservation_id' => 'nullable|integer|exists:reservations,id'
-        ]);
-        $available = $this->reservationService->checkAvailability(
-            $request->menu_id,
-            $request->reservation_datetime,
-            $request->exclude_reservation_id
-        );
-        return response()->json([
-            'available' => $available,
-            'message' => $available ? 'Waktu tersedia' : 'Waktu tidak tersedia'
-        ]);
+        try {
+            $request->validate([
+                'menu_id' => 'required|integer|exists:menus,id',
+                'reservation_datetime' => 'required|date|after:now',
+                'exclude_reservation_id' => 'nullable|integer|exists:reservations,id'
+            ]);
+
+            $available = $this->reservationService->checkAvailability(
+                $request->menu_id,
+                $request->reservation_datetime,
+                $request->exclude_reservation_id
+            );
+
+            return response()->json([
+                'available' => $available,
+                'message' => $available ? 'Waktu tersedia' : 'Waktu tidak tersedia'
+            ]);
+
+        } catch (\Exception $e) {
+            // Log error untuk debugging
+            Log::error('Error checking availability: ' . $e->getMessage());
+            
+            return response()->json([
+                'error' => 'Terjadi kesalahan saat mengecek ketersediaan',
+                'message' => $e->getMessage()
+            ], 500);
+        }
     }
     public function confirm(int $id): JsonResponse
     {
