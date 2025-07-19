@@ -25,4 +25,5 @@ interface ReservationRepositoryInterface
     public function getTodayReservations(): Collection;
     public function checkAvailability(int $menuId, string $datetime, ?int $excludeReservationId = null): bool;
     public function bulkUpdateStatus(array $ids, string $status): bool;
+    public function getByDateRangeAndMenu(string $startDate, string $endDate, int $menuId): Collection;
 }

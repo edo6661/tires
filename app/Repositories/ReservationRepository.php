@@ -82,6 +82,18 @@ class ReservationRepository implements ReservationRepositoryInterface
             ->orderBy('reservation_datetime')
             ->get();
     }
+    public function getByDateRangeAndMenu(string $startDate, string $endDate, int $menuId): Collection
+    {
+        return $this->model->with(['user', 'menu'])
+            ->where('menu_id', $menuId)
+            ->whereBetween('reservation_datetime', [
+                Carbon::parse($startDate)->startOfDay(),
+                Carbon::parse($endDate)->endOfDay()
+            ])
+            ->whereIn('status', ['pending', 'confirmed'])
+            ->orderBy('reservation_datetime')
+            ->get();
+    }
     public function getUpcoming(): Collection
     {
         return $this->model->with(['user', 'menu'])

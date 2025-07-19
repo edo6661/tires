@@ -28,4 +28,5 @@ interface ReservationServiceInterface
     public function completeReservation(int $id): bool;
     public function bulkUpdateReservationStatus(array $ids, string $status): bool;
     public function generateReservationNumber(): string;
+    public function getReservationsByDateRangeAndMenu(string $startDate, string $endDate, int $menuId): Collection;
 }

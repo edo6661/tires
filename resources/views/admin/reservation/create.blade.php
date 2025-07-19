@@ -214,19 +214,31 @@
                                                         class="h-10 w-10 rounded-md border flex items-center justify-center text-sm transition-colors relative">
                                                     <span x-text="day.day" :class="(day.isFullyBlocked || day.isPast) ? 'opacity-50' : ''"></span>
                                                 </button>
+                                                
+                                                <!-- Fully blocked indicator (X) -->
                                                 <div x-show="day.isFullyBlocked && !day.isPast" 
-                                                    class="absolute top-0 right-0 -mt-1 -mr-1 bg-red-500 text-white rounded-full w-4 h-4 flex items-center justify-center text-xs font-bold">
+                                                    class="absolute top-0 right-0 -mt-0.5 -mr-0.5 bg-red-500 text-white rounded-full w-4 h-4 flex items-center justify-center text-xs font-bold">
                                                     ×
                                                 </div>
-                                                <div x-show="day.hasBlockedTimes && !day.isFullyBlocked && !day.isPast" 
-                                                    class="absolute top-0 right-0 -mt-1 -mr-1 w-3 h-3 bg-orange-400 rounded-full"></div>
+                                                
+                                                <!-- PERBAIKAN: Prioritaskan indikator mixed -->
+                                                <div x-show="day.isMixed && !day.isFullyBlocked && !day.isPast" 
+                                                    class="absolute top-0 right-0 -mt-0.5 -mr-0.5 w-3 h-3 bg-gradient-to-r from-orange-400 to-purple-500 rounded-full border border-white"></div>
+                                                
+                                                <!-- Blocked periods (orange dot) -->
+                                                <div x-show="day.hasBlockedTimes && !day.hasReservationBlocked && !day.isMixed && !day.isFullyBlocked && !day.isPast" 
+                                                    class="absolute top-0 right-0 -mt-0.5 -mr-0.5 w-3 h-3 bg-orange-400 rounded-full"></div>
+                                                
+                                                <!-- PERBAIKAN: Reservasi (purple dot) -->
+                                                <div x-show="day.hasReservationBlocked && !day.hasBlockedTimes && !day.isMixed && !day.isFullyBlocked && !day.isPast" 
+                                                    class="absolute top-0 right-0 -mt-0.5 -mr-0.5 w-3 h-3 bg-purple-500 rounded-full"></div>
                                             </div>
                                         </template>
                                     </div>
                                     <div class="flex justify-between items-center mt-4">
                                         <button type="button" @click="previousMonth()" 
                                                 class="px-3 py-1 text-sm text-gray-600 hover:text-gray-800">
-                                            <i class="fas fa-chevron-left mr-1"></i>
+                                            <i class="fas fa-chevron-left mr-0.5"></i>
                                             Previous
                                         </button>
                                         <h4 class="text-lg font-medium text-gray-900" x-text="currentMonthYear"></h4>
@@ -240,6 +252,7 @@
                                 <div x-show="selectedDate && !isSelectedDateFullyBlocked" class="mb-6">
                                     <label class="block text-sm font-medium text-gray-700 mb-3">Select Time</label>
                                     <div class="grid grid-cols-3 gap-2">
+                                        <!-- Bagian time selection - replace bagian template x-for time in availableTimes -->
                                         <template x-for="time in availableTimes" :key="time.value">
                                             <div class="relative">
                                                 <button type="button"
@@ -247,18 +260,38 @@
                                                         :disabled="time.disabled"
                                                         :class="{
                                                             'bg-blue-500 text-white border-blue-500': selectedTime === time.value && !time.disabled,
-                                                            'bg-gray-100 text-gray-400 cursor-not-allowed border-gray-200': time.disabled,
-                                                            'bg-red-50 border-red-300 text-red-400 cursor-not-allowed': time.disabled,
+                                                            'bg-gray-100 text-gray-400 cursor-not-allowed border-gray-200': time.disabled && time.blockedBy === 'blocked_period',
+                                                            'bg-purple-50 border-purple-300 text-purple-400 cursor-not-allowed': time.disabled && time.blockedBy === 'existing_reservation',
+                                                            'bg-red-50 border-red-300 text-red-400 cursor-not-allowed': time.disabled && (!time.blockedBy || time.blockedBy === 'unknown'),
                                                             'hover:bg-blue-100 border-blue-300': !time.disabled && selectedTime !== time.value,
                                                             'border-gray-300': !time.disabled && selectedTime !== time.value
                                                         }"
                                                         class="px-3 py-2 text-sm border rounded-md transition-colors flex items-center justify-center w-full relative">
                                                     <span x-text="time.label" :class="time.disabled ? 'opacity-50' : ''"></span>
                                                 </button>
-                                                <div x-show="time.disabled" 
-                                                    class="absolute top-0 right-0 -mt-1 -mr-1 bg-red-500 text-white rounded-full w-4 h-4 flex items-center justify-center text-xs font-bold">
+                                                
+                                                <!-- Indicator untuk different block types -->
+                                                <div x-show="time.disabled && time.blockedBy === 'blocked_period'" 
+                                                    class="absolute top-0 right-0 -mt-0.5 -mr-0.5 bg-orange-500 text-white rounded-full w-4 h-4 flex items-center justify-center text-xs font-bold">
+                                                    B
+                                                </div>
+                                                
+                                                <!-- TAMBAHAN: Indicator untuk reservasi -->
+                                                <div x-show="time.disabled && time.blockedBy === 'existing_reservation'" 
+                                                    class="absolute top-0 right-0 -mt-0.5 -mr-0.5 bg-purple-500 text-white rounded-full w-4 h-4 flex items-center justify-center text-xs font-bold">
+                                                    R
+                                                </div>
+                                                
+                                                <!-- Generic X untuk yang lain -->
+                                                <div x-show="time.disabled && (!time.blockedBy || time.blockedBy === 'unknown')" 
+                                                    class="absolute top-0 right-0 -mt-0.5 -mr-0.5 bg-red-500 text-white rounded-full w-4 h-4 flex items-center justify-center text-xs font-bold">
                                                     ×
                                                 </div>
+                                                <div x-show="time.disabled && time.blockedBy === 'past_time'" 
+                                                    class="absolute top-0 right-0 -mt-0.5 -mr-0.5 bg-gray-500 text-white rounded-full w-4 h-4 flex items-center justify-center text-xs font-bold">
+                                                    ×
+                                                </div>
+
                                             </div>
                                         </template>
                                     </div>
@@ -280,7 +313,16 @@
                                         </div>
                                         <div class="flex items-center">
                                             <div class="w-3 h-3 bg-orange-400 rounded-full mr-2"></div>
-                                            <span class="text-gray-600">Partially Available</span>
+                                            <span class="text-gray-600">Blocked Period</span>
+                                        </div>
+                                        <!-- TAMBAHAN: Legend untuk reservasi -->
+                                        <div class="flex items-center">
+                                            <div class="w-3 h-3 bg-purple-500 rounded-full mr-2"></div>
+                                            <span class="text-gray-600">Has Reservation</span>
+                                        </div>
+                                        <div class="flex items-center">
+                                            <div class="w-3 h-3 bg-gradient-to-r from-orange-400 to-purple-500 rounded-full mr-2"></div>
+                                            <span class="text-gray-600">Mixed (Blocked + Reservation)</span>
                                         </div>
                                         <div class="flex items-center">
                                             <div class="w-3 h-3 bg-blue-500 rounded-md mr-2"></div>
@@ -475,28 +517,40 @@
                     const lastDay = new Date(this.currentYear, this.currentMonth + 1, 0);
                     const startDate = new Date(firstDay);
                     startDate.setDate(startDate.getDate() - firstDay.getDay());
+                    
                     const days = [];
                     const today = new Date();
                     today.setHours(0, 0, 0, 0);
+                    
                     for (let i = 0; i < 42; i++) {
                         const date = new Date(startDate);
                         date.setDate(startDate.getDate() + i);
+                        
                         const year = date.getFullYear();
                         const month = String(date.getMonth() + 1).padStart(2, '0');
                         const day = String(date.getDate()).padStart(2, '0');
                         const dateStr = `${year}-${month}-${day}`;
+                        
                         const isCurrentMonth = date.getMonth() === this.currentMonth;
                         const isPast = date < today;
+                        
                         const dateAvailability = this.availabilityData.find(item => item.date === dateStr);
                         const isFullyBlocked = dateAvailability ? dateAvailability.is_blocked : false;
+                        
                         let hasAvailableTime = false;
                         let hasBlockedTimes = false;
+                        let hasReservationBlocked = false;
+                        
                         if (dateAvailability && dateAvailability.available_hours) {
                             const availableCount = dateAvailability.available_hours.filter(hour => hour.available).length;
                             const blockedCount = dateAvailability.available_hours.filter(hour => !hour.available).length;
+                            
+                            // PERBAIKAN: Gunakan data yang sudah diproses dari backend
                             hasAvailableTime = availableCount > 0;
-                            hasBlockedTimes = blockedCount > 0;
+                            hasBlockedTimes = dateAvailability.has_blocked_periods || false;
+                            hasReservationBlocked = dateAvailability.has_reservations || false;
                         }
+                        
                         days.push({
                             date: dateStr,
                             day: date.getDate(),
@@ -504,14 +558,60 @@
                             isPast: isPast,
                             isFullyBlocked: isFullyBlocked,
                             hasBlockedTimes: hasBlockedTimes && !isFullyBlocked,
+                            hasReservationBlocked: hasReservationBlocked && !isFullyBlocked,
+                            isMixed: dateAvailability ? dateAvailability.is_mixed : false, // TAMBAHAN: indikator mixed
                             hasAvailableTime: hasAvailableTime,
                             disabled: isPast || isFullyBlocked
                         });
                     }
+                    
                     this.calendarDays = days;
                     console.log('Calendar generated with days:', days.length);
+                    console.log('Sample day data:', days.find(d => d.hasReservationBlocked || d.hasBlockedTimes));
                 },
-                previousMonth() {
+                 selectDate(dateStr) {
+                    const dateAvailability = this.availabilityData.find(item => item.date === dateStr);
+                    this.isSelectedDateFullyBlocked = dateAvailability ? dateAvailability.is_blocked : false;
+                    if (!this.isSelectedDateFullyBlocked) {
+                        this.selectedDate = dateStr;
+                        this.selectedTime = null;
+                        this.generateAvailableTimes();
+                    }
+                    console.log('Selected date:', dateStr, 'Is blocked:', this.isSelectedDateFullyBlocked);
+                },
+                generateAvailableTimes() {
+                    const times = [];
+                    const dateAvailability = this.availabilityData.find(item => item.date === this.selectedDate);
+                    const today = new Date();
+                    const todayStr = today.toISOString().split('T')[0];
+                    const currentHour = today.getHours();
+
+                    if (dateAvailability && dateAvailability.available_hours) {
+                        dateAvailability.available_hours.forEach(hourInfo => {
+                            const hour = parseInt(hourInfo.hour.split(':')[0]);
+                            const timeStr = hourInfo.hour;
+                            const displayTime = `${hour}:00`;
+                            
+                            let isDisabled = !hourInfo.available;
+                            let blockedBy = hourInfo.blocked_by || 'unknown';
+                            
+                            if (this.selectedDate === todayStr && hour < currentHour) {
+                                isDisabled = true;
+                                blockedBy = 'past_time';
+                            }
+                            
+                            times.push({
+                                value: timeStr,
+                                label: displayTime,
+                                disabled: isDisabled,
+                                blockedBy: blockedBy
+                            });
+                        });
+                    }
+                    
+                    this.availableTimes = times;
+                },
+                 previousMonth() {
                     if (this.currentMonth === 0) {
                         this.currentMonth = 11;
                         this.currentYear--;
@@ -532,43 +632,6 @@
                     this.loadBlockedDates().then(() => {
                         this.generateCalendar();
                     });
-                },
-                 selectDate(dateStr) {
-                    const dateAvailability = this.availabilityData.find(item => item.date === dateStr);
-                    this.isSelectedDateFullyBlocked = dateAvailability ? dateAvailability.is_blocked : false;
-                    if (!this.isSelectedDateFullyBlocked) {
-                        this.selectedDate = dateStr;
-                        this.selectedTime = null;
-                        this.generateAvailableTimes();
-                    }
-                    console.log('Selected date:', dateStr, 'Is blocked:', this.isSelectedDateFullyBlocked);
-                },
-                generateAvailableTimes() {
-                    const times = [];
-                    const dateAvailability = this.availabilityData.find(item => item.date === this.selectedDate);
-                    if (dateAvailability && dateAvailability.available_hours) {
-                        dateAvailability.available_hours.forEach(hourInfo => {
-                            const hour = parseInt(hourInfo.hour.split(':')[0]);
-                            const timeStr = hourInfo.hour;
-                            const displayTime = `${hour}:00`;
-                            times.push({
-                                value: timeStr,
-                                label: displayTime,
-                                disabled: !hourInfo.available
-                            });
-                        });
-                    } else {
-                        for (let hour = 8; hour <= 20; hour++) {
-                            const timeStr = `${hour.toString().padStart(2, '0')}:00`;
-                            times.push({
-                                value: timeStr,
-                                label: `${hour}:00`,
-                                disabled: false
-                            });
-                        }
-                    }
-                    this.availableTimes = times;
-                    console.log('Available times generated:', times);
                 },
                 selectTime(timeStr) {
                     this.selectedTime = timeStr;
