@@ -408,139 +408,119 @@ class ReservationController extends Controller
         return view('admin.reservation.block');
     }
     public function availability(Request $request): JsonResponse
-{
-    try {
-        $request->validate([
-            'menu_id' => 'nullable|integer|exists:menus,id',
-            'start_date' => 'required|date',
-            'end_date' => 'required|date|after_or_equal:start_date'
-        ]);
-        
-        $menuId = $request->menu_id;
-        $startDate = $request->start_date;
-        $endDate = $request->end_date;
-        $availabilityData = [];
-        
-        $start = Carbon::parse($startDate);
-        $end = Carbon::parse($endDate);
-        
-        $blockedPeriods = $this->blockedPeriodService->getByDateRange($startDate, $endDate);
-        
-        // PERBAIKAN 1: Query reservasi dengan filter menu_id
-        $existingReservations = [];
-        if ($menuId) {
-            $existingReservations = $this->reservationService->getReservationsByDateRangeAndMenu(
-                $startDate, 
-                $endDate, 
-                $menuId
-            );
-        }
-        
-        $current = $start->copy();
-        while ($current <= $end) {
-            $dateStr = $current->format('Y-m-d');
-            $isFullyBlocked = false;
-            $availableHours = [];
-            
-            // Cek fully blocked
-            foreach ($blockedPeriods as $period) {
-                if ($period->all_menus || ($menuId && $period->menu_id == $menuId)) {
-                    $startDateTime = Carbon::parse($period->start_datetime);
-                    $endDateTime = Carbon::parse($period->end_datetime);
-                    
-                    if ($current->between($startDateTime, $endDateTime) && 
-                        $startDateTime->format('H:i') == '00:00' && 
-                        $endDateTime->format('H:i') == '23:59') {
-                        $isFullyBlocked = true;
-                        break;
-                    }
-                }
+    {
+        try {
+            $request->validate([
+                'menu_id' => 'nullable|integer|exists:menus,id',
+                'start_date' => 'required|date',
+                'end_date' => 'required|date|after_or_equal:start_date'
+            ]);
+            $menuId = $request->menu_id;
+            $startDate = $request->start_date;
+            $endDate = $request->end_date;
+            $availabilityData = [];
+            $start = Carbon::parse($startDate);
+            $end = Carbon::parse($endDate);
+            $blockedPeriods = $this->blockedPeriodService->getByDateRange($startDate, $endDate);
+            // PERBAIKAN 1: Query reservasi dengan filter menu_id
+            $existingReservations = [];
+            if ($menuId) {
+                $existingReservations = $this->reservationService->getReservationsByDateRangeAndMenu(
+                    $startDate, 
+                    $endDate, 
+                    $menuId
+                );
             }
-            
-            if (!$isFullyBlocked) {
-                for ($hour = 8; $hour <= 20; $hour++) {
-                    $hourStr = str_pad($hour, 2, '0', STR_PAD_LEFT) . ':00';
-                    $isHourAvailable = true;
-                    $blockedBy = null;
-                    
-                    // Cek blocked period per jam
-                    foreach ($blockedPeriods as $period) {
-                        if ($period->all_menus || ($menuId && $period->menu_id == $menuId)) {
-                            $periodStart = Carbon::parse($period->start_datetime);
-                            $periodEnd = Carbon::parse($period->end_datetime);
-                            $checkTime = Carbon::parse($dateStr . ' ' . $hourStr);
-                            
-                            if ($checkTime->between($periodStart, $periodEnd)) {
-                                $isHourAvailable = false;
-                                $blockedBy = 'blocked_period';
-                                break;
-                            }
+            $current = $start->copy();
+            while ($current <= $end) {
+                $dateStr = $current->format('Y-m-d');
+                $isFullyBlocked = false;
+                $availableHours = [];
+                // Cek fully blocked
+                foreach ($blockedPeriods as $period) {
+                    if ($period->all_menus || ($menuId && $period->menu_id == $menuId)) {
+                        $startDateTime = Carbon::parse($period->start_datetime);
+                        $endDateTime = Carbon::parse($period->end_datetime);
+                        if ($current->between($startDateTime, $endDateTime) && 
+                            $startDateTime->format('H:i') == '00:00' && 
+                            $endDateTime->format('H:i') == '23:59') {
+                            $isFullyBlocked = true;
+                            break;
                         }
                     }
-                    
-                    // PERBAIKAN 2: Cek reservasi yang ada
-                    if ($isHourAvailable && $menuId) {
-                        foreach ($existingReservations as $reservation) {
-                            $reservationTime = Carbon::parse($reservation->reservation_datetime);
-                            $checkTime = Carbon::parse($dateStr . ' ' . $hourStr);
-                            
-                            if ($reservationTime->format('Y-m-d H:i') === $checkTime->format('Y-m-d H:i')) {
-                                $isHourAvailable = false;
-                                $blockedBy = 'existing_reservation';
-                                break;
+                }
+                if (!$isFullyBlocked) {
+                    for ($hour = 8; $hour <= 20; $hour++) {
+                        $hourStr = str_pad($hour, 2, '0', STR_PAD_LEFT) . ':00';
+                        $isHourAvailable = true;
+                        $blockedBy = null;
+                        // Cek blocked period per jam
+                        foreach ($blockedPeriods as $period) {
+                            if ($period->all_menus || ($menuId && $period->menu_id == $menuId)) {
+                                $periodStart = Carbon::parse($period->start_datetime);
+                                $periodEnd = Carbon::parse($period->end_datetime);
+                                $checkTime = Carbon::parse($dateStr . ' ' . $hourStr);
+                                if ($checkTime->between($periodStart, $periodEnd)) {
+                                    $isHourAvailable = false;
+                                    $blockedBy = 'blocked_period';
+                                    break;
+                                }
                             }
                         }
+                        // PERBAIKAN 2: Cek reservasi yang ada
+                        if ($isHourAvailable && $menuId) {
+                            foreach ($existingReservations as $reservation) {
+                                $reservationTime = Carbon::parse($reservation->reservation_datetime);
+                                $checkTime = Carbon::parse($dateStr . ' ' . $hourStr);
+                                if ($reservationTime->format('Y-m-d H:i') === $checkTime->format('Y-m-d H:i')) {
+                                    $isHourAvailable = false;
+                                    $blockedBy = 'existing_reservation';
+                                    break;
+                                }
+                            }
+                        }
+                        $availableHours[] = [
+                            'hour' => $hourStr,
+                            'available' => $isHourAvailable,
+                            'blocked_by' => $blockedBy
+                        ];
                     }
-                    
-                    $availableHours[] = [
-                        'hour' => $hourStr,
-                        'available' => $isHourAvailable,
-                        'blocked_by' => $blockedBy
-                    ];
                 }
+                // PERBAIKAN 3: Hitung status untuk indikator kalender
+                $hasBlockedPeriods = false;
+                $hasReservations = false;
+                foreach ($availableHours as $hour) {
+                    if ($hour['blocked_by'] === 'blocked_period') {
+                        $hasBlockedPeriods = true;
+                    }
+                    if ($hour['blocked_by'] === 'existing_reservation') {
+                        $hasReservations = true;
+                    }
+                }
+                $availabilityData[] = [
+                    'date' => $dateStr,
+                    'is_blocked' => $isFullyBlocked,
+                    'available_hours' => $availableHours,
+                    'has_blocked_periods' => $hasBlockedPeriods,
+                    'has_reservations' => $hasReservations,
+                    'is_mixed' => $hasBlockedPeriods && $hasReservations
+                ];
+                $current->addDay();
             }
-            
-            // PERBAIKAN 3: Hitung status untuk indikator kalender
-            $hasBlockedPeriods = false;
-            $hasReservations = false;
-            
-            foreach ($availableHours as $hour) {
-                if ($hour['blocked_by'] === 'blocked_period') {
-                    $hasBlockedPeriods = true;
-                }
-                if ($hour['blocked_by'] === 'existing_reservation') {
-                    $hasReservations = true;
-                }
-            }
-            
-            $availabilityData[] = [
-                'date' => $dateStr,
-                'is_blocked' => $isFullyBlocked,
-                'available_hours' => $availableHours,
-                'has_blocked_periods' => $hasBlockedPeriods,
-                'has_reservations' => $hasReservations,
-                'is_mixed' => $hasBlockedPeriods && $hasReservations
-            ];
-            
-            $current->addDay();
+            return response()->json([
+                'success' => true,
+                'data' => $availabilityData
+            ]);
+        } catch (\Exception $e) {
+            Log::error('Error getting availability data: ' . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'error' => 'Terjadi kesalahan saat mengambil data ketersediaan',
+                'message' => $e->getMessage(),
+                'data' => []
+            ], 500);
         }
-        
-        return response()->json([
-            'success' => true,
-            'data' => $availabilityData
-        ]);
-        
-    } catch (\Exception $e) {
-        Log::error('Error getting availability data: ' . $e->getMessage());
-        return response()->json([
-            'success' => false,
-            'error' => 'Terjadi kesalahan saat mengambil data ketersediaan',
-            'message' => $e->getMessage(),
-            'data' => []
-        ], 500);
     }
-}
-
     public function create(): View
     {
         $menus = $this->menuService->getActiveMenus();
