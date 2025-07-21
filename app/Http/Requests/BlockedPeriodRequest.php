@@ -53,6 +53,14 @@ class BlockedPeriodRequest extends FormRequest
                 'max:500',
                 'min:3'
             ],
+            'all_menus' => [
+                'boolean',
+                function ($attribute, $value, $fail) {
+                    if (!is_bool($value)) {
+                        $fail('Field semua menu harus bernilai true atau false.');
+                    }
+                }
+            ]
         ];
         return $rules;
     }
