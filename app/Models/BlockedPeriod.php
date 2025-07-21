@@ -50,9 +50,9 @@ class BlockedPeriod extends Model
         if ($hours < 1) {
             return $this->getDurationInMinutes() . ' minute';
         } elseif ($hours < 24) {
-            return number_format($hours, 1) . ' jam';
+            return number_format($hours, 1) . ' hours';
         } else {
-            return number_format($hours / 24, 1) . ' hari';
+            return number_format($hours / 24, 1) . ' days';
         }
     }
     

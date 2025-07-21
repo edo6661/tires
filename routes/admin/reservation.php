@@ -8,9 +8,6 @@ Route::prefix('reservation')->group(function () {
         Route::get('calendar', [ReservationController::class, 'calendar'])->name('calendar');
         Route::get('api/filtered', [ReservationController::class, 'getFilteredReservations'])
             ->name('api.filtered');
-
-        Route::get('block', [ReservationController::class, 'block'])
-            ->name('block');
         Route::post('availability', [ReservationController::class, 'availability'])
             ->name('availability');
     });

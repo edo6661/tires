@@ -403,10 +403,7 @@ class ReservationController extends Controller
             return response()->json(['error' => 'Format tanggal tidak valid'], 400);
         }
     }
-    public function block(): View
-    {
-        return view('admin.reservation.block');
-    }
+    
     public function availability(Request $request): JsonResponse
     {
         try {
@@ -422,7 +419,6 @@ class ReservationController extends Controller
             $start = Carbon::parse($startDate);
             $end = Carbon::parse($endDate);
             $blockedPeriods = $this->blockedPeriodService->getByDateRange($startDate, $endDate);
-            // PERBAIKAN 1: Query reservasi dengan filter menu_id
             $existingReservations = [];
             if ($menuId) {
                 $existingReservations = $this->reservationService->getReservationsByDateRangeAndMenu(
@@ -436,7 +432,6 @@ class ReservationController extends Controller
                 $dateStr = $current->format('Y-m-d');
                 $isFullyBlocked = false;
                 $availableHours = [];
-                // Cek fully blocked
                 foreach ($blockedPeriods as $period) {
                     if ($period->all_menus || ($menuId && $period->menu_id == $menuId)) {
                         $startDateTime = Carbon::parse($period->start_datetime);
@@ -454,7 +449,6 @@ class ReservationController extends Controller
                         $hourStr = str_pad($hour, 2, '0', STR_PAD_LEFT) . ':00';
                         $isHourAvailable = true;
                         $blockedBy = null;
-                        // Cek blocked period per jam
                         foreach ($blockedPeriods as $period) {
                             if ($period->all_menus || ($menuId && $period->menu_id == $menuId)) {
                                 $periodStart = Carbon::parse($period->start_datetime);
@@ -467,7 +461,6 @@ class ReservationController extends Controller
                                 }
                             }
                         }
-                        // PERBAIKAN 2: Cek reservasi yang ada
                         if ($isHourAvailable && $menuId) {
                             foreach ($existingReservations as $reservation) {
                                 $reservationTime = Carbon::parse($reservation->reservation_datetime);
@@ -486,7 +479,6 @@ class ReservationController extends Controller
                         ];
                     }
                 }
-                // PERBAIKAN 3: Hitung status untuk indikator kalender
                 $hasBlockedPeriods = false;
                 $hasReservations = false;
                 foreach ($availableHours as $hour) {

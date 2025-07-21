@@ -64,8 +64,8 @@
                                 id: 3, 
                                 name: 'Blocked', 
                                 icon: 'fas fa-ban', 
-                                url: '{{ route('admin.reservation.block') }}',
-                                isActive: currentRoute.includes('admin/reservation/block')
+                                url: '{{ route('admin.blocked-period.index') }}',
+                                isActive: currentRoute.includes('admin/blocked-period')
                             },
                             { 
                                 id: 4, 
