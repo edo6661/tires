@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Services\AnnouncementServiceInterface;
 use App\Http\Requests\AnnouncementRequest;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 
 class AnnouncementController extends Controller
 {
@@ -107,4 +108,52 @@ class AnnouncementController extends Controller
                 ->with('error', 'Terjadi kesalahan: ' . $e->getMessage());
         }
     }
+    public function bulkToggleStatus(Request $request)
+    {
+        $idsInput = $request->input('ids'); 
+        $statusInput = $request->input('status');
+
+        $ids = json_decode($idsInput, true); 
+        $status = $statusInput === 'true'; 
+        if (!$ids || !is_array($ids)) {
+            return response()->json(['success' => false, 'message' => 'Invalid data'], 400);
+        }
+
+        try {
+            foreach ($ids as $id) {
+                $announcement = $this->announcementService->findAnnouncement($id);
+                if ($announcement) {
+                    $announcement->is_active = $status;
+                    $announcement->save();
+                }
+            }
+            
+            return response()->json(['success' => true]);
+        } catch (\Exception $e) {
+            return response()->json(['success' => false, 'message' => $e->getMessage()], 500);
+        }
+    }
+
+    public function bulkDelete(Request $request)
+    {
+        $idsInput = $request->input('ids');
+        $ids = json_decode($idsInput, true); 
+
+        
+        if (!$ids || !is_array($ids)) {
+            return response()->json(['success' => false, 'message' => 'Invalid data'], 400);
+        }
+
+        try {
+            foreach ($ids as $id) {
+                $this->announcementService->deleteAnnouncement($id);
+            }
+            
+            return response()->json(['success' => true]);
+        } catch (\Exception $e) {
+            return response()->json(['success' => false, 'message' => $e->getMessage()], 500);
+        }
+    }
+
+
 }

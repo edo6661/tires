@@ -67,8 +67,9 @@ class AnnouncementRepository implements AnnouncementRepositoryInterface
     {
         $announcement = $this->findById($id);
         if ($announcement) {
-            $announcement->is_active = !$announcement->is_active;
-            return $announcement->save();
+            return $this->model->where('id', $id)->update([
+                'is_active' => !$announcement->is_active
+            ]);
         }
         return false;
     }

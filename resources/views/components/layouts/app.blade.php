@@ -81,7 +81,7 @@
                                 name: 'Contact', 
                                 icon: 'fa-solid fa-address-book', 
                                 url: '{{ route('admin.contact.index') }}',
-                                isActive: currentRoute.includes('customer-list')
+                                isActive: currentRoute.includes('admin/contact')
                             },
                             { 
                                 id: 2, 
