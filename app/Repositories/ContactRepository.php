@@ -29,6 +29,15 @@ class ContactRepository implements ContactRepositoryInterface
             ->orderBy('created_at', 'desc')
             ->paginate($perPage);
     }
+      public function getContactStats(): array
+    {
+        return [
+            'total' => $this->model->count(),
+            'pending' => $this->model->where('status', 'pending')->count(),
+            'replied' => $this->model->where('status', 'replied')->count(),
+            'today' => $this->model->whereDate('created_at', today())->count(),
+        ];
+    }
 
     public function findById(int $id): ?Contact
     {

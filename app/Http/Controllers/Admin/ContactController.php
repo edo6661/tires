@@ -14,12 +14,14 @@ class ContactController extends Controller
     {
     }
 
-    public function index()
+     public function index()
     {
         $contacts = $this->contactService->getPaginatedContacts(15);
-        return view('admin.contact.index', compact('contacts'));
+        
+        $stats = $this->contactService->getContactStats();
+        
+        return view('admin.contact.index', compact('contacts', 'stats'));
     }
-
     public function create()
     {
         return view('admin.contact.create');

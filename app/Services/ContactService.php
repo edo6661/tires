@@ -25,6 +25,11 @@ class ContactService implements ContactServiceInterface
     {
         return $this->contactRepository->getPaginated($perPage);
     }
+    public function getContactStats(): array
+    {
+        return $this->contactRepository->getContactStats();
+    }
+
 
     public function findContact(int $id): ?Contact
     {

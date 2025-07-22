@@ -80,14 +80,14 @@
                                 id: 1, 
                                 name: 'Contact', 
                                 icon: 'fa-solid fa-address-book', 
-                                url: '#customer-list',
+                                url: '{{ route('admin.contact.index') }}',
                                 isActive: currentRoute.includes('customer-list')
                             },
                             { 
                                 id: 2, 
                                 name: 'Announcement', 
                                 icon: 'fas fa-bullhorn', 
-                                url: '#announcements',
+                                url: '{{ route('admin.announcement.index') }}',
                                 isActive: currentRoute.includes('announcements')
                             },
                         ],
