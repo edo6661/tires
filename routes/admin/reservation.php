@@ -7,8 +7,10 @@ Route::prefix('reservation')->group(function () {
         ->name('check-availability');
         Route::get('calendar', [ReservationController::class, 'calendar'])->name('calendar');
         Route::get('api/filtered', [ReservationController::class, 'getFilteredReservations'])
-            ->name('api.filtered');
+        ->name('api.filtered');
         Route::post('availability', [ReservationController::class, 'availability'])
+        ->name('availability');
+        Route::get('availability', [ReservationController::class, 'viewAvailability'])
             ->name('availability');
     });
 });

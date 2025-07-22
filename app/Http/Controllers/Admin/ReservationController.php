@@ -513,6 +513,11 @@ class ReservationController extends Controller
             ], 500);
         }
     }
+    public function viewAvailability() {
+        $menus = $this->menuService->getActiveMenus();
+        return view('admin.reservation.availability', compact('menus'));
+    }
+
     public function create(): View
     {
         $menus = $this->menuService->getActiveMenus();

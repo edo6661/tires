@@ -37,7 +37,7 @@
                 />
                 <x-layouts.header.admin-dropdown-menu-item
                     icon="fas fa-users" 
-                    title="Customer List"
+                    title="Customer Management"
                     href="#"
                     :is-active="request()->routeIs('admin.customers')"
                 />

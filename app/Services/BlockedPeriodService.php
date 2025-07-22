@@ -21,9 +21,6 @@ class BlockedPeriodService implements BlockedPeriodServiceInterface
     {
         return $this->blockedPeriodRepository->getPaginated($perPage);
     }
-    /**
-     * Get paginated blocked periods with filters
-     */
     public function getPaginatedBlockedPeriodsWithFilters(array $filters, int $perPage = 15): LengthAwarePaginator
     {
         return $this->blockedPeriodRepository->getPaginatedWithFilters($filters, $perPage);
@@ -86,16 +83,10 @@ class BlockedPeriodService implements BlockedPeriodServiceInterface
     {
         return $this->blockedPeriodRepository->getActiveBlocks();
     }
-    /**
-     * Check schedule conflict (original method for backward compatibility)
-     */
     public function checkScheduleConflict(int $menuId, string $startDatetime, string $endDatetime): bool
     {
         return $this->blockedPeriodRepository->checkConflict($menuId, $startDatetime, $endDatetime);
     }
-    /**
-     * Enhanced conflict checking with exclusion support
-     */
     public function checkScheduleConflictWithExclusion(
         ?int $menuId, 
         string $startDatetime, 
@@ -111,9 +102,6 @@ class BlockedPeriodService implements BlockedPeriodServiceInterface
             $excludeId
         );
     }
-    /**
-     * Get detailed information about conflicts
-     */
     public function getConflictDetails(
         ?int $menuId, 
         string $startDatetime, 
@@ -145,16 +133,10 @@ class BlockedPeriodService implements BlockedPeriodServiceInterface
     {
         return $this->blockedPeriodRepository->getByDateRange($startDate, $endDate);
     }
-    /**
-     * Bulk delete blocked periods
-     */
     public function bulkDelete(array $ids): int
     {
         return $this->blockedPeriodRepository->bulkDelete($ids);
     }
-    /**
-     * Export blocked periods to Excel
-     */
     public function exportBlockedPeriods(array $filters = [])
     {
         $blockedPeriods = $this->blockedPeriodRepository->getAllWithFilters($filters);
@@ -163,23 +145,14 @@ class BlockedPeriodService implements BlockedPeriodServiceInterface
             'data' => ($blockedPeriods)
         ]);
     }
-    /**
-     * Get statistics about blocked periods
-     */
     public function getStatistics(array $filters = []): array
     {
         return $this->blockedPeriodRepository->getStatistics($filters);
     }
-    /**
-     * Check if a specific date/time is blocked for a menu
-     */
     public function isTimeBlocked(?int $menuId, string $datetime): bool
     {
         return $this->blockedPeriodRepository->isTimeBlocked($menuId, $datetime);
     }
-    /**
-     * Get available time slots for a menu on a specific date
-     */
     public function getAvailableTimeSlots(int $menuId, string $date, array $businessHours = []): array
     {
         $blockedPeriods = $this->getBlockedPeriodsByDate($date);
@@ -215,9 +188,6 @@ class BlockedPeriodService implements BlockedPeriodServiceInterface
         }
         return $availableSlots;
     }
-    /**
-     * Create recurring blocked periods
-     */
     public function createRecurringBlockedPeriods(array $data): array
     {
         $created = [];
