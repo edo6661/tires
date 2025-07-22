@@ -88,7 +88,7 @@
                                 name: 'Announcement', 
                                 icon: 'fas fa-bullhorn', 
                                 url: '{{ route('admin.announcement.index') }}',
-                                isActive: currentRoute.includes('announcements')
+                                isActive: currentRoute.includes('admin/announcement.*')
                             },
                         ],
                         settings: [
@@ -103,8 +103,8 @@
                                 id: 2, 
                                 name: 'Menu', 
                                 icon: 'fa-solid fa-book-open', 
-                                url: '#menu-registration',
-                                isActive: currentRoute.includes('menu-registration')
+                                url: '{{ route('admin.menu.index') }}',
+                                isActive: currentRoute.includes('admin/menu')
                             }
                         ]
                     };
