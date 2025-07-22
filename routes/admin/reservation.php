@@ -11,7 +11,7 @@ Route::prefix('reservation')->group(function () {
         Route::post('availability', [ReservationController::class, 'availability'])
         ->name('availability');
         Route::get('availability', [ReservationController::class, 'viewAvailability'])
-            ->name('availability');
+            ->name('viewAvailability');
     });
 });
 Route::resource('reservation', ReservationController::class);

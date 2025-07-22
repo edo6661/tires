@@ -18,4 +18,5 @@ interface MenuRepositoryInterface
     public function toggleActive(int $id): bool;
     public function reorder(array $orderData): bool;
     public function getByDisplayOrder(): Collection;
+    public function bulkDelete(array $ids): bool;
 }

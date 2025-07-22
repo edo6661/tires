@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Services\MenuServiceInterface;
 use App\Http\Requests\MenuRequest;
 use Illuminate\Http\Request;
+use Illuminate\Http\JsonResponse;
 
 class MenuController extends Controller
 {
@@ -75,19 +76,25 @@ class MenuController extends Controller
         }
     }
 
-    public function destroy(int $id)
+    public function destroy(int $id): JsonResponse
     {
         try {
             $deleted = $this->menuService->deleteMenu($id);
             if (!$deleted) {
-                return redirect()->route('admin.menu.index')
-                    ->with('error', 'Menu tidak ditemukan.');
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Menu tidak ditemukan.'
+                ], 404);
             }
-            return redirect()->route('admin.menu.index')
-                ->with('success', 'Menu berhasil dihapus.');
+            return response()->json([
+                'success' => true,
+                'message' => 'Menu berhasil dihapus.'
+            ]);
         } catch (\Exception $e) {
-            return redirect()->back()
-                ->with('error', 'Terjadi kesalahan: ' . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => 'Terjadi kesalahan: ' . $e->getMessage()
+            ], 500);
         }
     }
 
@@ -143,6 +150,35 @@ class MenuController extends Controller
             return response()->json(['end_time' => $endTime]);
         } catch (\Exception $e) {
             return response()->json(['error' => 'Terjadi kesalahan: ' . $e->getMessage()], 500);
+        }
+    }
+
+    public function bulkDelete(Request $request): JsonResponse
+    {
+        try {
+            $request->validate([
+                'ids' => 'required|array',
+                'ids.*' => 'integer|exists:menus,id',
+            ]);
+            
+
+            $success = $this->menuService->bulkDeleteMenus($request->ids);
+            if (!$success) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Tidak ada menu yang berhasil dihapus.'
+                ], 400);
+            }
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Menu berhasil dihapus secara bulk.'
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Terjadi kesalahan: ' . $e->getMessage()
+            ], 500);
         }
     }
 }

@@ -13,7 +13,6 @@
                 </a>
             </div>
         </div>
-
         <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
             <div class="bg-white rounded-lg shadow-sm p-6">
                 <div class="flex items-center justify-between">
@@ -66,7 +65,6 @@
                 </div>
             </div>
         </div>
-
         @if(session('success'))
             <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded-lg" x-data="{ show: true }" x-show="show">
                 <div class="flex items-center justify-between">
@@ -80,7 +78,6 @@
                 </div>
             </div>
         @endif
-
         @if(session('error'))
             <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded-lg" x-data="{ show: true }" x-show="show">
                 <div class="flex items-center justify-between">
@@ -94,7 +91,6 @@
                 </div>
             </div>
         @endif
-
         <div class="bg-white rounded-lg shadow-sm p-6">
             <div class="flex items-center justify-between mb-4">
                 <h3 class="text-lg font-semibold text-gray-900">Filters & Search</h3>
@@ -103,7 +99,6 @@
                     <span x-text="showFilters ? 'Hide Filters' : 'Show Filters'"></span>
                 </button>
             </div>
-
             <div x-show="showFilters" x-transition class="space-y-4">
                 <form method="GET" action="{{ route('admin.menu.index') }}" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                     <div>
@@ -138,7 +133,6 @@
                 </form>
             </div>
         </div>
-
         <div x-show="selectedItems.length > 0" class="bg-blue-50 border border-blue-200 rounded-lg p-4 flex items-center justify-between">
             <span class="text-blue-700">
                 <span x-text="selectedItems.length"></span> item(s) selected
@@ -162,7 +156,6 @@
                 </button>
             </div>
         </div>
-
         <div class="bg-white rounded-lg shadow-sm">
             <div class="p-6 border-b border-gray-200">
                 <div class="flex items-center justify-between">
@@ -173,7 +166,6 @@
                     </div>
                 </div>
             </div>
-
             @if($menus->count() > 0)
                 <div class="overflow-x-auto">
                     <table class="w-full">
@@ -265,7 +257,6 @@
                         </tbody>
                     </table>
                 </div>
-
                 <div class="px-6 py-4 border-t border-gray-200">
                     {{ $menus->appends(request()->query())->links() }}
                 </div>
@@ -281,7 +272,6 @@
                 </div>
             @endif
         </div>
-
         <div x-show="showDeleteModal" x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100" x-transition:leave="transition ease-in duration-200" x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0" x-cloak class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
             <div class="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
                 <div class="mt-3 text-center">
@@ -303,7 +293,6 @@
                 </div>
             </div>
         </div>
-
         <div x-show="showReorderModal" x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100" x-transition:leave="transition ease-in duration-200" x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0" x-cloak class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
             <div class="relative top-10 mx-auto p-5 border max-w-2xl shadow-lg rounded-md bg-white">
                 <div class="mt-3">
@@ -349,7 +338,6 @@
             </div>
         </div>
     </div>
-
     <script>
         function menuIndex() {
             return {
@@ -360,14 +348,11 @@
                 deleteTarget: null,
                 deleteMessage: '',
                 sortableInstance: null,
-
                 init() {
-                    // Initialize sortable when component is ready
                     this.$nextTick(() => {
                         this.initSortable();
                     });
                 },
-
                 initSortable() {
                     const sortableContainer = document.getElementById('sortable-menu');
                     if (sortableContainer && !this.sortableInstance) {
@@ -386,15 +371,12 @@
                         });
                     }
                 },
-
                 openReorderModal() {
                     this.showReorderModal = true;
-                    // Re-initialize sortable after modal is shown
                     this.$nextTick(() => {
                         this.initSortable();
                     });
                 },
-
                 toggleSelectAll(checked) {
                     const checkboxes = document.querySelectorAll('input[type="checkbox"][value]');
                     checkboxes.forEach(checkbox => {
@@ -410,7 +392,6 @@
                         }
                     });
                 },
-
                 toggleSelect(id, checked) {
                     if (checked && !this.selectedItems.includes(id)) {
                         this.selectedItems.push(id);
@@ -421,26 +402,22 @@
                         }
                     }
                 },
-
                 deleteSingle(id) {
                     this.deleteTarget = [id];
                     this.deleteMessage = 'Are you sure you want to delete this menu?';
                     this.showDeleteModal = true;
                 },
-
                 deleteSelected() {
                     if (this.selectedItems.length === 0) return;
                     this.deleteTarget = [...this.selectedItems];
                     this.deleteMessage = `Are you sure you want to delete ${this.selectedItems.length} menu(s)?`;
                     this.showDeleteModal = true;
                 },
-
                 async toggleStatusSelected(status) {
                     if (this.selectedItems.length === 0) {
                         alert('Please select at least one menu');
                         return;
                     }
-
                     try {
                         for (const id of this.selectedItems) {
                             await fetch(`/admin/menu/${id}/toggle-status`, {
@@ -457,7 +434,6 @@
                         alert('An error occurred while changing the status');
                     }
                 },
-
                 async confirmDelete() {
                     try {
                         if (this.deleteTarget.length === 1) {
@@ -467,21 +443,29 @@
                                     'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
                                 }
                             });
-                            if (response.ok) {
+                            const result = await response.json();
+                            if (result.success || response.ok) {
                                 window.location.reload();
                             } else {
-                                alert('An error occurred while deleting');
+                                alert(result.message || 'An error occurred while deleting');
                             }
                         } else {
-                            for (const id of this.deleteTarget) {
-                                await fetch(`/admin/menu/${id}`, {
-                                    method: 'DELETE',
-                                    headers: {
-                                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
-                                    }
-                                });
+                            const response = await fetch('/admin/menu/bulk-delete', {
+                                method: 'POST',
+                                headers: {
+                                    'Content-Type': 'application/json',
+                                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                                },
+                                body: JSON.stringify({
+                                    ids: this.deleteTarget
+                                })
+                            });
+                            const result = await response.json();
+                            if (result.success) {
+                                window.location.reload();
+                            } else {
+                                alert(result.message || 'An error occurred while deleting');
                             }
-                            window.location.reload();
                         }
                     } catch (error) {
                         console.error('Error:', error);
@@ -489,14 +473,12 @@
                     }
                     this.showDeleteModal = false;
                 },
-
                 async saveReorder() {
                     const sortableItems = document.querySelectorAll('#sortable-menu > div');
                     const orderData = Array.from(sortableItems).map((item, index) => ({
                         id: parseInt(item.dataset.id),
                         display_order: index + 1
                     }));
-
                     try {
                         const response = await fetch('/admin/menu/reorder', {
                             method: 'POST',
@@ -506,7 +488,6 @@
                             },
                             body: JSON.stringify({ order: orderData })
                         });
-
                         const result = await response.json();
                         if (result.success) {
                             this.showReorderModal = false;
@@ -521,7 +502,6 @@
                 }
             }
         }
-
         async function toggleStatus(id) {
             try {
                 const response = await fetch(`/admin/menu/${id}/toggle-status`, {
@@ -530,7 +510,6 @@
                         'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
                     }
                 });
-
                 const result = await response.json();
                 if (result.success) {
                     window.location.reload();

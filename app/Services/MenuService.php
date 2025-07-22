@@ -96,4 +96,12 @@ class MenuService implements MenuServiceInterface
             ->pluck('color', 'id')
             ->toArray();
     }
+    public function bulkDeleteMenus(array $ids): bool
+    {
+        if (empty($ids)) {
+            throw new \InvalidArgumentException('ID tidak boleh kosong');
+        }
+
+        return $this->menuRepository->bulkDelete($ids);
+    }
 }

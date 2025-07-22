@@ -71,7 +71,7 @@
                                 id: 4, 
                                 name: 'Availability', 
                                 icon: 'fas fa-check-circle', 
-                                url: '{{ route('admin.reservation.availability') }}',
+                                url: '{{ route('admin.reservation.viewAvailability') }}',
                                 isActive: currentRoute.includes('admin/reservation/availability')
                             }
                         ],

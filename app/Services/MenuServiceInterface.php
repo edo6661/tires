@@ -19,4 +19,5 @@ interface MenuServiceInterface
     public function getMenusByDisplayOrder(): Collection;
     public function calculateMenuEndTime(int $menuId, string $startTime): ?string;
     public function getMenuColorsMapping(): array;
+    public function bulkDeleteMenus(array $ids): bool;
 }

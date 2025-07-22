@@ -20,6 +20,7 @@ class MenuRequest extends FormRequest
             'photo_path' => 'nullable|string|max:255',
             'display_order' => 'integer|min:0',
             'is_active' => 'boolean',
+            'color' => 'nullable',
         ];
     }
 

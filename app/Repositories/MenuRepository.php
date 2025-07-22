@@ -91,4 +91,13 @@ class MenuRepository implements MenuRepositoryInterface
             ->orderBy('display_order')
             ->get();
     }
+    public function bulkDelete(array $ids): bool
+    {
+        try {
+            $count = $this->model->whereIn('id', $ids)->delete();
+            return $count > 0;
+        } catch (\Exception $e) {
+            return false;
+        }
+    }
 }
