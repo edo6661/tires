@@ -1,5 +1,4 @@
 <?php
-
 namespace App\Services;
 
 use App\Models\Contact;
@@ -25,11 +24,11 @@ class ContactService implements ContactServiceInterface
     {
         return $this->contactRepository->getPaginated($perPage);
     }
+
     public function getContactStats(): array
     {
         return $this->contactRepository->getContactStats();
     }
-
 
     public function findContact(int $id): ?Contact
     {
@@ -47,7 +46,15 @@ class ContactService implements ContactServiceInterface
 
     public function updateContact(int $id, array $data): ?Contact
     {
-        return $this->contactRepository->update($id, $data);
+        // Validasi bahwa hanya status dan admin_reply yang bisa diupdate
+        $allowedFields = ['status', 'admin_reply', 'replied_at'];
+        $filteredData = array_intersect_key($data, array_flip($allowedFields));
+
+        if (empty($filteredData)) {
+            throw new \InvalidArgumentException('Tidak ada field yang valid untuk diupdate');
+        }
+
+        return $this->contactRepository->update($id, $filteredData);
     }
 
     public function deleteContact(int $id): bool
@@ -67,11 +74,29 @@ class ContactService implements ContactServiceInterface
 
     public function replyToContact(int $id, string $reply): bool
     {
+        if (empty(trim($reply))) {
+            throw new \InvalidArgumentException('Reply tidak boleh kosong');
+        }
+
         return $this->contactRepository->markAsReplied($id, $reply);
     }
 
     public function getPendingContacts(): Collection
     {
         return $this->contactRepository->getPending();
+    }
+
+    public function bulkDeleteContacts(array $ids): bool
+    {
+        if (empty($ids)) {
+            throw new \InvalidArgumentException('ID tidak boleh kosong');
+        }
+
+        return $this->contactRepository->bulkDelete($ids);
+    }
+
+    public function getFilteredContacts(array $filters): LengthAwarePaginator
+    {
+        return $this->contactRepository->getFiltered($filters);
     }
 }

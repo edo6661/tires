@@ -1,5 +1,4 @@
 <?php
-
 namespace App\Services;
 
 use App\Models\Contact;
@@ -10,6 +9,7 @@ interface ContactServiceInterface
 {
     public function getAllContacts(): Collection;
     public function getPaginatedContacts(int $perPage = 15): LengthAwarePaginator;
+    public function getContactStats(): array;
     public function findContact(int $id): ?Contact;
     public function createContact(array $data): Contact;
     public function updateContact(int $id, array $data): ?Contact;
@@ -18,4 +18,6 @@ interface ContactServiceInterface
     public function getContactsByStatus(string $status): Collection;
     public function replyToContact(int $id, string $reply): bool;
     public function getPendingContacts(): Collection;
+    public function bulkDeleteContacts(array $ids): bool;
+    public function getFilteredContacts(array $filters): LengthAwarePaginator;
 }

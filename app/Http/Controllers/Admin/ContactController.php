@@ -1,45 +1,27 @@
 <?php
-
 namespace App\Http\Controllers\Admin;
-
 use App\Http\Controllers\Controller;
 use App\Services\ContactServiceInterface;
 use App\Http\Requests\ContactRequest;
 use Illuminate\Http\Request;
-
+use Illuminate\Http\JsonResponse;
 class ContactController extends Controller
 {
-
     public function __construct(protected ContactServiceInterface $contactService)
     {
     }
-
-     public function index()
+    public function index(Request $request)
     {
-        $contacts = $this->contactService->getPaginatedContacts(15);
-        
+        $filters = $request->only(['status', 'start_date', 'end_date', 'search']);
+        if (array_filter($filters)) {
+            $filters['per_page'] = 15;
+            $contacts = $this->contactService->getFilteredContacts($filters);
+        } else {
+            $contacts = $this->contactService->getPaginatedContacts(15);
+        }
         $stats = $this->contactService->getContactStats();
-        
         return view('admin.contact.index', compact('contacts', 'stats'));
     }
-    public function create()
-    {
-        return view('admin.contact.create');
-    }
-
-    public function store(ContactRequest $request)
-    {
-        try {
-            $this->contactService->createContact($request->validated());
-            return redirect()->route('admin.contact.index')
-                ->with('success', 'Kontak berhasil dibuat.');
-        } catch (\Exception $e) {
-            return redirect()->back()
-                ->with('error', 'Terjadi kesalahan: ' . $e->getMessage())
-                ->withInput();
-        }
-    }
-
     public function show(int $id)
     {
         $contact = $this->contactService->findContact($id);
@@ -49,26 +31,19 @@ class ContactController extends Controller
         }
         return view('admin.contact.show', compact('contact'));
     }
-
-    public function edit(int $id)
-    {
-        $contact = $this->contactService->findContact($id);
-        if (!$contact) {
-            return redirect()->route('admin.contact.index')
-                ->with('error', 'Kontak tidak ditemukan.');
-        }
-        return view('admin.contact.edit', compact('contact'));
-    }
-
-    public function update(ContactRequest $request, int $id)
+    public function update(Request $request, int $id)
     {
         try {
-            $contact = $this->contactService->updateContact($id, $request->validated());
+            $validatedData = $request->validate([
+                'status' => 'sometimes|in:pending,replied',
+                'admin_reply' => 'sometimes|string|max:2000',
+            ]);
+            $contact = $this->contactService->updateContact($id, $validatedData);
             if (!$contact) {
                 return redirect()->route('admin.contact.index')
                     ->with('error', 'Kontak tidak ditemukan.');
             }
-            return redirect()->route('admin.contact.index')
+            return redirect()->route('admin.contact.show', $id)
                 ->with('success', 'Kontak berhasil diperbarui.');
         } catch (\Exception $e) {
             return redirect()->back()
@@ -76,69 +51,106 @@ class ContactController extends Controller
                 ->withInput();
         }
     }
-
-    public function destroy(int $id)
+    public function destroy(int $id): JsonResponse
     {
         try {
             $deleted = $this->contactService->deleteContact($id);
             if (!$deleted) {
-                return redirect()->route('admin.contact.index')
-                    ->with('error', 'Kontak tidak ditemukan.');
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Kontak tidak ditemukan.'
+                ], 404);
             }
-            return redirect()->route('admin.contact.index')
-                ->with('success', 'Kontak berhasil dihapus.');
+            return response()->json([
+                'success' => true,
+                'message' => 'Kontak berhasil dihapus.'
+            ]);
         } catch (\Exception $e) {
-            return redirect()->back()
-                ->with('error', 'Terjadi kesalahan: ' . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => 'Terjadi kesalahan: ' . $e->getMessage()
+            ], 500);
         }
     }
-
-    // public function pending()
-    // {
-    //     $pendingContacts = $this->contactService->getPendingContacts();
-    //     return view('admin.contact.pending', compact('pendingContacts'));
-    // }
-
-    // public function reply(int $id)
-    // {
-    //     $contact = $this->contactService->findContact($id);
-    //     if (!$contact) {
-    //         return redirect()->route('admin.contact.index')
-    //             ->with('error', 'Kontak tidak ditemukan.');
-    //     }
-    //     return view('admin.contact.reply', compact('contact'));
-    // }
-
-    // public function storeReply(Request $request, int $id)
-    // {
-    //     $request->validate([
-    //         'admin_reply' => 'required|string'
-    //     ]);
-
-    //     try {
-    //         $replied = $this->contactService->replyToContact($id, $request->admin_reply);
-    //         if (!$replied) {
-    //             return redirect()->route('admin.contact.index')
-    //                 ->with('error', 'Kontak tidak ditemukan.');
-    //         }
-    //         return redirect()->route('admin.contact.index')
-    //             ->with('success', 'Balasan berhasil dikirim.');
-    //     } catch (\Exception $e) {
-    //         return redirect()->back()
-    //             ->with('error', 'Terjadi kesalahan: ' . $e->getMessage())
-    //             ->withInput();
-    //     }
-    // }
-
-    // public function filterByStatus(Request $request)
-    // {
-    //     $request->validate([
-    //         'status' => 'required|in:pending,replied'
-    //     ]);
-
-    //     $contacts = $this->contactService->getContactsByStatus($request->status);
-    //     $status = $request->status;
-        
-    //     return view('admin.contact.filter', compact('contacts', 'status'));
-    // }
+    public function reply(Request $request, int $id): JsonResponse
+    {
+        try {
+            $request->validate([
+                'admin_reply' => 'required|string|max:2000',
+            ]);
+            $success = $this->contactService->replyToContact($id, $request->admin_reply);
+            if (!$success) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Kontak tidak ditemukan atau gagal memperbarui.'
+                ], 404);
+            }
+            return response()->json([
+                'success' => true,
+                'message' => 'Reply berhasil dikirim dan status diperbarui.'
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Terjadi kesalahan: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+    public function bulkDelete(Request $request): JsonResponse
+    {
+        try {
+            $request->validate([
+                'ids' => 'required|array',
+                'ids.*' => 'integer|exists:contacts,id',
+            ]);
+            $success = $this->contactService->bulkDeleteContacts($request->ids);
+            if (!$success) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Tidak ada kontak yang berhasil dihapus.'
+                ], 400);
+            }
+            return response()->json([
+                'success' => true,
+                'message' => 'Kontak berhasil dihapus secara bulk.'
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Terjadi kesalahan: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+    public function markAsReplied(Request $request): JsonResponse
+    {
+        try {
+            $request->validate([
+                'ids' => 'required|array',
+                'ids.*' => 'integer|exists:contacts,id',
+                'admin_reply' => 'required|string|max:2000',
+            ]);
+            $successCount = 0;
+            foreach ($request->ids as $id) {
+                $success = $this->contactService->replyToContact($id, $request->admin_reply);
+                if ($success) {
+                    $successCount++;
+                }
+            }
+            if ($successCount === 0) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Tidak ada kontak yang berhasil diperbarui.'
+                ], 400);
+            }
+            return response()->json([
+                'success' => true,
+                'message' => "$successCount kontak berhasil ditandai sebagai replied."
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Terjadi kesalahan: ' . $e->getMessage()
+            ], 500);
+        }
+    }
 }

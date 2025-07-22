@@ -8,11 +8,11 @@
                 <p class="text-gray-600 mt-1">Manage contact messages from customers</p>
             </div>
             <div class="flex items-center gap-3">
-                <a href="{{ route('admin.contact.create') }}" 
+                {{-- <a href="{{ route('admin.contact.create') }}" 
                    class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors duration-200 flex items-center gap-2">
                     <i class="fas fa-plus"></i>
                     Add Contact
-                </a>
+                </a> --}}
             </div>
         </div>
 
@@ -261,10 +261,10 @@
                                                class="text-blue-600 hover:text-blue-900" title="View Details">
                                                 <i class="fas fa-eye"></i>
                                             </a>
-                                            <a href="{{ route('admin.contact.edit', $contact->id) }}" 
+                                            {{-- <a href="{{ route('admin.contact.edit', $contact->id) }}" 
                                                class="text-yellow-600 hover:text-yellow-900" title="Edit">
                                                 <i class="fas fa-edit"></i>
-                                            </a>
+                                            </a> --}}
                                             @if($contact->status === \App\Enums\ContactStatus::PENDING)
                                                 <button @click="quickReply({{ $contact->id }})" 
                                                         class="text-green-600 hover:text-green-900" title="Quick Reply">
