@@ -21,4 +21,5 @@ interface TireStorageRepositoryInterface
     public function getByStatus(string $status): Collection;
     public function getActiveByUserId(int $userId): Collection;
     public function getEndedByUserId(int $userId): Collection;
+    public function getPaginatedWithFilters(int $perPage = 15, array $filters = []): LengthAwarePaginator;
 }

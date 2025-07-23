@@ -42,6 +42,12 @@
                     :is-active="request()->routeIs('admin.customer.*')"
                 />
                 <x-layouts.header.admin-dropdown-menu-item
+                    icon="fas fa-tree"
+                    title="Tire Management"
+                    href="{{ route('admin.tire-storage.index') }}"
+                    :is-active="request()->routeIs('admin.tire-storage.*')"
+                />
+                <x-layouts.header.admin-dropdown-menu-item
                     icon="fas fa-chart-bar" 
                     title="Aggregation / Analysis"
                     href="#"

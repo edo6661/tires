@@ -1,4 +1,3 @@
-{{-- resources/views/admin/business-setting/edit.blade.php --}}
 <x-layouts.app>
     <div class="max-w-7xl mx-auto">
         <div class="mb-6">
@@ -13,7 +12,6 @@
                 </a>
             </div>
         </div>
-
         @if($errors->any())
             <div class="mb-6 bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
                 <ul class="list-disc list-inside">
@@ -23,13 +21,10 @@
                 </ul>
             </div>
         @endif
-
         <form action="{{ route('admin.business-setting.update') }}" method="POST" enctype="multipart/form-data">
             @csrf
             @method('PUT')
-            
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                {{-- Basic Information --}}
                 <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
                     <h2 class="text-lg font-semibold text-gray-900 mb-4 flex items-center">
                         <i class="fas fa-store text-blue-600 mr-2"></i>
@@ -47,7 +42,6 @@
                                    class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                                    required>
                         </div>
-                        
                         <div>
                             <label for="phone_number" class="block text-sm font-medium text-gray-700 mb-1">
                                 Phone Number <span class="text-red-500">*</span>
@@ -59,7 +53,6 @@
                                    class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                                    required>
                         </div>
-                        
                         <div>
                             <label for="address" class="block text-sm font-medium text-gray-700 mb-1">
                                 Address <span class="text-red-500">*</span>
@@ -70,7 +63,6 @@
                                       class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                                       required>{{ old('address', $businessSettings->address ?? '') }}</textarea>
                         </div>
-                        
                         <div>
                             <label for="website_url" class="block text-sm font-medium text-gray-700 mb-1">Website URL</label>
                             <input type="url" 
@@ -78,12 +70,10 @@
                                    name="website_url" 
                                    value="{{ old('website_url', $businessSettings->website_url ?? '') }}"
                                    class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                                   placeholder="https://example.com">
+                                   placeholder="https:
                         </div>
                     </div>
                 </div>
-
-                {{-- Business Hours --}}
                 <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
                     <h2 class="text-lg font-semibold text-gray-900 mb-4 flex items-center">
                         <i class="fas fa-clock text-green-600 mr-2"></i>
@@ -102,7 +92,6 @@
                             ];
                             $currentHours = old('business_hours', $businessSettings->business_hours ?? []);
                         @endphp
-                        
                         @foreach($days as $day => $dayName)
                             @php
                                 $dayData = $currentHours[$day] ?? ['closed' => true];
@@ -110,7 +99,6 @@
                                 $openTime = $dayData['open'] ?? '09:00';
                                 $closeTime = $dayData['close'] ?? '18:00';
                             @endphp
-                            
                             <div class="border border-gray-200 rounded-lg p-4">
                                 <div class="flex items-center justify-between mb-3">
                                     <h3 class="font-medium text-gray-900">{{ $dayName }}</h3>
@@ -124,7 +112,6 @@
                                         <span class="ml-2 text-sm text-gray-700">Closed</span>
                                     </label>
                                 </div>
-                                
                                 <div class="grid grid-cols-2 gap-4" 
                                      x-show="!days.{{ $day }}.closed" 
                                      x-transition>
@@ -149,8 +136,6 @@
                         @endforeach
                     </div>
                 </div>
-
-                {{-- Site Settings --}}
                 <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
                     <h2 class="text-lg font-semibold text-gray-900 mb-4 flex items-center">
                         <i class="fas fa-globe text-purple-600 mr-2"></i>
@@ -165,7 +150,6 @@
                                    value="{{ old('site_name', $businessSettings->site_name ?? '') }}"
                                    class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
                         </div>
-                        
                         <div>
                             <label class="flex items-center">
                                 <input type="hidden" name="site_public" value="0">
@@ -177,7 +161,6 @@
                                 <span class="ml-2 text-sm text-gray-700">Make site public</span>
                             </label>
                         </div>
-                        
                         <div>
                             <label for="reply_email" class="block text-sm font-medium text-gray-700 mb-1">Reply Email</label>
                             <input type="email" 
@@ -186,7 +169,6 @@
                                    value="{{ old('reply_email', $businessSettings->reply_email ?? '') }}"
                                    class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
                         </div>
-                        
                         <div>
                             <label for="google_analytics_id" class="block text-sm font-medium text-gray-700 mb-1">Google Analytics ID</label>
                             <input type="text" 
@@ -198,8 +180,6 @@
                         </div>
                     </div>
                 </div>
-
-                {{-- Description & Image --}}
                 <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
                     <h2 class="text-lg font-semibold text-gray-900 mb-4 flex items-center">
                         <i class="fas fa-image text-orange-600 mr-2"></i>
@@ -214,7 +194,6 @@
                                       class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                                       placeholder="Describe your business...">{{ old('shop_description', $businessSettings->shop_description ?? '') }}</textarea>
                         </div>
-                        
                         <div>
                             <label for="access_information" class="block text-sm font-medium text-gray-700 mb-1">Access Information</label>
                             <textarea id="access_information" 
@@ -223,7 +202,6 @@
                                       class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                                       placeholder="How to get to your business...">{{ old('access_information', $businessSettings->access_information ?? '') }}</textarea>
                         </div>
-                        
                         <div>
                             <label for="top_image" class="block text-sm font-medium text-gray-700 mb-1">Top Image</label>
                             <input type="file" 
@@ -233,7 +211,7 @@
                                    class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
                             @if($businessSettings && $businessSettings->top_image_path)
                                 <div class="mt-2">
-                                    <img src="{{ asset($businessSettings->top_image_path) }}" 
+                                    <img src="{{ $businessSettings->path_top_image_url }}" 
                                          alt="Current image" 
                                          class="h-20 w-32 object-cover rounded">
                                     <p class="text-xs text-gray-500 mt-1">Current image</p>
@@ -243,8 +221,6 @@
                     </div>
                 </div>
             </div>
-
-            {{-- Policies Section --}}
             <div class="mt-6 bg-white rounded-lg shadow-sm border border-gray-200 p-6">
                 <h2 class="text-lg font-semibold text-gray-900 mb-4 flex items-center">
                     <i class="fas fa-file-contract text-indigo-600 mr-2"></i>
@@ -269,8 +245,6 @@
                     </div>
                 </div>
             </div>
-
-            {{-- Submit Button --}}
             <div class="mt-6 flex justify-end space-x-3">
                 <a href="{{ route('admin.business-setting.index') }}" 
                    class="px-6 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 font-medium transition">
@@ -283,7 +257,6 @@
             </div>
         </form>
     </div>
-
     <script>
         function businessHours() {
             return {

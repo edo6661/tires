@@ -22,4 +22,5 @@ interface TireStorageServiceInterface
     public function getEndedTireStoragesByUser(int $userId): Collection;
     public function endTireStorage(int $id): bool;
     public function calculateStorageFee(int $id): float;
+    public function getPaginatedTireStoragesWithFilters(int $perPage = 15, array $filters = []): LengthAwarePaginator;   
 }

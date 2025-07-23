@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Enums\TireStorageStatus;
 use App\Models\TireStorage;
 use App\Repositories\TireStorageRepositoryInterface;
 use App\Services\TireStorageServiceInterface;
@@ -141,12 +142,8 @@ class TireStorageService implements TireStorageServiceInterface
             return false;
         }
 
-        if ($tireStorage->status !== 'active') {
-            throw new \Exception('Penyimpanan ban tidak aktif, status saat ini: ' . $tireStorage->status);
-        }
-
         $updated = $this->tireStorageRepository->update($id, [
-            'status' => 'ended',
+            'status' => TireStorageStatus::ENDED,
             'planned_end_date' => Carbon::now()->toDateString()
         ]);
 
@@ -205,5 +202,9 @@ class TireStorageService implements TireStorageServiceInterface
         $monthlyRate = 50000; 
         
         return $months * $monthlyRate;
+    }
+    public function getPaginatedTireStoragesWithFilters(int $perPage = 15, array $filters = []): LengthAwarePaginator
+    {
+        return $this->tireStorageRepository->getPaginatedWithFilters($perPage, $filters);
     }
 }
