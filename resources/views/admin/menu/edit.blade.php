@@ -239,7 +239,7 @@
                 </div>
                 <div class="flex items-center gap-4">
                     <button type="button"
-                            onclick="deleteMenu()"
+                            @click="showDeleteConfirmation()"
                             class="px-6 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors duration-200 flex items-center gap-2">
                         <i class="fas fa-trash"></i>
                         Delete Menu
@@ -252,7 +252,104 @@
                 </div>
             </div>
         </form>
+
+        <div x-show="showDeleteModal" 
+             x-transition:enter="transition ease-out duration-300" 
+             x-transition:enter-start="opacity-0" 
+             x-transition:enter-end="opacity-100" 
+             x-transition:leave="transition ease-in duration-200" 
+             x-transition:leave-start="opacity-100" 
+             x-transition:leave-end="opacity-0" 
+             x-cloak 
+             class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
+            <div class="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
+                <div class="mt-3 text-center">
+                    <div class="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-red-100">
+                        <i class="fas fa-exclamation-triangle text-red-600"></i>
+                    </div>
+                    <h3 class="text-lg font-medium text-gray-900 mt-2">Konfirmasi Hapus Menu</h3>
+                    <div class="mt-2 px-7 py-3">
+                        <p class="text-sm text-gray-500">
+                            Apakah Anda yakin ingin menghapus menu <strong>"{{ $menu->name }}"</strong>? 
+                            Tindakan ini tidak dapat dibatalkan.
+                        </p>
+                    </div>
+                    <div class="items-center px-4 py-3 flex gap-2 justify-center">
+                        <button @click="showDeleteModal = false" 
+                                class="px-4 py-2 bg-gray-200 text-gray-800 text-base font-medium rounded-md shadow-sm hover:bg-gray-300">
+                            Batal
+                        </button>
+                        <button @click="confirmDelete()" 
+                                :disabled="isDeleting"
+                                class="px-4 py-2 bg-red-600 text-white text-base font-medium rounded-md shadow-sm hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed">
+                            <span x-show="!isDeleting">Hapus Menu</span>
+                            <span x-show="isDeleting" class="flex items-center gap-2">
+                                <i class="fas fa-spinner fa-spin"></i>
+                                Menghapus...
+                            </span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div x-show="showSuccessModal" 
+             x-transition:enter="transition ease-out duration-300" 
+             x-transition:enter-start="opacity-0" 
+             x-transition:enter-end="opacity-100" 
+             x-transition:leave="transition ease-in duration-200" 
+             x-transition:leave-start="opacity-100" 
+             x-transition:leave-end="opacity-0" 
+             x-cloak 
+             class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
+            <div class="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
+                <div class="mt-3 text-center">
+                    <div class="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-green-100">
+                        <i class="fas fa-check-circle text-green-600"></i>
+                    </div>
+                    <h3 class="text-lg font-medium text-gray-900 mt-2">Berhasil!</h3>
+                    <div class="mt-2 px-7 py-3">
+                        <p class="text-sm text-gray-500" x-text="successMessage"></p>
+                    </div>
+                    <div class="items-center px-4 py-3">
+                        <button @click="redirectToIndex()" 
+                                class="px-4 py-2 bg-blue-600 text-white text-base font-medium rounded-md shadow-sm hover:bg-blue-700 w-full">
+                            OK
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div x-show="showErrorModal" 
+             x-transition:enter="transition ease-out duration-300" 
+             x-transition:enter-start="opacity-0" 
+             x-transition:enter-end="opacity-100" 
+             x-transition:leave="transition ease-in duration-200" 
+             x-transition:leave-start="opacity-100" 
+             x-transition:leave-end="opacity-0" 
+             x-cloak 
+             class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
+            <div class="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
+                <div class="mt-3 text-center">
+                    <div class="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-red-100">
+                        <i class="fas fa-exclamation-circle text-red-600"></i>
+                    </div>
+                    <h3 class="text-lg font-medium text-gray-900 mt-2">Terjadi Kesalahan</h3>
+                    <div class="mt-2 px-7 py-3">
+                        <p class="text-sm text-gray-500" x-text="errorMessage"></p>
+                    </div>
+                    <div class="items-center px-4 py-3">
+                        <button @click="showErrorModal = false" 
+                                class="px-4 py-2 bg-red-600 text-white text-base font-medium rounded-md shadow-sm hover:bg-red-700 w-full">
+                            Tutup
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
+
     <script>
         function menuEdit() {
             return {
@@ -263,29 +360,41 @@
                     time: '{{ old("required_time", $menu->required_time) }}',
                     description: '{{ old("description", $menu->description) }}'
                 },
+                showDeleteModal: false,
+                showSuccessModal: false,
+                showErrorModal: false,
+                isDeleting: false,
+                successMessage: '',
+                errorMessage: '',
+                
                 init() {
                     this.$watch('previewData', () => {
                         this.updatePreview();
                     });
                     this.setupFormListeners();
                 },
+                
                 setupFormListeners() {
                     const nameInput = document.getElementById('name');
                     nameInput?.addEventListener('input', (e) => {
                         this.previewData.name = e.target.value;
                     });
+                    
                     const priceInput = document.getElementById('price');
                     priceInput?.addEventListener('input', (e) => {
                         this.previewData.price = e.target.value;
                     });
+                    
                     const timeInput = document.getElementById('required_time');
                     timeInput?.addEventListener('input', (e) => {
                         this.previewData.time = e.target.value;
                     });
+                    
                     const descInput = document.getElementById('description');
                     descInput?.addEventListener('input', (e) => {
                         this.previewData.description = e.target.value;
                     });
+                    
                     const colorInputs = document.querySelectorAll('input[name="color"]');
                     colorInputs.forEach(input => {
                         input.addEventListener('change', (e) => {
@@ -295,45 +404,57 @@
                         });
                     });
                 },
+                
                 updatePreview() {
+                },
+                
+                showDeleteConfirmation() {
+                    this.showDeleteModal = true;
+                },
+                
+                async confirmDelete() {
+                    this.isDeleting = true;
+                    const menuId = {{ $menu->id }};
+                    
+                    try {
+                        const response = await fetch(`/admin/menu/${menuId}`, {
+                            method: 'DELETE',
+                            headers: {
+                                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || 
+                                               document.querySelector('input[name="_token"]').value,
+                                'Accept': 'application/json',
+                                'Content-Type': 'application/json',
+                            }
+                        });
+                        
+                        const data = await response.json();
+                        
+                        this.showDeleteModal = false;
+                        this.isDeleting = false;
+                        
+                        if (data.success) {
+                            this.successMessage = 'Menu berhasil dihapus!';
+                            this.showSuccessModal = true;
+                        } else {
+                            this.errorMessage = data.message || 'Gagal menghapus menu';
+                            this.showErrorModal = true;
+                        }
+                    } catch (error) {
+                        console.error('Error:', error);
+                        this.showDeleteModal = false;
+                        this.isDeleting = false;
+                        this.errorMessage = 'Terjadi kesalahan saat menghapus menu';
+                        this.showErrorModal = true;
+                    }
+                },
+                
+                redirectToIndex() {
+                    window.location.href = '{{ route("admin.menu.index") }}';
                 }
             }
         }
-        function deleteMenu() {
-            if (confirm('Apakah Anda yakin ingin menghapus menu ini? Tindakan ini tidak dapat dibatalkan.')) {
-                const button = event.target.closest('button');
-                const menuId = {{ $menu->id }};
-                button.disabled = true;
-                button.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Menghapus...';
-                fetch(`/admin/menu/${menuId}`, {
-                    method: 'DELETE',
-                    headers: {
-                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || 
-                                       document.querySelector('input[name="_token"]').value,
-                        'Accept': 'application/json',
-                        'Content-Type': 'application/json',
-                    }
-                })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success) {
-                        alert('Menu berhasil dihapus!');
-                        window.location.href = '{{ route("admin.menu.index") }}';
-                    } else {
-                        alert('Error: ' + (data.message || 'Gagal menghapus menu'));
-                        button.disabled = false;
-                        button.innerHTML = '<i class="fas fa-trash"></i> Delete Menu';
-                    }
-                })
-                .catch(error => {
-                    console.error('Error:', error);
-                    alert('Terjadi kesalahan saat menghapus menu');
-                    button.disabled = false;
-                    button.innerHTML = '<i class="fas fa-trash"></i> Delete Menu';
-                });
-            }
-        }
     </script>
+
     <style>
         [x-cloak] {
             display: none !important;

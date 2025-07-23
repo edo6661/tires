@@ -1,5 +1,5 @@
 <x-layouts.app>
-    <div class="max-w-7xl mx-auto space-y-6">
+    <div class="max-w-7xl mx-auto space-y-6" x-data="menuShow()">
         <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
             <div>
                 <div class="flex items-center gap-2 mb-2">
@@ -23,7 +23,6 @@
                 </a>
             </div>
         </div>
-
         @if(session('success'))
             <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded-lg" x-data="{ show: true }" x-show="show">
                 <div class="flex items-center justify-between">
@@ -37,7 +36,6 @@
                 </div>
             </div>
         @endif
-
         @if(session('error'))
             <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded-lg" x-data="{ show: true }" x-show="show">
                 <div class="flex items-center justify-between">
@@ -51,7 +49,6 @@
                 </div>
             </div>
         @endif
-
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
             <div class="lg:col-span-1">
                 <div class="bg-white rounded-lg shadow-sm p-6 space-y-6">
@@ -67,7 +64,6 @@
                             </div>
                         @endif
                     </div>
-
                     <div class="flex justify-center">
                         @if($menu->is_active)
                             <span class="inline-flex items-center px-4 py-2 rounded-full text-sm font-medium bg-green-100 text-green-800">
@@ -81,14 +77,13 @@
                             </span>
                         @endif
                     </div>
-
                     <div class="flex flex-col gap-2">
                         <button onclick="toggleStatus({{ $menu->id }})" 
                                 class="w-full px-4 py-2 text-white rounded-lg transition-colors duration-200 flex items-center justify-center gap-2 {{ $menu->is_active ? 'bg-red-600 hover:bg-red-700' : 'bg-green-600 hover:bg-green-700' }}">
                             <i class="fas fa-{{ $menu->is_active ? 'pause' : 'play' }}"></i>
                             {{ $menu->is_active ? 'Deactivate' : 'Activate' }} Menu
                         </button>
-                        <button onclick="deleteMenu({{ $menu->id }})" 
+                        <button @click="showDeleteModal()" 
                                 class="w-full px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors duration-200 flex items-center justify-center gap-2">
                             <i class="fas fa-trash"></i>
                             Delete Menu
@@ -96,25 +91,21 @@
                     </div>
                 </div>
             </div>
-
             <div class="lg:col-span-2">
                 <div class="bg-white rounded-lg shadow-sm p-6">
                     <h3 class="text-xl font-semibold text-gray-900 mb-6">Menu Information</h3>
-                    
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div class="space-y-4">
                             <div>
                                 <label class="block text-sm font-medium text-gray-700 mb-1">Menu Name</label>
                                 <p class="text-lg font-semibold text-gray-900">{{ $menu->name }}</p>
                             </div>
-                            
                             <div>
                                 <label class="block text-sm font-medium text-gray-700 mb-1">Price</label>
                                 <p class="text-2xl font-bold text-green-600">
                                     $ {{ number_format($menu->price, 0, '.', ',') }}
                                 </p>
                             </div>
-                            
                             <div>
                                 <label class="block text-sm font-medium text-gray-700 mb-1">Required Time</label>
                                 <p class="text-lg text-gray-900 flex items-center gap-2">
@@ -123,7 +114,6 @@
                                 </p>
                             </div>
                         </div>
-
                         <div class="space-y-4">
                             <div>
                                 <label class="block text-sm font-medium text-gray-700 mb-1">Display Order</label>
@@ -133,7 +123,6 @@
                                     </span>
                                 </p>
                             </div>
-                            
                             <div>
                                 <label class="block text-sm font-medium text-gray-700 mb-1">Menu Color</label>
                                 <div class="flex items-center gap-2">
@@ -142,14 +131,12 @@
                                     <p class="text-gray-900 font-mono">{{ $menu->color }}</p>
                                 </div>
                             </div>
-                            
                             <div>
                                 <label class="block text-sm font-medium text-gray-700 mb-1">Date Created</label>
                                 <p class="text-gray-900">
                                     {{ $menu->created_at->format('F d, Y, H:i') }}
                                 </p>
                             </div>
-                            
                             <div>
                                 <label class="block text-sm font-medium text-gray-700 mb-1">Last Updated</label>
                                 <p class="text-gray-900">
@@ -161,7 +148,6 @@
                 </div>
             </div>
         </div>
-
         @if($menu->description)
         <div class="bg-white rounded-lg shadow-sm p-6">
             <h3 class="text-lg font-semibold text-gray-900 mb-4">Menu Description</h3>
@@ -170,36 +156,115 @@
             </div>
         </div>
         @endif
-
-
-        <div x-data="{ showDeleteModal: false }" @show-delete-modal.window="showDeleteModal = true" x-cloak>
-            <div x-show="showDeleteModal" x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100" x-transition:leave="transition ease-in duration-200" x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
-                <div @click.away="showDeleteModal = false" class="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
-                    <div class="mt-3 text-center">
-                        <div class="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-red-100">
-                            <i class="fas fa-exclamation-triangle text-red-600"></i>
-                        </div>
-                        <h3 class="text-lg font-medium text-gray-900 mt-2">Confirm Deletion</h3>
-                        <div class="mt-2 px-7 py-3">
-                            <p class="text-sm text-gray-500">
-                                Are you sure you want to delete the menu item "{{ $menu->name }}"? This action cannot be undone.
-                            </p>
-                        </div>
-                        <div class="items-center px-4 py-3 flex gap-2 justify-center">
-                            <button @click="showDeleteModal = false" class="px-4 py-2 bg-gray-200 text-gray-800 text-base font-medium rounded-md shadow-sm hover:bg-gray-300">
-                                Cancel
-                            </button>
-                            <button onclick="confirmDelete()" class="px-4 py-2 bg-red-600 text-white text-base font-medium rounded-md shadow-sm hover:bg-red-700">
-                                Delete
-                            </button>
-                        </div>
+        <div x-show="showDeleteConfirm" 
+             x-transition:enter="transition ease-out duration-300" 
+             x-transition:enter-start="opacity-0" 
+             x-transition:enter-end="opacity-100" 
+             x-transition:leave="transition ease-in duration-200" 
+             x-transition:leave-start="opacity-100" 
+             x-transition:leave-end="opacity-0" 
+             x-cloak 
+             class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
+            <div class="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
+                <div class="mt-3 text-center">
+                    <div class="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-red-100">
+                        <i class="fas fa-exclamation-triangle text-red-600"></i>
+                    </div>
+                    <h3 class="text-lg font-medium text-gray-900 mt-2">Konfirmasi Hapus Menu</h3>
+                    <div class="mt-2 px-7 py-3">
+                        <p class="text-sm text-gray-500">
+                            Apakah Anda yakin ingin menghapus menu <strong>"{{ $menu->name }}"</strong>? 
+                            Tindakan ini tidak dapat dibatalkan.
+                        </p>
+                    </div>
+                    <div class="items-center px-4 py-3 flex gap-2 justify-center">
+                        <button @click="showDeleteConfirm = false" 
+                                class="px-4 py-2 bg-gray-200 text-gray-800 text-base font-medium rounded-md shadow-sm hover:bg-gray-300 transition-colors duration-200">
+                            Batal
+                        </button>
+                        <button @click="confirmDelete()" 
+                                :disabled="isDeleting"
+                                class="px-4 py-2 bg-red-600 text-white text-base font-medium rounded-md shadow-sm hover:bg-red-700 transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed">
+                            <span x-show="!isDeleting" class="flex items-center gap-2">
+                                <i class="fas fa-trash"></i>
+                                Hapus
+                            </span>
+                            <span x-show="isDeleting" class="flex items-center gap-2">
+                                <i class="fas fa-spinner fa-spin"></i>
+                                Menghapus...
+                            </span>
+                        </button>
                     </div>
                 </div>
             </div>
         </div>
     </div>
-
     <script>
+        function menuShow() {
+            return {
+                showDeleteConfirm: false,
+                isDeleting: false,
+                showDeleteModal() {
+                    this.showDeleteConfirm = true;
+                },
+                async confirmDelete() {
+                    this.isDeleting = true;
+                    try {
+                        const response = await fetch(`/admin/menu/{{ $menu->id }}`, {
+                            method: 'DELETE',
+                            headers: {
+                                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || 
+                                               document.querySelector('input[name="_token"]')?.value,
+                                'Accept': 'application/json',
+                                'Content-Type': 'application/json',
+                            }
+                        });
+                        const data = await response.json();
+                        if (data.success) {
+                            this.showDeleteConfirm = false;
+                            const successDiv = document.createElement('div');
+                            successDiv.className = 'fixed top-4 right-4 bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded-lg shadow-lg z-50';
+                            successDiv.innerHTML = `
+                                <div class="flex items-center gap-2">
+                                    <i class="fas fa-check-circle"></i>
+                                    Menu berhasil dihapus!
+                                </div>
+                            `;
+                            document.body.appendChild(successDiv);
+                            setTimeout(() => {
+                                window.location.href = '{{ route("admin.menu.index") }}';
+                            }, 1500);
+                        } else {
+                            throw new Error(data.message || 'Gagal menghapus menu');
+                        }
+                    } catch (error) {
+                        console.error('Error:', error);
+                        const errorDiv = document.createElement('div');
+                        errorDiv.className = 'fixed top-4 right-4 bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded-lg shadow-lg z-50';
+                        errorDiv.innerHTML = `
+                            <div class="flex items-center justify-between">
+                                <div class="flex items-center gap-2">
+                                    <i class="fas fa-exclamation-circle"></i>
+                                    ${error.message || 'Terjadi kesalahan saat menghapus menu'}
+                                </div>
+                                <button onclick="this.parentElement.parentElement.remove()" class="text-red-700 hover:text-red-900">
+                                    <i class="fas fa-times"></i>
+                                </button>
+                            </div>
+                        `;
+                        document.body.appendChild(errorDiv);
+                        setTimeout(() => {
+                            if (errorDiv.parentNode) {
+                                errorDiv.remove();
+                            }
+                        }, 5000);
+                        this.showDeleteConfirm = false;
+                    } finally {
+                        this.isDeleting = false;
+                    }
+                }
+            }
+        }
         async function toggleStatus(id) {
             try {
                 const response = await fetch(`/admin/menu/${id}/toggle-status`, {
@@ -208,7 +273,6 @@
                         'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
                     }
                 });
-
                 const result = await response.json();
                 if (result.success) {
                     window.location.reload();
@@ -218,32 +282,6 @@
             } catch (error) {
                 console.error('Error:', error);
                 alert('An error occurred while changing the status.');
-            }
-        }
-
-        function deleteMenu(id) {
-            
-            window.dispatchEvent(new CustomEvent('show-delete-modal'));
-        }
-
-        async function confirmDelete() {
-            try {
-                const response = await fetch(`/admin/menu/{{ $menu->id }}`, {
-                    method: 'DELETE',
-                    headers: {
-                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
-                    }
-                });
-
-                const result = await response.json();
-                if (result.success) {
-                    window.location.href = "{{ route('admin.menu.index') }}";
-                } else {
-                    alert(result.message || 'An error occurred while deleting the menu item.');
-                }
-            } catch (error) {
-                console.error('Error:', error);
-                alert('An error occurred while deleting the menu item.');
             }
         }
     </script>

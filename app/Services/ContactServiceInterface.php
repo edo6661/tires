@@ -20,5 +20,4 @@ interface ContactServiceInterface
     public function getPendingContacts(): Collection;
     public function bulkDeleteContacts(array $ids): bool;
     public function getFilteredContacts(array $filters): LengthAwarePaginator;
-    public function bulkDeleteMenus(array $ids): bool;
 }
