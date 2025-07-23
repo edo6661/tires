@@ -38,7 +38,7 @@
                 <x-layouts.header.admin-dropdown-menu-item
                     icon="fas fa-users" 
                     title="Customer Management"
-                    href="#"
+                    href="{{ route('admin.customer.index') }}"
                     :is-active="request()->routeIs('admin.customers')"
                 />
                 <x-layouts.header.admin-dropdown-menu-item

@@ -26,6 +26,8 @@ use App\Services\TireStorageService;
 use App\Services\TireStorageServiceInterface;
 use App\Services\UserService;
 use App\Services\UserServiceInterface;
+use App\Services\CustomerService;
+use App\Services\CustomerServiceInterface;
 use Illuminate\Support\ServiceProvider as sv;
 
 class ServiceProvider extends sv
@@ -47,6 +49,7 @@ class ServiceProvider extends sv
         $this->app->bind(ReservationServiceInterface::class, ReservationService::class);
         $this->app->bind(TireStorageServiceInterface::class, TireStorageService::class);
         $this->app->bind(UserServiceInterface::class, UserService::class);
+        $this->app->bind(CustomerServiceInterface::class, CustomerService::class);
 
     }
 

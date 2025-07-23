@@ -12,6 +12,6 @@ Route::name('menu.')->prefix('menu')->controller(MenuController::class)->group(f
     Route::delete('/{id}', 'destroy')->name('destroy');
     Route::patch('/{id}/toggle-status', 'toggleStatus')->name('toggleStatus');
     Route::post('/reorder', 'reorder')->name('reorder');
-    Route::post('/calculate-end-time', 'calculateEndTime')->name('calculateEndTime');
+    Route::post('/calculate-end-time', action: 'calculateEndTime')->name('calculateEndTime');
     Route::post('/bulk-delete', 'bulkDelete')->name('bulk-delete');
 });

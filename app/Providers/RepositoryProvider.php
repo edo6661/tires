@@ -27,6 +27,8 @@ use App\Repositories\TireStorageRepositoryInterface;
 use App\Repositories\UserRepository;
 use App\Repositories\UserRepositoryInterface;
 use Illuminate\Support\ServiceProvider;
+use App\Repositories\CustomerRepository;
+use App\Repositories\CustomerRepositoryInterface;
 
 class RepositoryProvider extends ServiceProvider
 {
@@ -47,6 +49,7 @@ class RepositoryProvider extends ServiceProvider
         $this->app->bind(ReservationRepositoryInterface::class, ReservationRepository::class);
         $this->app->bind(TireStorageRepositoryInterface::class, TireStorageRepository::class);
         $this->app->bind(UserRepositoryInterface::class, UserRepository::class);
+        $this->app->bind(CustomerRepositoryInterface::class, CustomerRepository::class);
     }
 
     /**

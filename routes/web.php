@@ -27,6 +27,7 @@ Route::middleware(['auth'])->group(function () {
             require __DIR__ . '/admin/blocked-period.php';
             require __DIR__ . '/admin/business-setting.php';
             require __DIR__ . '/admin/contact.php';
+            require __DIR__ . '/admin/customer.php';
             require __DIR__ . '/admin/faq.php';
             require __DIR__ . '/admin/menu.php';
             require __DIR__ . '/admin/payment.php';

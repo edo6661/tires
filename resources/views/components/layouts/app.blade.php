@@ -92,13 +92,13 @@
                             },
                         ],
                         settings: [
-                            { 
-                                id: 1, 
-                                name: 'Business Information', 
-                                icon: 'fa-solid fa-store', 
-                                url: '#business-info',
-                                isActive: currentRoute.includes('business-info')
-                            },
+                            // { 
+                            //     id: 1, 
+                            //     name: 'Business Information', 
+                            //     icon: 'fa-solid fa-store', 
+                            //     url: '#business-info',
+                            //     isActive: currentRoute.includes('business-info')
+                            // },
                             { 
                                 id: 2, 
                                 name: 'Menu', 
