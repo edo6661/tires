@@ -547,10 +547,13 @@ class ReservationController extends Controller
     public function edit(int $id): View
     {
         $reservation = $this->reservationService->findReservation($id);
+        $menus = $this->menuService->getActiveMenus();
+        $users = $this->userService->getCustomers();
+
         if (!$reservation) {
             abort(404, 'Reservasi tidak ditemukan');
         }
-        return view('admin.reservation.edit', compact('reservation'));
+        return view('admin.reservation.edit', compact('reservation', 'menus', 'users'));
     }
     public function update(ReservationRequest $request, int $id): RedirectResponse
     {
