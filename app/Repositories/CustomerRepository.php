@@ -28,7 +28,7 @@ class CustomerRepository implements CustomerRepositoryInterface
     {
         $query = DB::table('reservations as r')
             ->select([
-                DB::raw('COALESCE(r.user_id, CONCAT("guest_", r.id)) as customer_id'),
+                DB::raw('COALESCE(r.user_id::text, CONCAT(\'guest_\', MIN(r.id)::text)) as customer_id'),
                 DB::raw('COALESCE(u.full_name, r.full_name) as full_name'),
                 DB::raw('COALESCE(u.full_name_kana, r.full_name_kana) as full_name_kana'),
                 DB::raw('COALESCE(u.email, r.email) as email'),
@@ -55,25 +55,25 @@ class CustomerRepository implements CustomerRepositoryInterface
         if (!empty($filters['search'])) {
             $search = '%' . $filters['search'] . '%';
             $query->where(function($q) use ($search) {
-                $q->where('u.full_name', 'LIKE', $search)
-                  ->orWhere('r.full_name', 'LIKE', $search)
-                  ->orWhere('u.email', 'LIKE', $search)
-                  ->orWhere('r.email', 'LIKE', $search)
-                  ->orWhere('u.phone_number', 'LIKE', $search)
-                  ->orWhere('r.phone_number', 'LIKE', $search);
+                $q->where('u.full_name', 'ILIKE', $search)
+                  ->orWhere('r.full_name', 'ILIKE', $search)
+                  ->orWhere('u.email', 'ILIKE', $search)
+                  ->orWhere('r.email', 'ILIKE', $search)
+                  ->orWhere('u.phone_number', 'ILIKE', $search)
+                  ->orWhere('r.phone_number', 'ILIKE', $search);
             });
         }
 
         if (!empty($filters['customer_type'])) {
             switch ($filters['customer_type']) {
                 case 'first_time':
-                    $query->having('reservation_count', '=', 1);
+                    $query->having(DB::raw('COUNT(r.id)'), '=', 1);
                     break;
                 case 'repeat':
-                    $query->having('reservation_count', '>=', 3);
+                    $query->having(DB::raw('COUNT(r.id)'), '>=', 3);
                     break;
                 case 'dormant':
-                    $query->having('latest_reservation', '<', Carbon::now()->subMonths(3));
+                    $query->having(DB::raw('MAX(r.reservation_datetime)'), '<', Carbon::now()->subMonths(3));
                     break;
             }
         }
@@ -86,7 +86,7 @@ class CustomerRepository implements CustomerRepositoryInterface
         // Cek apakah ini adalah user_id yang terdaftar atau guest reservation
         $customer = DB::table('reservations as r')
             ->select([
-                DB::raw('COALESCE(r.user_id, CONCAT("guest_", r.id)) as customer_id'),
+                DB::raw('COALESCE(r.user_id::text, CONCAT(\'guest_\', MIN(r.id)::text)) as customer_id'),
                 DB::raw('COALESCE(u.full_name, r.full_name) as full_name'),
                 DB::raw('COALESCE(u.full_name_kana, r.full_name_kana) as full_name_kana'),
                 DB::raw('COALESCE(u.email, r.email) as email'),
@@ -110,7 +110,7 @@ class CustomerRepository implements CustomerRepositoryInterface
                       // Atau jika ini adalah guest reservation dengan ID tertentu
                       ->orWhere(function($q) use ($id) {
                           // Untuk guest customer, gunakan reservation ID
-                          if (strpos($id, 'guest_') === 0) {
+                          if (is_string($id) && strpos($id, 'guest_') === 0) {
                               $reservationId = str_replace('guest_', '', $id);
                               $q->where('r.id', $reservationId)->whereNull('r.user_id');
                           }
@@ -142,7 +142,7 @@ class CustomerRepository implements CustomerRepositoryInterface
     {
         return DB::table('reservations as r')
             ->select([
-                DB::raw('COALESCE(r.user_id, CONCAT("guest_", r.id)) as customer_id'),
+                DB::raw('COALESCE(r.user_id::text, CONCAT(\'guest_\', MIN(r.id)::text)) as customer_id'),
                 DB::raw('COALESCE(u.full_name, r.full_name) as full_name'),
                 DB::raw('COALESCE(u.email, r.email) as email'),
                 DB::raw('COUNT(r.id) as reservation_count')
@@ -155,7 +155,7 @@ class CustomerRepository implements CustomerRepositoryInterface
                 'u.full_name', 
                 'u.email'
             ])
-            ->having('reservation_count', '=', 1)
+            ->having(DB::raw('COUNT(r.id)'), '=', 1)
             ->get();
     }
 
@@ -163,7 +163,7 @@ class CustomerRepository implements CustomerRepositoryInterface
     {
         return DB::table('reservations as r')
             ->select([
-                DB::raw('COALESCE(r.user_id, CONCAT("guest_", r.id)) as customer_id'),
+                DB::raw('COALESCE(r.user_id::text, CONCAT(\'guest_\', MIN(r.id)::text)) as customer_id'),
                 DB::raw('COALESCE(u.full_name, r.full_name) as full_name'),
                 DB::raw('COALESCE(u.email, r.email) as email'),
                 DB::raw('COUNT(r.id) as reservation_count')
@@ -176,7 +176,7 @@ class CustomerRepository implements CustomerRepositoryInterface
                 'u.full_name', 
                 'u.email'
             ])
-            ->having('reservation_count', '>=', 3)
+            ->having(DB::raw('COUNT(r.id)'), '>=', 3)
             ->get();
     }
 
@@ -184,7 +184,7 @@ class CustomerRepository implements CustomerRepositoryInterface
     {
         return DB::table('reservations as r')
             ->select([
-                DB::raw('COALESCE(r.user_id, CONCAT("guest_", r.id)) as customer_id'),
+                DB::raw('COALESCE(r.user_id::text, CONCAT(\'guest_\', MIN(r.id)::text)) as customer_id'),
                 DB::raw('COALESCE(u.full_name, r.full_name) as full_name'),
                 DB::raw('COALESCE(u.email, r.email) as email'),
                 DB::raw('MAX(r.reservation_datetime) as latest_reservation')
@@ -197,7 +197,7 @@ class CustomerRepository implements CustomerRepositoryInterface
                 'u.full_name', 
                 'u.email'
             ])
-            ->having('latest_reservation', '<', Carbon::now()->subMonths(3))
+            ->having(DB::raw('MAX(r.reservation_datetime)'), '<', Carbon::now()->subMonths(3))
             ->get();
     }
 
@@ -209,7 +209,7 @@ class CustomerRepository implements CustomerRepositoryInterface
             $query->where('user_id', $userId);
         } else {
             // Untuk guest customer, gunakan ID reservasi
-            if (strpos($customerId, 'guest_') === 0) {
+            if (is_string($customerId) && strpos($customerId, 'guest_') === 0) {
                 $reservationId = str_replace('guest_', '', $customerId);
                 $query->where('id', $reservationId);
             } else {
@@ -239,7 +239,7 @@ class CustomerRepository implements CustomerRepositoryInterface
             $reservationQuery->where('user_id', $userId);
         } else {
             // Untuk guest customer
-            if (strpos($customerId, 'guest_') === 0) {
+            if (is_string($customerId) && strpos($customerId, 'guest_') === 0) {
                 $reservationId = str_replace('guest_', '', $customerId);
                 $reservationQuery->where('id', $reservationId);
             } else {
@@ -268,19 +268,19 @@ class CustomerRepository implements CustomerRepositoryInterface
         
         return DB::table('reservations as r')
             ->select([
-                DB::raw('COALESCE(r.user_id, CONCAT("guest_", r.id)) as customer_id'),
+                DB::raw('COALESCE(r.user_id::text, CONCAT(\'guest_\', MIN(r.id)::text)) as customer_id'),
                 DB::raw('COALESCE(u.full_name, r.full_name) as full_name'),
                 DB::raw('COALESCE(u.email, r.email) as email'),
                 DB::raw('COALESCE(u.phone_number, r.phone_number) as phone_number')
             ])
             ->leftJoin('users as u', 'r.user_id', '=', 'u.id')
             ->where(function($q) use ($searchTerm) {
-                $q->where('u.full_name', 'LIKE', $searchTerm)
-                  ->orWhere('r.full_name', 'LIKE', $searchTerm)
-                  ->orWhere('u.email', 'LIKE', $searchTerm)
-                  ->orWhere('r.email', 'LIKE', $searchTerm)
-                  ->orWhere('u.phone_number', 'LIKE', $searchTerm)
-                  ->orWhere('r.phone_number', 'LIKE', $searchTerm);
+                $q->where('u.full_name', 'ILIKE', $searchTerm)
+                  ->orWhere('r.full_name', 'ILIKE', $searchTerm)
+                  ->orWhere('u.email', 'ILIKE', $searchTerm)
+                  ->orWhere('r.email', 'ILIKE', $searchTerm)
+                  ->orWhere('u.phone_number', 'ILIKE', $searchTerm)
+                  ->orWhere('r.phone_number', 'ILIKE', $searchTerm);
             })
             ->groupBy([
                 'r.user_id', 
