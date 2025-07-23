@@ -21,31 +21,31 @@
                     type="reservation" 
                     icon="fas fa-calendar-alt" 
                     title="Reservation Management"
-                    :is-active="request()->routeIs('admin.reservation.*')"
+                    {{-- :is-active="request()->routeIs('admin.reservation.*')" --}}
                 />
                 <x-layouts.header.admin-dropdown-menu
                     type="customer" 
                     icon="fas fa-headset" 
                     title="Customer Support"
-                    :is-active="request()->routeIs('admin.customer.*')"
+                    {{-- :is-active="request()->routeIs('admin.customer.*')" --}}
                 />
                 <x-layouts.header.admin-dropdown-menu
                     type="settings" 
                     icon="fas fa-cog" 
                     title="Settings"
-                    :is-active="request()->routeIs('admin.settings.*')"
+                    {{-- :is-active="request()->routeIs('admin.settings.*')" --}}
                 />
                 <x-layouts.header.admin-dropdown-menu-item
                     icon="fas fa-users" 
                     title="Customer Management"
                     href="{{ route('admin.customer.index') }}"
-                    :is-active="request()->routeIs('admin.customers')"
+                    :is-active="request()->routeIs('admin.customer.*')"
                 />
                 <x-layouts.header.admin-dropdown-menu-item
                     icon="fas fa-chart-bar" 
                     title="Aggregation / Analysis"
                     href="#"
-                    :is-active="request()->routeIs('admin.analytics')"
+                    {{-- :is-active="request()->routeIs('admin.analytics')" --}}
                 />
             </div>
         </nav>

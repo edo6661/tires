@@ -11,4 +11,5 @@ interface BusinessSettingServiceInterface
     public function createBusinessSettings(array $data): BusinessSetting;
     public function isBusinessOpen(): bool;
     public function getBusinessHours(): array;
+    public function getBusinessHoursForDisplay(): array;
 }

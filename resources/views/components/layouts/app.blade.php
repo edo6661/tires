@@ -88,17 +88,17 @@
                                 name: 'Announcement', 
                                 icon: 'fas fa-bullhorn', 
                                 url: '{{ route('admin.announcement.index') }}',
-                                isActive: currentRoute.includes('admin/announcement.*')
+                                isActive: currentRoute.includes('admin/announcement')
                             },
                         ],
                         settings: [
-                            // { 
-                            //     id: 1, 
-                            //     name: 'Business Information', 
-                            //     icon: 'fa-solid fa-store', 
-                            //     url: '#business-info',
-                            //     isActive: currentRoute.includes('business-info')
-                            // },
+                            { 
+                                id: 1, 
+                                name: 'Business Information', 
+                                icon: 'fa-solid fa-store', 
+                                url: '{{ route('admin.business-setting.index') }}',
+                                isActive: currentRoute.includes('admin/business-setting')
+                            },
                             { 
                                 id: 2, 
                                 name: 'Menu', 

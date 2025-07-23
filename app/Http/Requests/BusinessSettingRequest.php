@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
@@ -18,10 +19,14 @@ class BusinessSettingRequest extends FormRequest
             'address' => 'required|string',
             'access_information' => 'nullable|string',
             'business_hours' => 'required|array',
+            'business_hours.*' => 'required|array',
+            'business_hours.*.closed' => 'sometimes|boolean',
+            'business_hours.*.open' => 'required_without:business_hours.*.closed|date_format:H:i|nullable',
+            'business_hours.*.close' => 'required_without:business_hours.*.closed|date_format:H:i|nullable|after:business_hours.*.open',
             'website_url' => 'nullable|url|max:255',
             'site_name' => 'nullable|string|max:255',
             'shop_description' => 'nullable|string',
-            'top_image_path' => 'nullable|string|max:255',
+            'top_image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
             'site_public' => 'boolean',
             'reply_email' => 'nullable|email|max:255',
             'terms_of_use' => 'nullable|string',
@@ -33,31 +38,43 @@ class BusinessSettingRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'shop_name.required' => 'The shop name field is required.',
-            'shop_name.string' => 'The shop name must be a string.',
-            'shop_name.max' => 'The shop name may not be greater than 255 characters.',
-            'phone_number.required' => 'The phone number field is required.',
-            'phone_number.string' => 'The phone number must be a string.',
-            'phone_number.max' => 'The phone number may not be greater than 20 characters.',
-            'address.required' => 'The address field is required.',
-            'address.string' => 'The address must be a string.',
-            'access_information.string' => 'The access information must be a string.',
-            'business_hours.required' => 'The business hours field is required.',
-            'business_hours.array' => 'The business hours must be an array.',
-            'website_url.url' => 'The website URL must be a valid URL.',
-            'website_url.max' => 'The website URL may not be greater than 255 characters.',
-            'site_name.string' => 'The site name must be a string.',
-            'site_name.max' => 'The site name may not be greater than 255 characters.',
-            'shop_description.string' => 'The shop description must be a string.',
-            'top_image_path.string' => 'The top image path must be a string.',
-            'top_image_path.max' => 'The top image path may not be greater than 255 characters.',
-            'site_public.boolean' => 'The site public field must be true or false.',
-            'reply_email.email' => 'The reply email must be a valid email address.',
-            'reply_email.max' => 'The reply email may not be greater than 255 characters.',
-            'terms_of_use.string' => 'The terms of use must be a string.',
-            'privacy_policy.string' => 'The privacy policy must be a string.',
-            'google_analytics_id.string' => 'The google analytics ID must be a string.',
-            'google_analytics_id.max' => 'The google analytics ID may not be greater than 255 characters.',
+            'shop_name.required' => 'Shop name is required.',
+            'phone_number.required' => 'Phone number is required.',
+            'address.required' => 'Address is required.',
+            'business_hours.required' => 'Business hours are required.',
+            'business_hours.*.open.required_without' => 'Opening time is required if the shop is not closed.',
+            'business_hours.*.close.required_without' => 'Closing time is required if the shop is not closed.',
+            'business_hours.*.open.date_format' => 'Opening time must be in HH:MM format.',
+            'business_hours.*.close.date_format' => 'Closing time must be in HH:MM format.',
+            'business_hours.*.close.after' => 'Closing time must be after opening time.',
+            'website_url.url' => 'Website URL format is invalid.',
+            'reply_email.email' => 'Reply email format is invalid.',
+            'top_image.image' => 'The file must be an image.',
+            'top_image.mimes' => 'Image must be in one of the following formats: jpeg, png, jpg, gif.',
+            'top_image.max' => 'Image size must not exceed 2MB.',
         ];
+    }
+
+    protected function prepareForValidation()
+    {
+        $businessHours = $this->input('business_hours', []);
+        $transformedHours = [];
+
+        foreach ($businessHours as $day => $hours) {
+            if (isset($hours['closed']) && $hours['closed'] == '1') {
+                $transformedHours[$day] = ['closed' => true];
+            } else {
+                $transformedHours[$day] = [
+                    'open' => $hours['open'] ?? null,
+                    'close' => $hours['close'] ?? null,
+                    'closed' => false
+                ];
+            }
+        }
+
+        $this->merge([
+            'business_hours' => $transformedHours,
+            'site_public' => $this->has('site_public') ? true : false,
+        ]);
     }
 }

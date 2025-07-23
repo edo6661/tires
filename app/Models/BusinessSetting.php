@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Storage;
 
 class BusinessSetting extends Model
 {
@@ -30,4 +31,12 @@ class BusinessSetting extends Model
         'business_hours' => 'array',
         'site_public' => 'boolean',
     ];
+     public function getPathTopImageUrlAttribute() 
+    {
+        if (filter_var($this->top_image_path, FILTER_VALIDATE_URL)) {
+            return $this->top_image_path;
+        }
+        
+        return Storage::disk('s3')->url($this->top_image_path);
+    }
 }
