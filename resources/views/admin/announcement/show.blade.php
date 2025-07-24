@@ -10,23 +10,7 @@
                 <div class="h-6 w-px bg-gray-300"></div>
                 <h1 class="text-2xl font-bold text-gray-900">Announcement Detail</h1>
             </div>
-            <div class="flex items-center gap-3">
-                <a href="{{ route('admin.announcement.edit', $announcement->id) }}"
-                   class="px-4 py-2 bg-yellow-600 text-white rounded-lg hover:bg-yellow-700 transition-colors duration-200 flex items-center gap-2">
-                    <i class="fas fa-edit"></i>
-                    Edit
-                </a>
-                <button onclick="toggleStatus({{ $announcement->id }})"
-                        class="px-4 py-2 bg-{{ $announcement->is_active ? 'red' : 'green' }}-600 text-white rounded-lg hover:bg-{{ $announcement->is_active ? 'red' : 'green' }}-700 transition-colors duration-200 flex items-center gap-2">
-                    <i class="fas fa-{{ $announcement->is_active ? 'pause' : 'play' }}"></i>
-                    {{ $announcement->is_active ? 'Deactivate' : 'Activate' }}
-                </button>
-                <button onclick="confirmDelete({{ $announcement->id }})"
-                        class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors duration-200 flex items-center gap-2">
-                    <i class="fas fa-trash"></i>
-                    Delete
-                </button>
-            </div>
+            
         </div>
         @if(session('success'))
             <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded-lg" x-data="{ show: true }" x-show="show">

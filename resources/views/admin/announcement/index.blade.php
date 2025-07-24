@@ -156,10 +156,7 @@
             <div class="p-6 border-b border-gray-200">
                 <div class="flex items-center justify-between">
                     <h3 class="text-lg font-semibold text-gray-900">Announcements List</h3>
-                    <div class="flex items-center gap-2">
-                        <input type="checkbox" @change="toggleSelectAll($event.target.checked)" class="rounded border-gray-300 text-blue-600 focus:ring-blue-500">
-                        <label class="text-sm text-gray-700">Select All</label>
-                    </div>
+                   
                 </div>
             </div>
             @if($announcements->count() > 0)
@@ -168,7 +165,10 @@
                         <thead class="bg-gray-50">
                             <tr>
                                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                    <input type="checkbox" @change="toggleSelectAll($event.target.checked)" class="rounded border-gray-300 text-blue-600 focus:ring-blue-500">
+                                <input type="checkbox"
+                                    @change="toggleSelectAll($event.target.checked)"
+                                    :checked="allItemIds.length > 0 && selectedItems.length === allItemIds.length"
+                                    class="rounded border-gray-300 text-blue-600 focus:ring-blue-500">
                                 </th>
                                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Title</th>
                                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Content</th>
@@ -181,7 +181,7 @@
                             @foreach($announcements as $announcement)
                                 <tr class="hover:bg-gray-50">
                                     <td class="px-6 py-4 whitespace-nowrap">
-                                        <input type="checkbox" value="{{ $announcement->id }}" @change="toggleSelect({{ $announcement->id }}, $event.target.checked)" class="rounded border-gray-300 text-blue-600 focus:ring-blue-500">
+                                        <input type="checkbox" value="{{ $announcement->id }}" x-model.number="selectedItems" class="rounded border-gray-300 text-blue-600 focus:ring-blue-500">
                                     </td>
                                     <td class="px-6 py-4">
                                         <div class="text-sm font-medium text-gray-900 max-w-xs">
@@ -280,32 +280,15 @@
                 showFilters: false,
                 showDeleteModal: false,
                 selectedItems: [],
+                allItemIds: [], 
                 deleteTarget: null,
                 deleteMessage: '',
-                toggleSelectAll(checked) {
-                    const checkboxes = document.querySelectorAll('input[type="checkbox"][value]');
-                    checkboxes.forEach(checkbox => {
-                        checkbox.checked = checked;
-                        const id = parseInt(checkbox.value);
-                        if (checked && !this.selectedItems.includes(id)) {
-                            this.selectedItems.push(id);
-                        } else if (!checked) {
-                            const index = this.selectedItems.indexOf(id);
-                            if (index > -1) {
-                                this.selectedItems.splice(index, 1);
-                            }
-                        }
-                    });
+                init() {
+                    this.allItemIds = Array.from(document.querySelectorAll('tbody input[type="checkbox"][value]'))
+                                        .map(cb => parseInt(cb.value));
                 },
-                toggleSelect(id, checked) {
-                    if (checked && !this.selectedItems.includes(id)) {
-                        this.selectedItems.push(id);
-                    } else if (!checked) {
-                        const index = this.selectedItems.indexOf(id);
-                        if (index > -1) {
-                            this.selectedItems.splice(index, 1);
-                        }
-                    }
+                toggleSelectAll(checked) {
+                    this.selectedItems = checked ? [...this.allItemIds] : [];
                 },
                 deleteSingle(id) {
                     this.deleteTarget = [id];
@@ -348,11 +331,15 @@
                 async confirmDelete() {
                     try {
                         if (this.deleteTarget.length === 1) {
-                            const response = await fetch(`/admin/announcement/${this.deleteTarget[0]}`, {
-                                method: 'DELETE',
+                            const formData = new FormData();
+                            formData.append('ids', JSON.stringify(this.deleteTarget));
+
+                            const response = await fetch('/admin/announcement/bulk-delete', {
+                                method: 'POST',
                                 headers: {
                                     'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
-                                }
+                                },
+                                body: formData
                             });
                             if (response.ok) {
                                 window.location.reload();
