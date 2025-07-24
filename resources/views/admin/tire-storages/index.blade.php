@@ -13,7 +13,6 @@
                 </a>
             </div>
         </div>
-
         <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
             <div class="bg-white rounded-lg shadow-sm p-6">
                 <div class="flex items-center justify-between">
@@ -66,7 +65,6 @@
                 </div>
             </div>
         </div>
-
         @if(session('success'))
             <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded-lg" x-data="{ show: true }" x-show="show">
                 <div class="flex items-center justify-between">
@@ -80,7 +78,6 @@
                 </div>
             </div>
         @endif
-
         @if(session('error'))
             <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded-lg" x-data="{ show: true }" x-show="show">
                 <div class="flex items-center justify-between">
@@ -94,7 +91,6 @@
                 </div>
             </div>
         @endif
-
         <div class="bg-white rounded-lg shadow-sm p-6">
             <div class="flex items-center justify-between mb-4">
                 <h3 class="text-lg font-semibold text-gray-900">Filters & Search</h3>
@@ -137,7 +133,6 @@
                 </form>
             </div>
         </div>
-
         <div x-show="selectedItems.length > 0" class="bg-blue-50 border border-blue-200 rounded-lg p-4 flex items-center justify-between">
             <span class="text-blue-700">
                 <span x-text="selectedItems.length"></span> item(s) selected
@@ -153,25 +148,22 @@
                 </button>
             </div>
         </div>
-
         <div class="bg-white rounded-lg shadow-sm">
             <div class="p-6 border-b border-gray-200">
                 <div class="flex items-center justify-between">
                     <h3 class="text-lg font-semibold text-gray-900">Tire Storage List</h3>
-                    <div class="flex items-center gap-2">
-                        <input type="checkbox" @change="toggleSelectAll($event.target.checked)" class="rounded border-gray-300 text-blue-600 focus:ring-blue-500">
-                        <label class="text-sm text-gray-700">Select All</label>
-                    </div>
                 </div>
             </div>
-
             @if($tireStorages->count() > 0)
                 <div class="overflow-x-auto">
                     <table class="w-full">
                         <thead class="bg-gray-50">
                             <tr>
                                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                    <input type="checkbox" @change="toggleSelectAll($event.target.checked)" class="rounded border-gray-300 text-blue-600 focus:ring-blue-500">
+                                <input type="checkbox"
+                                    @change="toggleSelectAll($event.target.checked)"
+                                    :checked="allItemIds.length > 0 && selectedItems.length === allItemIds.length"
+                                    class="rounded border-gray-300 text-blue-600 focus:ring-blue-500">
                                 </th>
                                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Customer</th>
                                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Tire Info</th>
@@ -185,7 +177,8 @@
                             @foreach($tireStorages as $storage)
                                 <tr class="hover:bg-gray-50">
                                     <td class="px-6 py-4 whitespace-nowrap">
-                                        <input type="checkbox" value="{{ $storage->id }}" @change="toggleSelect({{ $storage->id }}, $event.target.checked)" class="rounded border-gray-300 text-blue-600 focus:ring-blue-500">
+                                        <input type="checkbox" value="{{ $storage->id }}" x-model.number="selectedItems" class="rounded border-gray-300 text-blue-600 focus:ring-blue-500">
+
                                     </td>
                                     <td class="px-6 py-4">
                                         <div class="flex items-center gap-3">
@@ -268,7 +261,6 @@
                 </div>
             @endif
         </div>
-
         <div x-show="showDeleteModal" x-transition class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50" x-cloak>
             <div class="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
                 <div class="mt-3 text-center">
@@ -291,61 +283,35 @@
             </div>
         </div>
     </div>
-
     <script>
         function tireStorageIndex() {
             return {
                 showFilters: false,
                 showDeleteModal: false,
                 selectedItems: [],
+                allItemIds: [], 
                 deleteTarget: null,
                 deleteMessage: '',
-
+                init() {
+                    this.allItemIds = Array.from(document.querySelectorAll('tbody input[type="checkbox"][value]'))
+                                        .map(cb => parseInt(cb.value));
+                },
                 toggleSelectAll(checked) {
-                    const checkboxes = document.querySelectorAll('input[type="checkbox"][value]');
-                    this.selectedItems = [];
-                    checkboxes.forEach(checkbox => {
-                        checkbox.checked = checked;
-                        if (checked) {
-                            const id = parseInt(checkbox.value);
-                            this.selectedItems.push(id);
-                        }
-                    });
+                    this.selectedItems = checked ? [...this.allItemIds] : [];
                 },
-
-                toggleSelect(id, checked) {
-                    if (checked && !this.selectedItems.includes(id)) {
-                        this.selectedItems.push(id);
-                    } else if (!checked) {
-                        const index = this.selectedItems.indexOf(id);
-                        if (index > -1) {
-                            this.selectedItems.splice(index, 1);
-                        }
-                    }
-                },
-
                 deleteSingle(id) {
                     this.deleteTarget = [id];
                     this.deleteMessage = 'Are you sure you want to delete this tire storage?';
                     this.showDeleteModal = true;
                 },
-
                 deleteSelected() {
-                    if (this.selectedItems.length === 0) {
-                        alert('Please select at least one storage item.');
-                        return;
-                    }
+                    if (this.selectedItems.length === 0) return;
                     this.deleteTarget = [...this.selectedItems];
                     this.deleteMessage = `Are you sure you want to delete ${this.selectedItems.length} storage item(s)?`;
                     this.showDeleteModal = true;
                 },
-
                 async endSelected() {
-                    if (this.selectedItems.length === 0) {
-                        alert('Please select at least one storage item.');
-                        return;
-                    }
-                    
+                    if (this.selectedItems.length === 0) return;
                     if (confirm(`Are you sure you want to end ${this.selectedItems.length} storage item(s)?`)) {
                         try {
                             const response = await fetch('/admin/tire-storage/bulk-end', {
@@ -354,75 +320,57 @@
                                     'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
                                     'Content-Type': 'application/json'
                                 },
-                                body: JSON.stringify({
-                                    ids: this.selectedItems
-                                })
+                                body: JSON.stringify({ ids: this.selectedItems })
                             });
-
                             const result = await response.json();
-                            
                             if (result.success) {
-                                alert(result.message);
                                 window.location.reload();
                             } else {
-                                alert(result.message || 'An error occurred while ending the storage.');
+                                alert(result.message || 'An error occurred.');
                             }
                         } catch (error) {
                             console.error('Error:', error);
-                            alert('An error occurred while ending the storage.');
+                            alert('An error occurred.');
                         }
                     }
                 },
-
                 async confirmDelete() {
                     try {
-                        if (this.deleteTarget.length === 1) {
-                            const response = await fetch(`/admin/tire-storage/bulk-delete`, {
+                        let response;
+                        if (this.deleteTarget.length > 1) { 
+                            response = await fetch('/admin/tire-storage/bulk-delete', {
                                 method: 'POST',
                                 headers: {
-                                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
-                                    'Content-Type': 'application/json' 
-
+                                    'Content-Type': 'application/json',
+                                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
                                 },
-                                body: JSON.stringify({ ids: this.deleteTarget }) 
+                                body: JSON.stringify({ ids: this.deleteTarget })
                             });
-                            
-                            if (response.ok) {
-                                window.location.reload();
-                            } else {
-                                const result = await response.json();
-                                alert(result.message || 'An error occurred while deleting.');
-                            }
+                        } else if (this.deleteTarget.length === 1) { 
+                            response = await fetch(`/admin/tire-storage/${this.deleteTarget[0]}`, {
+                                method: 'DELETE',
+                                headers: {
+                                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                                }
+                            });
                         } else {
-                            const response = await fetch('/admin/tire-storage/bulk-delete', {
-                                method: 'POST',
-                                headers: {
-                                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
-                                    'Content-Type': 'application/json'
-                                },
-                                body: JSON.stringify({
-                                    ids: this.deleteTarget
-                                })
-                            });
-
+                            return; 
+                        }
+                        if (response.ok) {
+                            window.location.reload();
+                        } else {
                             const result = await response.json();
-                            
-                            if (result.success) {
-                                alert(result.message);
-                                window.location.reload();
-                            } else {
-                                alert(result.message || 'An error occurred while deleting.');
-                            }
+                            alert(result.message || 'An error occurred during deletion.');
                         }
                     } catch (error) {
                         console.error('Error:', error);
-                        alert('An error occurred while deleting.');
+                        alert('An error occurred during deletion.');
+                    } finally {
+                        this.showDeleteModal = false;
                     }
-                    this.showDeleteModal = false;
                 }
             }
         }
-
         async function endStorage(id) {
             if (confirm('Are you sure you want to end this tire storage?')) {
                 try {
@@ -430,24 +378,19 @@
                         method: 'POST',
                         headers: {
                             'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
-                            'Content-Type': 'application/json'
                         }
                     });
-                    
                     const result = await response.json();
                     if (result.success) {
-                        alert(result.message);
                         window.location.reload();
                     } else {
-                        alert(result.message || 'An error occurred while ending storage.');
+                        alert(result.message || 'An error occurred.');
                     }
                 } catch (error) {
                     console.error('Error:', error);
-                    alert('An error occurred while ending storage.');
+                    alert('An error occurred.');
                 }
             }
         }
-
-       
     </script>
 </x-layouts.app>
