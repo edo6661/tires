@@ -35,7 +35,7 @@
                 </div>
 
                 <button type="submit" class="w-full bg-primary hover:bg-green-700 text-white font-medium py-2.5 px-4 rounded-md transition duration-200">
-                    Login
+                    Submit
                 </button>
 
             </form>
