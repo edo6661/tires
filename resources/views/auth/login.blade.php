@@ -12,6 +12,10 @@
 
             <form method="POST" action="{{ route('login') }}" class="space-y-6">
                 @csrf
+                @if(request('redirect'))
+                    <input type="hidden" name="redirect" value="{{ request('redirect') }}">
+                @endif
+                
                 <div>
                     <label for="email" class="block text-sm font-medium text-gray-700 mb-1">Email Address*</label>
                     <div class="relative">
@@ -90,7 +94,8 @@
                 <p class="text-gray-600">
                     Don't have a RESERVATION account?
                 </p>
-                <a href="{{ route('register') }}" class="mt-2 inline-block text-primary hover:text-green-800 transition font-medium">
+                <a href="{{ route('register') . (request('redirect') ? '?redirect=' . urlencode(request('redirect')) : '') }}" 
+                   class="mt-2 inline-block text-primary hover:text-green-800 transition font-medium">
                     Sign up now
                 </a>
             </div>

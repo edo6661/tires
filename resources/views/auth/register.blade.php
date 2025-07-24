@@ -8,6 +8,9 @@
 
             <form method="POST" action="{{ route('register') }}" class="space-y-6">
                 @csrf
+                @if(request('redirect'))
+                    <input type="hidden" name="redirect" value="{{ request('redirect') }}">
+                @endif
 
                 <div>
                     <label for="full_name" class="block text-sm font-medium text-gray-700 mb-1">Full Name*</label>
@@ -273,7 +276,8 @@
                 <p class="text-gray-600">
                     Already have a RESERVATION account?
                 </p>
-                <a href="{{ route('login') }}" class="mt-2 inline-block text-primary hover:text-green-800 transition font-medium">
+                <a href="{{ route('login') . (request('redirect') ? '?redirect=' . urlencode(request('redirect')) : '') }}" 
+                   class="mt-2 inline-block text-primary hover:text-green-800 transition font-medium">
                     Sign in here
                 </a>
             </div>
@@ -283,9 +287,9 @@
                     By registering, you agree to our terms of service and privacy policy.
                 </p>
                 <div class="flex justify-center space-x-4">
-                    <a href="
-                    <a href="
-                    <a href="
+                    <a href="#" class="text-primary hover:text-green-800">Terms of Service</a>
+                    <a href="#" class="text-primary hover:text-green-800">Privacy Policy</a>
+                    <a href="#" class="text-primary hover:text-green-800">Contact Us</a>
                 </div>
                 <p class="mt-4 text-gray-500">© RESERVATION</p>
             </div>

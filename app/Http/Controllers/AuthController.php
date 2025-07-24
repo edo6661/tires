@@ -1,7 +1,5 @@
 <?php
-
 namespace App\Http\Controllers;
-
 use App\Http\Controllers\Controller;
 use App\Http\Requests\LoginRequest;
 use App\Http\Requests\UserRequest;
@@ -11,70 +9,67 @@ use App\Services\AuthServiceInterface;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\View\View;
 use Illuminate\Http\Request;
-
 class AuthController extends Controller
 {
     public function __construct(
         protected AuthServiceInterface $authService
     ) {}
-
-    public function showLoginForm(): View
+    public function showLoginForm(Request $request): View
     {
-        return view('auth.login');
+        return view('auth.login', [
+            'redirect' => $request->get('redirect')
+        ]);
     }
-
     public function login(LoginRequest $request): RedirectResponse
     {
         $credentials = $request->only(['email', 'password']);
-        
         if ($this->authService->login($credentials)) {
             $request->session()->regenerate();
             $user = $this->authService->getCurrentUser();
+            $redirectUrl = $request->get('redirect');
+            if ($redirectUrl) {
+                return redirect()->to($redirectUrl);
+            }
             if ($user->isAdmin()) {
                 return redirect()->route('admin.dashboard');
             }
             return redirect()->route('customer.dashboard');
         }
-
         return back()->withErrors([
             'email' => 'Email or password is incorrect.',
         ])->withInput($request->except('password'));
     }
-
-    public function showRegisterForm(): View
+    public function showRegisterForm(Request $request): View
     {
-        return view('auth.register');
+        return view('auth.register', [
+            'redirect' => $request->get('redirect')
+        ]);
     }
-
     public function register(UserRequest $request): RedirectResponse
     {
         $data = $request->validated();
-        
         $user = $this->authService->register($data);
-        
+        $redirectUrl = $request->get('redirect');
+        if ($redirectUrl) {
+            return redirect()->to($redirectUrl);
+        }
         if ($user->isAdmin()) {
             return redirect()->route('admin.dashboard');
         }
-        
         return redirect()->route('customer.dashboard');
     }
-
     public function showForgotPasswordForm(): View
     {
         return view('auth.forgot-password');
     }
-
     public function sendResetLink(ForgotPasswordRequest $request): RedirectResponse
     {
         $sent = $this->authService->sendPasswordResetLink($request->email);
-        
         if ($sent) {
             return back()->with('status', 'Link reset password telah dikirim ke email Anda.');
         }
-        
         return back()->withErrors(['email' => 'Terjadi kesalahan saat mengirim email reset password.']);
     }
-
     public function showResetPasswordForm(Request $request, string $token): View
     {
         return view('auth.reset-password', [
@@ -82,7 +77,6 @@ class AuthController extends Controller
             'email' => $request->email
         ]);
     }
-
     public function resetPassword(ResetPasswordRequest $request): RedirectResponse
     {
         $reset = $this->authService->resetPassword(
@@ -90,18 +84,14 @@ class AuthController extends Controller
             $request->token,
             $request->password
         );
-
         if ($reset) {
             return redirect()->route('login')->with('status', 'Password Anda berhasil direset. Silakan login dengan password baru.');
         }
-
         return back()->withErrors(['email' => 'Token reset password tidak valid atau sudah kedaluwarsa.']);
     }
-
     public function logout(): RedirectResponse
     {
         $this->authService->logout();
-        
         return redirect()->route('login');
     }
 }

@@ -11,6 +11,8 @@ Route::get('/inquiry', function () {
 })->name('inquiry');
 
 require __DIR__ . '/auth.php';
+require __DIR__ . '/customer/booking.php';
+
 
 Route::middleware(['auth'])->group(function () {
     

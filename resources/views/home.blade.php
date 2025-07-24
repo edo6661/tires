@@ -86,7 +86,7 @@
                             <button aria-label="View Details" class="text-gray-400 hover:text-[#4abaa7] transition" title="View Details">
                                <i class="fa-solid fa-circle-info" aria-hidden="true"></i>
                             </button>
-                            <button class="rounded-full bg-[#4abaa7] hover:bg-green-600 text-white text-sm font-semibold px-5 py-2 transition" type="button">Book</button>
+                            <a href="{{ route('booking.first-step', ['menuId'=>$menu->id]) }}" class="block rounded-full bg-[#4abaa7] hover:bg-green-600 text-white text-sm font-semibold px-5 py-2 transition" type="button">Book</a>
                         </div>
                     </div>
                 </article>
@@ -102,7 +102,7 @@
                             <button aria-label="View Details" class="text-gray-400 hover:text-[#4abaa7] transition" title="View Details">
                                <i class="fa-solid fa-circle-info" aria-hidden="true"></i>
                             </button>
-                            <button class="rounded-full bg-[#4abaa7] hover:bg-green-600 text-white text-sm font-semibold px-5 py-2 transition" type="button">Book</button>
+                            <a href="#" class="block rounded-full bg-[#4abaa7] hover:bg-green-600 text-white text-sm font-semibold px-5 py-2 transition" type="button">Book</a>
                         </div>
                     </div>
                 </article>
