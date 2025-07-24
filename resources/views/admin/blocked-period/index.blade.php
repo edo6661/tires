@@ -1,7 +1,5 @@
-<!-- resources/views/admin/blocked-period/index.blade.php -->
 <x-layouts.app>
     <div class="max-w-7xl mx-auto space-y-6" x-data="blockedPeriodIndex()">
-        <!-- Header Section -->
         <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
             <div>
                 <h1 class="text-2xl font-bold text-gray-900">Blocked Period Management</h1>
@@ -15,8 +13,6 @@
                 </a>
             </div>
         </div>
-
-        <!-- Statistics Cards -->
         <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
             <div class="bg-white rounded-lg shadow-sm p-6">
                 <div class="flex items-center justify-between">
@@ -63,8 +59,6 @@
                 </div>
             </div>
         </div>
-
-        <!-- Alert Messages -->
         @if(session('success'))
             <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded-lg" x-data="{ show: true }" x-show="show">
                 <div class="flex items-center justify-between">
@@ -78,7 +72,6 @@
                 </div>
             </div>
         @endif
-
         @if(session('error'))
             <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded-lg" x-data="{ show: true }" x-show="show">
                 <div class="flex items-center justify-between">
@@ -92,8 +85,6 @@
                 </div>
             </div>
         @endif
-
-        <!-- Filters Section -->
         <div class="bg-white rounded-lg shadow-sm p-6">
             <div class="flex items-center justify-between mb-4">
                 <h3 class="text-lg font-semibold text-gray-900">Filters & Search</h3>
@@ -102,10 +93,8 @@
                     <span x-text="showFilters ? 'Hide Filters' : 'Show Filters'"></span>
                 </button>
             </div>
-            
             <div x-show="showFilters" x-transition class="space-y-4">
                 <form method="GET" action="{{ route('admin.blocked-period.index') }}" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                    <!-- Menu Filter -->
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-1">Menu</label>
                         <select name="menu_id" class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent">
@@ -117,8 +106,6 @@
                             @endforeach
                         </select>
                     </div>
-
-                    <!-- Status Filter -->
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-1">Status</label>
                         <select name="status" class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent">
@@ -128,36 +115,26 @@
                             <option value="expired" {{ request('status') == 'expired' ? 'selected' : '' }}>Expired</option>
                         </select>
                     </div>
-
-                    <!-- Start Date -->
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-1">Start Date</label>
                         <input type="date" name="start_date" value="{{ request('start_date') }}" 
                                class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent">
                     </div>
-
-                    <!-- End Date -->
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-1">End Date</label>
                         <input type="date" name="end_date" value="{{ request('end_date') }}" 
                                class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent">
                     </div>
-
-                    <!-- All Menus Filter -->
                     <div class="flex items-center">
                         <input type="checkbox" name="all_menus" value="1" {{ request('all_menus') ? 'checked' : '' }}
                                class="rounded border-gray-300 text-blue-600 focus:ring-blue-500">
                         <label class="ml-2 text-sm text-gray-700">Block All Menus Only</label>
                     </div>
-
-                    <!-- Search -->
                     <div class="lg:col-span-2">
                         <label class="block text-sm font-medium text-gray-700 mb-1">Search</label>
                         <input type="text" name="search" value="{{ request('search') }}" placeholder="Search by reason or menu name..."
                                class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent">
                     </div>
-
-                    <!-- Buttons -->
                     <div class="flex gap-2">
                         <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors duration-200 flex items-center gap-2">
                             <i class="fas fa-search"></i>
@@ -171,8 +148,6 @@
                 </form>
             </div>
         </div>
-
-        <!-- Bulk Actions -->
         <div x-show="selectedItems.length > 0" 
              class="bg-blue-50 border border-blue-200 rounded-lg p-4 flex items-center justify-between">
             <span class="text-blue-700">
@@ -185,28 +160,24 @@
                 </button>
             </div>
         </div>
-
-        <!-- Table Section -->
         <div class="bg-white rounded-lg shadow-sm">
             <div class="p-6 border-b border-gray-200">
                 <div class="flex items-center justify-between">
                     <h3 class="text-lg font-semibold text-gray-900">Blocked Periods List</h3>
-                    <div class="flex items-center gap-2">
-                        <input type="checkbox" @change="toggleSelectAll($event.target.checked)" 
-                               class="rounded border-gray-300 text-blue-600 focus:ring-blue-500">
-                        <label class="text-sm text-gray-700">Select All</label>
-                    </div>
+                    
                 </div>
             </div>
-
             @if($blockedPeriods->count() > 0)
                 <div class="overflow-x-auto">
                     <table class="w-full">
                         <thead class="bg-gray-50">
                             <tr>
                                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                    <input type="checkbox" @change="toggleSelectAll($event.target.checked)" 
-                                           class="rounded border-gray-300 text-blue-600 focus:ring-blue-500">
+                                    <input type="checkbox"
+                                        @change="toggleSelectAll($event.target.checked)"
+                                        :checked="selectedItems.length === {{ $blockedPeriods->count() }} && {{ $blockedPeriods->count() }} > 0"
+                                        class="rounded border-gray-300 text-blue-600 focus:ring-blue-500">
+
                                 </th>
                                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Menu</th>
                                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Time</th>
@@ -266,7 +237,6 @@
                                             $isUpcoming = $period->start_datetime > $now;
                                             $isExpired = $period->end_datetime < $now;
                                         @endphp
-                                        
                                         @if($isActive)
                                             <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
                                                 <i class="fas fa-circle text-green-500 mr-1 text-xs"></i>
@@ -305,8 +275,6 @@
                         </tbody>
                     </table>
                 </div>
-
-                <!-- Pagination -->
                 <div class="px-6 py-4 border-t border-gray-200">
                     {{ $blockedPeriods->appends(request()->query())->links() }}
                 </div>
@@ -323,8 +291,6 @@
                 </div>
             @endif
         </div>
-
-        <!-- Delete Confirmation Modal -->
         <div x-show="showDeleteModal" 
              x-transition:enter="transition ease-out duration-300"
              x-transition:enter-start="opacity-0"
@@ -356,7 +322,6 @@
             </div>
         </div>
     </div>
-
     <script>
         function blockedPeriodIndex() {
             return {
@@ -368,15 +333,12 @@
                 activeCount: {{ $blockedPeriods->where('start_datetime', '<=', now())->where('end_datetime', '>=', now())->count() }},
                 upcomingCount: {{ $blockedPeriods->where('start_datetime', '>', now())->count() }},
                 expiredCount: {{ $blockedPeriods->where('end_datetime', '<', now())->count() }},
-
                 init() {
                     this.calculateStats();
                 },
-
                 calculateStats() {
                     // Stats are already calculated in the backend
                 },
-
                 toggleSelectAll(checked) {
                     const checkboxes = document.querySelectorAll('input[type="checkbox"][value]');
                     checkboxes.forEach(checkbox => {
@@ -392,7 +354,6 @@
                         }
                     });
                 },
-
                 toggleSelect(id, checked) {
                     if (checked && !this.selectedItems.includes(id)) {
                         this.selectedItems.push(id);
@@ -403,19 +364,16 @@
                         }
                     }
                 },
-
                 deleteSingle(id) {
                     this.deleteTarget = [id];
                     this.deleteMessage = 'Are you sure you want to delete this blocked period?';
                     this.showDeleteModal = true;
                 },
-
                 deleteSelected() {
                     this.deleteTarget = [...this.selectedItems];
                     this.deleteMessage = `Are you sure you want to delete ${this.selectedItems.length} blocked periods?`;
                     this.showDeleteModal = true;
                 },
-
                 async confirmDelete() {
                     try {
                         const response = await fetch('{{ route("admin.blocked-period.bulk-delete") }}', {
@@ -428,9 +386,7 @@
                                 ids: this.deleteTarget
                             })
                         });
-
                         const result = await response.json();
-
                         if (result.success) {
                             window.location.reload();
                         } else {
@@ -440,7 +396,6 @@
                         console.error('Error:', error);
                         alert('An error occurred while deleting');
                     }
-
                     this.showDeleteModal = false;
                 }
             }
