@@ -126,10 +126,6 @@ class ReservationService implements ReservationServiceInterface
             return false;
         }
 
-        if ($reservation->status !== 'pending') {
-            throw new \Exception('Reservasi tidak bisa dikonfirmasi karena status saat ini: ' . $reservation->status);
-        }
-
         $updated = $this->reservationRepository->update($id, ['status' => 'confirmed']);
         return $updated !== null;
     }
