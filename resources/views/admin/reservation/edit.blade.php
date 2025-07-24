@@ -120,10 +120,10 @@
                         </div>
                         <div>
                             <label for="reservation_datetime" class="block text-sm font-medium text-gray-700 mb-2">Reservation Date & Time *</label>
-                            {{-- <input type="datetime-local" name="reservation_datetime" id="reservation_datetime" 
+                            <input type="hidden" name="reservation_datetime" id="reservation_datetime" 
                                    x-model="reservationDateTime" @change="checkAvailability()"
                                    value="{{ old('reservation_datetime', $reservation->reservation_datetime->format('Y-m-d\TH:i')) }}"
-                                   class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" required> --}}
+                                   class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" required>
                             <button type="button" @click="openCalendarModal()"
                             class="px-4 py-2 text-sm font-medium text-blue-600 bg-blue-50 border border-blue-300 rounded-md hover:bg-blue-100 focus:outline-none focus:ring-2 focus:ring-blue-500">
                                 <i class="fas fa-calendar-alt mr-2"></i>
@@ -595,25 +595,18 @@
                 generateAvailableTimes() {
                     const times = [];
                     const dateAvailability = this.availabilityData.find(item => item.date === this.selectedDate);
-                    const today = new Date();
-                    const todayStr = today.toISOString().split('T')[0];
-                    const currentHour = today.getHours();
-
+                    const now = new Date(); 
                     if (dateAvailability && dateAvailability.available_hours) {
                         dateAvailability.available_hours.forEach(hourInfo => {
-                            const hour = parseInt(hourInfo.hour.split(':')[0]);
                             const timeStr = hourInfo.hour;
-                            const displayTime = `${hour}:00`;
-                            
+                            const displayTime = `${parseInt(timeStr.split(':')[0])}:00`;
+                            const slotDateTime = new Date(`${this.selectedDate}T${timeStr}`);
                             let isDisabled = !hourInfo.available;
                             let blockedBy = hourInfo.blocked_by || 'unknown';
-                            
-                            // Check if this is past time for today
-                            if (this.selectedDate === todayStr && hour < currentHour) {
+                            if (slotDateTime < now) {
                                 isDisabled = true;
                                 blockedBy = 'past_time';
                             }
-                            
                             times.push({
                                 value: timeStr,
                                 label: displayTime,
@@ -622,7 +615,6 @@
                             });
                         });
                     }
-                    
                     this.availableTimes = times;
                 },
                 

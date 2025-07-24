@@ -108,10 +108,10 @@
                         </div>
                         <div>
                             <label for="reservation_datetime" class="block text-sm font-medium text-gray-700 mb-2">Reservation Date & Time *</label>
-                            {{-- <input type="datetime-local" name="reservation_datetime" id="reservation_datetime" 
+                            <input type="hidden" name="reservation_datetime" id="reservation_datetime" 
                                    x-model="reservationDateTime" @change="checkAvailability()"
                                    value="{{ old('reservation_datetime') }}"
-                                   class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" required> --}}
+                                   class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" required>
                             <button type="button" @click="openCalendarModal()"
                             class="px-4 py-2 text-sm font-medium text-blue-600 bg-blue-50 border border-blue-300 rounded-md hover:bg-blue-100 focus:outline-none focus:ring-2 focus:ring-blue-500">
                                 <i class="fas fa-calendar-alt mr-2"></i>
@@ -214,21 +214,17 @@
                                                         class="h-10 w-10 rounded-md border flex items-center justify-center text-sm transition-colors relative">
                                                     <span x-text="day.day" :class="(day.isFullyBlocked || day.isPast) ? 'opacity-50' : ''"></span>
                                                 </button>
-                                                
                                                 <!-- Fully blocked indicator (X) -->
                                                 <div x-show="day.isFullyBlocked && !day.isPast" 
                                                     class="absolute top-0 right-0 -mt-0.5 -mr-0.5 bg-red-500 text-white rounded-full w-4 h-4 flex items-center justify-center text-xs font-bold">
                                                     ×
                                                 </div>
-                                                
                                                 <!-- PERBAIKAN: Prioritaskan indikator mixed -->
                                                 <div x-show="day.isMixed && !day.isFullyBlocked && !day.isPast" 
                                                     class="absolute top-0 right-0 -mt-0.5 -mr-0.5 w-3 h-3 bg-gradient-to-r from-orange-400 to-purple-500 rounded-full border border-white"></div>
-                                                
                                                 <!-- Blocked periods (orange dot) -->
                                                 <div x-show="day.hasBlockedTimes && !day.hasReservationBlocked && !day.isMixed && !day.isFullyBlocked && !day.isPast" 
                                                     class="absolute top-0 right-0 -mt-0.5 -mr-0.5 w-3 h-3 bg-orange-400 rounded-full"></div>
-                                                
                                                 <!-- PERBAIKAN: Reservasi (purple dot) -->
                                                 <div x-show="day.hasReservationBlocked && !day.hasBlockedTimes && !day.isMixed && !day.isFullyBlocked && !day.isPast" 
                                                     class="absolute top-0 right-0 -mt-0.5 -mr-0.5 w-3 h-3 bg-purple-500 rounded-full"></div>
@@ -269,19 +265,16 @@
                                                         class="px-3 py-2 text-sm border rounded-md transition-colors flex items-center justify-center w-full relative">
                                                     <span x-text="time.label" :class="time.disabled ? 'opacity-50' : ''"></span>
                                                 </button>
-                                                
                                                 <!-- Indicator untuk different block types -->
                                                 <div x-show="time.disabled && time.blockedBy === 'blocked_period'" 
                                                     class="absolute top-0 right-0 -mt-0.5 -mr-0.5 bg-orange-500 text-white rounded-full w-4 h-4 flex items-center justify-center text-xs font-bold">
                                                     B
                                                 </div>
-                                                
                                                 <!-- TAMBAHAN: Indicator untuk reservasi -->
                                                 <div x-show="time.disabled && time.blockedBy === 'existing_reservation'" 
                                                     class="absolute top-0 right-0 -mt-0.5 -mr-0.5 bg-purple-500 text-white rounded-full w-4 h-4 flex items-center justify-center text-xs font-bold">
                                                     R
                                                 </div>
-                                                
                                                 <!-- Generic X untuk yang lain -->
                                                 <div x-show="time.disabled && (!time.blockedBy || time.blockedBy === 'unknown')" 
                                                     class="absolute top-0 right-0 -mt-0.5 -mr-0.5 bg-red-500 text-white rounded-full w-4 h-4 flex items-center justify-center text-xs font-bold">
@@ -291,7 +284,6 @@
                                                     class="absolute top-0 right-0 -mt-0.5 -mr-0.5 bg-gray-500 text-white rounded-full w-4 h-4 flex items-center justify-center text-xs font-bold">
                                                     ×
                                                 </div>
-
                                             </div>
                                         </template>
                                     </div>
@@ -432,7 +424,6 @@
                                         phoneNumber && phoneNumber.value.trim() !== '';
                     }
                     this.isFormValid = menuSelected && dateTimeSelected && customerInfoValid;
-                    
                 },
                 async checkAvailability() {
                     if (!this.selectedMenu || !this.reservationDateTime) {
@@ -472,7 +463,6 @@
                     if (this.isFormValid && this.availabilityStatus === 'available') {
                         document.querySelector('form').submit();
                     } else {
-                        
                     }
                 },
                 get currentMonthYear() {
@@ -506,40 +496,30 @@
                     const lastDay = new Date(this.currentYear, this.currentMonth + 1, 0);
                     const startDate = new Date(firstDay);
                     startDate.setDate(startDate.getDate() - firstDay.getDay());
-                    
                     const days = [];
                     const today = new Date();
                     today.setHours(0, 0, 0, 0);
-                    
                     for (let i = 0; i < 42; i++) {
                         const date = new Date(startDate);
                         date.setDate(startDate.getDate() + i);
-                        
                         const year = date.getFullYear();
                         const month = String(date.getMonth() + 1).padStart(2, '0');
                         const day = String(date.getDate()).padStart(2, '0');
                         const dateStr = `${year}-${month}-${day}`;
-                        
                         const isCurrentMonth = date.getMonth() === this.currentMonth;
                         const isPast = date < today;
-                        
                         const dateAvailability = this.availabilityData.find(item => item.date === dateStr);
                         const isFullyBlocked = dateAvailability ? dateAvailability.is_blocked : false;
-                        
                         let hasAvailableTime = false;
                         let hasBlockedTimes = false;
                         let hasReservationBlocked = false;
-                        
                         if (dateAvailability && dateAvailability.available_hours) {
                             const availableCount = dateAvailability.available_hours.filter(hour => hour.available).length;
                             const blockedCount = dateAvailability.available_hours.filter(hour => !hour.available).length;
-                            
-                            // PERBAIKAN: Gunakan data yang sudah diproses dari backend
                             hasAvailableTime = availableCount > 0;
                             hasBlockedTimes = dateAvailability.has_blocked_periods || false;
                             hasReservationBlocked = dateAvailability.has_reservations || false;
                         }
-                        
                         days.push({
                             date: dateStr,
                             day: date.getDate(),
@@ -548,12 +528,11 @@
                             isFullyBlocked: isFullyBlocked,
                             hasBlockedTimes: hasBlockedTimes && !isFullyBlocked,
                             hasReservationBlocked: hasReservationBlocked && !isFullyBlocked,
-                            isMixed: dateAvailability ? dateAvailability.is_mixed : false, // TAMBAHAN: indikator mixed
+                            isMixed: dateAvailability ? dateAvailability.is_mixed : false, 
                             hasAvailableTime: hasAvailableTime,
                             disabled: isPast || isFullyBlocked
                         });
                     }
-                    
                     this.calendarDays = days;
                 },
                  selectDate(dateStr) {
@@ -565,27 +544,21 @@
                         this.generateAvailableTimes();
                     }
                 },
-                generateAvailableTimes() {
+                 generateAvailableTimes() {
                     const times = [];
                     const dateAvailability = this.availabilityData.find(item => item.date === this.selectedDate);
-                    const today = new Date();
-                    const todayStr = today.toISOString().split('T')[0];
-                    const currentHour = today.getHours();
-
+                    const now = new Date(); 
                     if (dateAvailability && dateAvailability.available_hours) {
                         dateAvailability.available_hours.forEach(hourInfo => {
-                            const hour = parseInt(hourInfo.hour.split(':')[0]);
                             const timeStr = hourInfo.hour;
-                            const displayTime = `${hour}:00`;
-                            
+                            const displayTime = `${parseInt(timeStr.split(':')[0])}:00`;
+                            const slotDateTime = new Date(`${this.selectedDate}T${timeStr}`);
                             let isDisabled = !hourInfo.available;
                             let blockedBy = hourInfo.blocked_by || 'unknown';
-                            
-                            if (this.selectedDate === todayStr && hour < currentHour) {
+                            if (slotDateTime < now) {
                                 isDisabled = true;
                                 blockedBy = 'past_time';
                             }
-                            
                             times.push({
                                 value: timeStr,
                                 label: displayTime,
@@ -594,7 +567,6 @@
                             });
                         });
                     }
-                    
                     this.availableTimes = times;
                 },
                  previousMonth() {
@@ -625,7 +597,6 @@
                 confirmSelection() {
                     if (this.selectedDate && this.selectedTime && !this.isSelectedDateFullyBlocked) {
                         const dateTimeStr = `${this.selectedDate}T${this.selectedTime}`;
-                       
                         this.reservationDateTime = dateTimeStr;
                         const datetimeInput = document.getElementById('reservation_datetime');
                         if (datetimeInput) {
@@ -681,7 +652,6 @@
                                     this.blockedTimes[dateInfo.date] = unavailableHours;
                                 }
                             });
-                           
                         } else {
                             console.error('Failed to load availability data:', data.message || 'Unknown error');
                             this.availabilityData = [];
