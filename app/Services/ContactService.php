@@ -1,6 +1,7 @@
 <?php
 namespace App\Services;
 
+use App\Events\ContactReplied;
 use App\Models\Contact;
 use App\Repositories\ContactRepositoryInterface;
 use Illuminate\Database\Eloquent\Collection;
@@ -46,7 +47,6 @@ class ContactService implements ContactServiceInterface
 
     public function updateContact(int $id, array $data): ?Contact
     {
-        // Validasi bahwa hanya status dan admin_reply yang bisa diupdate
         $allowedFields = ['status', 'admin_reply', 'replied_at'];
         $filteredData = array_intersect_key($data, array_flip($allowedFields));
 
@@ -54,7 +54,11 @@ class ContactService implements ContactServiceInterface
             throw new \InvalidArgumentException('Tidak ada field yang valid untuk diupdate');
         }
 
-        return $this->contactRepository->update($id, $filteredData);
+         $contact = $this->contactRepository->update($id, $filteredData);
+         if ($contact && isset($data['admin_reply']) && !empty($data['admin_reply'])) {
+            event(new ContactReplied($contact)); 
+        }
+        return $contact;
     }
 
     public function deleteContact(int $id): bool
@@ -78,7 +82,16 @@ class ContactService implements ContactServiceInterface
             throw new \InvalidArgumentException('Reply tidak boleh kosong');
         }
 
-        return $this->contactRepository->markAsReplied($id, $reply);
+         $success = $this->contactRepository->markAsReplied($id, $reply);
+
+        if ($success) {
+            $contact = $this->contactRepository->findById($id);
+            if ($contact) {
+                event(new ContactReplied($contact));
+            }
+        }
+
+        return $success;
     }
 
     public function getPendingContacts(): Collection

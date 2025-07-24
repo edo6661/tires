@@ -4,25 +4,26 @@ namespace App\Http\Controllers;
 
 use App\Events\InquirySubmitted;
 use App\Services\BusinessSettingServiceInterface;
+use App\Services\ContactServiceInterface; // Tambahkan ini
 use App\Services\MenuServiceInterface;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth; // Tambahkan ini
 use Illuminate\Support\Facades\Validator;
 
 class HomeController extends Controller
 {
-    
     public function __construct(
         protected MenuServiceInterface $menuService,
-        protected BusinessSettingServiceInterface $businessSettingService
+        protected BusinessSettingServiceInterface $businessSettingService,
+        protected ContactServiceInterface $contactService // Tambahkan ini
     ) {}
-
 
     public function index()
     {
         $menus = $this->menuService->getAllMenus();
         $businessSettings = $this->businessSettingService->getBusinessSettings();
         
-        return view('home', compact('businessSettings', 'menus'));    
+        return view('home', compact('businessSettings', 'menus'));   
     }
 
     public function inquiry()
@@ -48,13 +49,18 @@ class HomeController extends Controller
                 ->with('error', 'Please check your input and try again.');
         }
 
-        event(new InquirySubmitted(
-            name: $request->name,
-            email: $request->email,
-            phone: $request->phone ?? '',
-            subject: $request->subject,
-            message: $request->message
-        ));
+        $contactData = [
+            'user_id' => Auth::check() ? Auth::id() : null,
+            'full_name' => $request->name,
+            'email' => $request->email,
+            'phone_number' => $request->phone,
+            'subject' => $request->subject,
+            'message' => $request->message,
+        ];
+
+        $contact = $this->contactService->createContact($contactData);
+
+        event(new InquirySubmitted($contact));
 
         return back()->with('success', 'Thank you for your inquiry! We will get back to you soon.');
     }

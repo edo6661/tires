@@ -79,45 +79,48 @@
                 @csrf
                 <div>
                     <label for="name" class="block text-sm font-medium text-gray-700 mb-1">Name *</label>
-                    <input type="text" id="name" name="name" value="{{ old('name') }}" 
-                           class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent @error('name') border-red-500 @enderror" 
-                           placeholder="Tokyo Taro" required>
+                    <input type="text" id="name" name="name" 
+                        value="{{ old('name', auth()->user()->full_name ?? '') }}" 
+                        class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent @error('name') border-red-500 @enderror"
+                        placeholder="Tokyo Taro" required>
                     @error('name')
                         <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                     @enderror
                 </div>
                 <div>
                     <label for="email" class="block text-sm font-medium text-gray-700 mb-1">Email Address *</label>
-                    <input type="email" id="email" name="email" value="{{ old('email') }}" 
-                           class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent @error('email') border-red-500 @enderror" 
-                           placeholder="email address" required>
+                    <input type="email" id="email" name="email" 
+                        value="{{ old('email', auth()->user()->email ?? '') }}"
+                        class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent @error('email') border-red-500 @enderror"
+                        placeholder="email address" required>
                     @error('email')
                         <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                     @enderror
                 </div>
                 <div>
                     <label for="phone" class="block text-sm font-medium text-gray-700 mb-1">Phone Number</label>
-                    <input type="tel" id="phone" name="phone" value="{{ old('phone') }}" 
-                           class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent @error('phone') border-red-500 @enderror" 
-                           placeholder="00-0000-0000">
+                    <input type="tel" id="phone" name="phone" 
+                        value="{{ old('phone', auth()->user()->phone_number ?? '') }}"
+                        class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent @error('phone') border-red-500 @enderror"
+                        placeholder="00-0000-0000">
                     @error('phone')
                         <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                     @enderror
                 </div>
                 <div>
                     <label for="subject" class="block text-sm font-medium text-gray-700 mb-1">Subject *</label>
-                    <input type="text" id="subject" name="subject" value="{{ old('subject') }}" 
-                           class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent @error('subject') border-red-500 @enderror" 
-                           required>
+                    <input type="text" id="subject" name="subject" value="{{ old('subject') }}"
+                        class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent @error('subject') border-red-500 @enderror"
+                        required>
                     @error('subject')
                         <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                     @enderror
                 </div>
                 <div>
                     <label for="message" class="block text-sm font-medium text-gray-700 mb-1">Inquiry Content *</label>
-                    <textarea id="message" name="message" rows="5" 
-                              class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent @error('message') border-red-500 @enderror" 
-                              placeholder="Please enter the content of your inquiry" required>{{ old('message') }}</textarea>
+                    <textarea id="message" name="message" rows="5"
+                            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent @error('message') border-red-500 @enderror"
+                            placeholder="Please enter the content of your inquiry" required>{{ old('message') }}</textarea>
                     @error('message')
                         <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                     @enderror

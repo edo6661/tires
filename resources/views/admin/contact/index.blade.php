@@ -103,7 +103,7 @@
                 </button>
             </div>
             
-            <div x-show="showFilters" x-transition class="space-y-4">
+            <div x-show="showFilters" x-cloak x-transition class="space-y-4">
                 <form method="GET" action="{{ route('admin.contact.index') }}" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                     <!-- Status Filter -->
                     <div>
@@ -151,7 +151,7 @@
         </div>
 
         <!-- Bulk Actions -->
-        <div x-show="selectedItems.length > 0" 
+        <div x-cloak x-show="selectedItems.length > 0" 
              class="bg-blue-50 border border-blue-200 rounded-lg p-4 flex items-center justify-between">
             <span class="text-blue-700">
                 <span x-text="selectedItems.length"></span> items selected
@@ -309,6 +309,7 @@
              x-transition:leave="transition ease-in duration-200"
              x-transition:leave-start="opacity-100"
              x-transition:leave-end="opacity-0"
+             x-cloak
              class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
             <div class="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
                 <div class="mt-3">
@@ -340,6 +341,7 @@
              x-transition:leave="transition ease-in duration-200"
              x-transition:leave-start="opacity-100"
              x-transition:leave-end="opacity-0"
+             x-cloak
              class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
             <div class="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
                 <div class="mt-3 text-center">

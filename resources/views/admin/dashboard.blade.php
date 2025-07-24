@@ -1,5 +1,5 @@
 <x-layouts.app>
-    <div class="max-w-7xl mx-auto space-y-6">
+    <div class="max-w-7xl mx-auto space-y-6" x-data="dashboardData()">
        <div class="bg-white rounded-lg shadow-sm p-6">
             <div class="space-y-3">
                 @foreach ($announcements as $announcement)
@@ -10,7 +10,9 @@
                                 <span class="font-semibold text-sm">[{{ $announcement->title }}]</span>
                                 <div class="flex items-center gap-2">
                                     <span class="text-xs text-gray-500">{{ $announcement->created_at->format('Y-m-d H:i') }}</span>
-                                    <i class="fa-solid fa-xmark cursor-pointer text-sm"></i>
+                                    <i class="fa-solid fa-xmark cursor-pointer text-sm hover:text-red-600 transition-colors" 
+                                       @click="deactivateAnnouncement({{ $announcement->id }})" 
+                                       title="Tutup pengumuman"></i>
                                 </div>
                             </div>
                             <p class="text-sm text-gray-700 line-clamp-2 break-words">
@@ -21,6 +23,7 @@
                 @endforeach
             </div>
         </div>
+        <!-- Rest of your dashboard content remains the same -->
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
             <div class="space-y-6">
                 <div class="bg-white rounded-lg shadow-sm p-6">
@@ -150,4 +153,36 @@
             </div>
         </div>
     </div>
+    <script>
+        function dashboardData() {
+            return {
+                async deactivateAnnouncement(announcementId) {
+                    if (!confirm('Are you sure you want to close this announcement?')) {
+                        return;
+                    }
+                    try {
+                        const formData = new FormData();
+                        formData.append('ids', JSON.stringify([announcementId]));
+                        formData.append('status', false); 
+                        const response = await fetch('/admin/announcement/bulk-toggle-status', {
+                            method: 'POST',
+                            headers: {
+                                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                            },
+                            body: formData
+                        });
+                        const result = await response.json();
+                        if (result.success) {
+                            window.location.reload();
+                        } else {
+                            alert(result.message || 'An error occurred while deactivating the announcement');
+                        }
+                    } catch (error) {
+                        console.error('Error:', error);
+                        alert('An error occurred while deactivating the announcement');
+                    }
+                }
+            }
+        }
+    </script>
 </x-layouts.app>

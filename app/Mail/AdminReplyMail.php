@@ -2,38 +2,45 @@
 
 namespace App\Mail;
 
-use App\Models\Contact; // Tambahkan ini
+use App\Models\Contact;
 use Illuminate\Bus\Queueable;
+use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Mail\Mailable;
 use Illuminate\Mail\Mailables\Content;
 use Illuminate\Mail\Mailables\Envelope;
 use Illuminate\Queue\SerializesModels;
 
-class InquiryThankYouMail extends Mailable
+class AdminReplyMail extends Mailable implements ShouldQueue
 {
     use Queueable, SerializesModels;
 
     public Contact $contact;
 
     /**
-     * Ubah constructor untuk menerima objek Contact
+     * Create a new message instance.
      */
     public function __construct(Contact $contact)
     {
         $this->contact = $contact;
     }
 
+    /**
+     * Get the message envelope.
+     */
     public function envelope(): Envelope
     {
         return new Envelope(
-            subject: 'Thank You for Your Inquiry - ' . config('app.name'),
+            subject: 'Re: ' . $this->contact->subject,
         );
     }
 
+    /**
+     * Get the message content definition.
+     */
     public function content(): Content
     {
         return new Content(
-            view: 'emails.customer-inquiry-thankyou',
+            view: 'emails.contact.admin-reply',
         );
     }
 }

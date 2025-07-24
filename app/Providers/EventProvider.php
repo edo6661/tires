@@ -12,6 +12,9 @@ use Illuminate\Auth\Events\Registered;
 use Illuminate\Auth\Listeners\SendEmailVerificationNotification;
 use Illuminate\Foundation\Support\Providers\EventServiceProvider as ServiceProvider;
 use Illuminate\Support\Facades\Event;
+use App\Events\ContactReplied; 
+use App\Listeners\SendAdminReplyNotification; 
+
 
 class EventProvider extends ServiceProvider
 {
@@ -25,6 +28,9 @@ class EventProvider extends ServiceProvider
         ],
         BookingCompleted::class => [
             SendBookingConfirmationEmail::class,
+        ],
+        ContactReplied::class => [ 
+            SendAdminReplyNotification::class,
         ],
     ];
 

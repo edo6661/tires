@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Thank You for Your Inquiry - {{ config('app.name') }}</title>
+    <title>Response to Your Inquiry - {{ config('app.name') }}</title>
     <style>
         * {
             margin: 0;
@@ -49,7 +49,7 @@
         }
 
         .header {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #4299e1 0%, #3182ce 100%);
             color: white;
             padding: 40px 30px;
             text-align: center;
@@ -101,20 +101,20 @@
             margin-bottom: 30px;
         }
 
-        .thank-you-icon {
+        .reply-icon {
             width: 80px;
             height: 80px;
-            background: linear-gradient(135deg, #48bb78, #38a169);
+            background: linear-gradient(135deg, #4299e1, #3182ce);
             border-radius: 50%;
             display: inline-flex;
             align-items: center;
             justify-content: center;
             margin-bottom: 20px;
-            box-shadow: 0 10px 30px rgba(72, 187, 120, 0.3);
+            box-shadow: 0 10px 30px rgba(66, 153, 225, 0.3);
         }
 
-        .thank-you-icon::before {
-            content: '✅';
+        .reply-icon::before {
+            content: '📧';
             font-size: 36px;
         }
 
@@ -132,15 +132,15 @@
             line-height: 1.7;
         }
 
-        .inquiry-summary {
+        .original-inquiry {
             background: #f7fafc;
             border-radius: 12px;
             padding: 25px;
             margin: 30px 0;
-            border-left: 4px solid #48bb78;
+            border-left: 4px solid #4299e1;
         }
 
-        .summary-title {
+        .inquiry-title {
             font-size: 18px;
             font-weight: 600;
             color: #2d3748;
@@ -159,7 +159,7 @@
         .detail-label {
             font-weight: 600;
             color: #2d3748;
-            min-width: 100px;
+            min-width: 120px;
             margin-right: 15px;
         }
 
@@ -168,7 +168,7 @@
             flex: 1;
         }
 
-        .message-preview {
+        .original-message {
             background: #edf2f7;
             border-radius: 8px;
             padding: 15px;
@@ -177,45 +177,51 @@
             line-height: 1.6;
             color: #2d3748;
             border: 1px solid #e2e8f0;
-            max-height: 150px;
-            overflow: hidden;
-            position: relative;
         }
 
-        .message-preview::after {
-            content: '';
-            position: absolute;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            height: 30px;
-            background: linear-gradient(transparent, #edf2f7);
-        }
-
-        .next-steps-box {
-            background: linear-gradient(135deg, #bee3f8, #90cdf4);
+        .admin-reply-section {
+            background: linear-gradient(135deg, #e6fffa, #b2f5ea);
             border-radius: 12px;
-            padding: 20px;
-            margin: 25px 0;
-            border-left: 4px solid #4299e1;
+            padding: 25px;
+            margin: 30px 0;
+            border-left: 4px solid #38b2ac;
         }
 
-        .next-steps-box p {
-            color: #2a4365;
-            margin: 0;
-            font-weight: 500;
+        .reply-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: #234e52;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+        }
+
+        .reply-title::before {
+            content: '💬';
+            margin-right: 10px;
+        }
+
+        .admin-message {
+            background: white;
+            border-radius: 8px;
+            padding: 20px;
+            font-size: 16px;
+            line-height: 1.7;
+            color: #2d3748;
+            border: 1px solid #b2f5ea;
+            white-space: pre-line;
         }
 
         .contact-info-box {
-            background: linear-gradient(135deg, #fbb6ce, #f687b3);
+            background: linear-gradient(135deg, #fed7d7, #feb2b2);
             border-radius: 12px;
             padding: 20px;
             margin: 25px 0;
-            border-left: 4px solid #d53f8c;
+            border-left: 4px solid #e53e3e;
         }
 
         .contact-info-box p {
-            color: #702459;
+            color: #742a2a;
             margin: 0;
             font-weight: 500;
         }
@@ -232,7 +238,7 @@
             margin: 0 auto;
         }
 
-        .appreciation-notice {
+        .team-notice {
             background: #4a5568;
             color: white;
             padding: 15px;
@@ -242,8 +248,8 @@
             font-weight: 500;
         }
 
-        .appreciation-notice::before {
-            content: '🙏 ';
+        .team-notice::before {
+            content: '👥 ';
             margin-right: 8px;
         }
 
@@ -267,24 +273,43 @@
             color: #7c2d12;
         }
 
+        .signature {
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 2px solid #e2e8f0;
+        }
+
+        .signature-name {
+            font-weight: 600;
+            color: #2d3748;
+            font-size: 16px;
+            margin-bottom: 5px;
+        }
+
+        .signature-title {
+            color: #718096;
+            font-size: 14px;
+            font-style: italic;
+        }
+
         /* Responsive Design */
         @media (max-width: 600px) {
             body {
                 padding: 10px;
             }
-            
+
             .content {
                 padding: 30px 25px;
             }
-            
+
             .header {
                 padding: 30px 20px;
             }
-            
+
             .header h1 {
                 font-size: 24px;
             }
-            
+
             .greeting {
                 font-size: 22px;
             }
@@ -306,69 +331,63 @@
         <div class="header">
             <div class="header-content">
                 <h1>{{ config('app.name') }}</h1>
-                <div class="header-subtitle">Thank You for Your Inquiry!</div>
+                <div class="header-subtitle">Response to Your Inquiry</div>
             </div>
         </div>
-        
+
         <div class="content">
             <div class="icon-container">
-                <div class="thank-you-icon"></div>
+                <div class="reply-icon"></div>
             </div>
-            
+
             <div class="greeting">Hello {{ $contact->getFullName() }},</div>
-            
-            <p>Thank you for reaching out to us! We have successfully received your inquiry and truly appreciate you taking the time to contact us.</p>
-            
-            <p>Our team will review your message carefully and get back to you as soon as possible. We typically respond to inquiries within <span class="highlight">24-48 hours</span> during business days.</p>
-            
-            <div class="inquiry-summary">
-                <div class="summary-title">📋 Your Inquiry Summary</div>
-                
+
+            <p>Thank you for your patience while we reviewed your inquiry. We're pleased to provide you with a response to your message.</p>
+
+            <div class="original-inquiry">
+                <div class="inquiry-title">📋 Your Original Inquiry</div>
+
                 <div class="detail-row">
                     <div class="detail-label">Subject:</div>
                     <div class="detail-value"><strong>{{ $contact->subject }}</strong></div>
                 </div>
-                
+
                 <div class="detail-row">
                     <div class="detail-label">Submitted:</div>
-                    <div class="detail-value">{{ date('F j, Y \a\t g:i A') }}</div>
+                    <div class="detail-value">{{ $contact->created_at->format('F j, Y \a\t g:i A') }}</div>
                 </div>
-                
+
                 <div class="detail-row">
-                    <div class="detail-label">Contact Email:</div>
-                    <div class="detail-value">{{ $contact->getEmail() }}</div>
-                </div>
-                
-                @if($contact->getPhoneNumber() && $contact->getPhoneNumber() !== 'N/A')
-                    <div class="detail-row">
-                        <div class="detail-label">Phone:</div>
-                        <div class="detail-value">{{ $contact->getPhoneNumber() }}</div>
-                    </div>
-                    @endif
-                
-                <div class="detail-row">
-                    <div class="detail-label">Message:</div>
+                    <div class="detail-label">Your Message:</div>
                     <div class="detail-value">
-                        <div class="message-preview">{{ $contact->message }}</div>
+                        <div class="original-message">{{ $contact->message }}</div>
                     </div>
                 </div>
             </div>
-            
-            <div class="divider"></div>
-            
-            <div class="next-steps-box">
-                <p><strong>🔄 What happens next?</strong> Our team is reviewing your inquiry and will respond directly to your email address. Please keep an eye on your inbox (and spam folder, just in case!).</p>
+
+            <div class="admin-reply-section">
+                <div class="reply-title">Our Response</div>
+                <div class="admin-message">{{ $contact->admin_reply }}</div>
             </div>
-            
+
+            <div class="divider"></div>
+
+            <p>We hope this response addresses your inquiry completely. If you have any follow-up questions or need further clarification, please don't hesitate to reach out to us again.</p>
+
             <div class="contact-info-box">
-                <p><strong>📞 Need urgent assistance?</strong> If your inquiry is time-sensitive, feel free to contact us directly through our other channels listed on our website.</p>
+                <p><strong>📞 Need additional help?</strong> Feel free to contact us through our website or use any of our available communication channels for further assistance.</p>
+            </div>
+
+            <div class="signature">
+                <div class="signature-name">{{ config('app.name') }} Support Team</div>
+                <div class="signature-title">Customer Service Department</div>
             </div>
         </div>
-        
+
         <div class="footer">
             <div class="footer-content">
-                <div class="appreciation-notice">
-                    We value your interest in our services and look forward to assisting you
+                <div class="team-notice">
+                    Thank you for choosing {{ config('app.name') }}. We appreciate your business!
                 </div>
                 <p class="copyright">&copy; {{ date('Y') }} {{ config('app.name') }}. All rights reserved.</p>
             </div>
