@@ -113,15 +113,24 @@
                                             </svg>
                                             <span x-text="getReservedSlotsCount(dayData)"></span> &nbsp; reserved slots
                                         </div>
+                                        <div x-show="getBlockedSlotsCount(dayData) > 0" 
+                                             class="inline-flex items-center px-3 py-1 rounded-full bg-red-100 text-red-800">
+                                            <svg class="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                                                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" />
+                                            </svg>
+                                            <span x-text="getBlockedSlotsCount(dayData)"></span> &nbsp; blocked slots
+                                        </div>
                                     </div>
                                     <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-2">
                                         <template x-for="hourSlot in dayData.available_hours" :key="hourSlot.hour">
                                             <button 
                                                 type="button"
                                                 @click="selectTimeSlot(dayData.date, hourSlot.hour, hourSlot.available)"
+                                                // MODIFIED: Added class for 'blocked_period'
                                                 :class="{
                                                     'bg-green-100 text-green-800 hover:bg-green-200 border-green-300 cursor-pointer transform hover:scale-105': hourSlot.available,
                                                     'bg-yellow-100 text-yellow-800 cursor-not-allowed border-yellow-300': !hourSlot.available && hourSlot.blocked_by === 'existing_reservation',
+                                                    'bg-red-100 text-red-800 cursor-not-allowed border-red-300': !hourSlot.available && hourSlot.blocked_by === 'blocked_period',
                                                     'ring-2 ring-blue-500 ring-opacity-50': selectedTimeSlot === `${dayData.date} ${hourSlot.hour}`
                                                 }"
                                                 :disabled="!hourSlot.available"
@@ -136,6 +145,13 @@
                                                         </svg>
                                                         Reserved
                                                     </span>
+                                                    <span x-show="hourSlot.blocked_by === 'blocked_period'" 
+                                                          class="inline-flex items-center">
+                                                        <svg class="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                                                           <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" />
+                                                        </svg>
+                                                        Blocked
+                                                    </span>
                                                 </div>
                                                 <div x-show="hourSlot.available" class="text-xs mt-1 text-green-600">
                                                     Available
@@ -147,7 +163,7 @@
                             </div>
                         </template>
                     </div>
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 p-4 bg-white border-2 border-gray-200 rounded-lg">
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 p-4 bg-white border-2 border-gray-200 rounded-lg">
                         <div class="flex items-center space-x-3">
                             <div class="w-6 h-6 bg-green-100 border-2 border-green-300 rounded-lg flex items-center justify-center">
                                 <svg class="w-4 h-4 text-green-600" fill="currentColor" viewBox="0 0 20 20">
@@ -168,6 +184,17 @@
                             <div>
                                 <div class="font-medium text-gray-900">Reserved</div>
                                 <div class="text-sm text-gray-600">Already has reservation</div>
+                            </div>
+                        </div>
+                        <div class="flex items-center space-x-3">
+                            <div class="w-6 h-6 bg-red-100 border-2 border-red-300 rounded-lg flex items-center justify-center">
+                                <svg class="w-4 h-4 text-red-600" fill="currentColor" viewBox="0 0 20 20">
+                                   <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" />
+                                </svg>
+                            </div>
+                            <div>
+                                <div class="font-medium text-gray-900">Blocked</div>
+                                <div class="text-sm text-gray-600">Blocked Period</div>
                             </div>
                         </div>
                     </div>
@@ -223,7 +250,7 @@
         function availabilityData() {
             return {
                 selectedDate: new Date().toISOString().split('T')[0],
-                selectedMenuId: '',
+                selectedMenuId: @json($menus->first()->id ?? null),
                 loading: false,
                 availabilityData: [],
                 selectedTimeSlot: '',
@@ -262,6 +289,10 @@
                 },
                 getReservedSlotsCount(dayData) {
                     return dayData.available_hours.filter(slot => !slot.available && slot.blocked_by === 'existing_reservation').length;
+                },
+                // ADDED: Function to count blocked slots
+                getBlockedSlotsCount(dayData) {
+                    return dayData.available_hours.filter(slot => !slot.available && slot.blocked_by === 'blocked_period').length;
                 },
                 showAlert(message) {
                     this.alertMessage = message;

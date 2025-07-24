@@ -120,10 +120,10 @@
                         </div>
                         <div>
                             <label for="reservation_datetime" class="block text-sm font-medium text-gray-700 mb-2">Reservation Date & Time *</label>
-                            <input type="datetime-local" name="reservation_datetime" id="reservation_datetime" 
+                            {{-- <input type="datetime-local" name="reservation_datetime" id="reservation_datetime" 
                                    x-model="reservationDateTime" @change="checkAvailability()"
                                    value="{{ old('reservation_datetime', $reservation->reservation_datetime->format('Y-m-d\TH:i')) }}"
-                                   class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" required>
+                                   class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" required> --}}
                             <button type="button" @click="openCalendarModal()"
                             class="px-4 py-2 text-sm font-medium text-blue-600 bg-blue-50 border border-blue-300 rounded-md hover:bg-blue-100 focus:outline-none focus:ring-2 focus:ring-blue-500">
                                 <i class="fas fa-calendar-alt mr-2"></i>
@@ -443,14 +443,7 @@
                     
                     this.isFormValid = menuSelected && dateTimeSelected && customerInfoValid;
                     
-                    console.log('Form validation:', {
-                        menuSelected,
-                        dateTimeSelected,
-                        customerInfoValid,
-                        customerType: this.customerType,
-                        isFormValid: this.isFormValid,
-                        availabilityStatus: this.availabilityStatus
-                    });
+                   
                 },
                 
                 async checkAvailability() {
@@ -475,7 +468,6 @@
                         });
                         
                         const data = await response.json();
-                        console.log('Availability check response:', data);
                         
                         if (data.available) {
                             this.availabilityStatus = 'available';
@@ -498,10 +490,7 @@
                     if (this.isFormValid && this.availabilityStatus === 'available') {
                         document.querySelector('form').submit();
                     } else {
-                        console.log('Form is invalid or time slot is not available:', {
-                            isFormValid: this.isFormValid,
-                            availabilityStatus: this.availabilityStatus
-                        });
+                       
                     }
                 },
                 
@@ -589,7 +578,6 @@
                     }
                     
                     this.calendarDays = days;
-                    console.log('Calendar generated with days:', days.length);
                 },
                 
                 selectDate(dateStr) {
@@ -602,7 +590,6 @@
                         this.generateAvailableTimes();
                     }
                     
-                    console.log('Selected date:', dateStr, 'Is blocked:', this.isSelectedDateFullyBlocked);
                 },
                 
                 generateAvailableTimes() {
@@ -667,17 +654,11 @@
                 
                 selectTime(timeStr) {
                     this.selectedTime = timeStr;
-                    console.log('Selected time:', timeStr); 
                 },
                 
                 confirmSelection() {
                     if (this.selectedDate && this.selectedTime && !this.isSelectedDateFullyBlocked) {
                         const dateTimeStr = `${this.selectedDate}T${this.selectedTime}`;
-                        console.log('Confirming selection:', {
-                            selectedDate: this.selectedDate,
-                            selectedTime: this.selectedTime,
-                            dateTimeStr: dateTimeStr
-                        });
                         
                         this.reservationDateTime = dateTimeStr;
                         
@@ -701,7 +682,6 @@
                 
                 async loadBlockedDates() {
                     if (!this.selectedMenu) {
-                        console.log('No menu selected, cannot load blocked dates');
                         return;
                     }
                     
@@ -721,7 +701,6 @@
                         });
                         
                         const data = await response.json();
-                        console.log('Availability data received:', data);
                         
                         if (data.success && data.data) {
                             this.availabilityData = data.data;
@@ -748,11 +727,7 @@
                                 }
                             });
                             
-                            console.log('Processed availability data:', {
-                                availabilityData: this.availabilityData,
-                                blockedDates: this.blockedDates,
-                                blockedTimes: this.blockedTimes
-                            });
+                           
                         } else {
                             console.error('Failed to load availability data:', data.message || 'Unknown error');
                             this.availabilityData = [];

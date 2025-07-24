@@ -50,7 +50,6 @@
             const date = currentUrl.searchParams.get('date') || new Date().toISOString().split('T')[0];
             if (!document.querySelector('[x-show="showModal"]').style.display !== 'none' && 
                 !document.querySelector('[x-show="showTooltip"]')) {
-                console.log('Auto-refresh triggered');
             }
         }, 30000);
         document.addEventListener('keydown', (e) => {

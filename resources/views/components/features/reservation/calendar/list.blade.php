@@ -342,10 +342,8 @@
         dateRangeFilters.classList.toggle('hidden');
     }
     function toggleAdvancedFilters() {
-        console.log('Advanced filters toggled');
     }
     function exportReservations() {
-        console.log('Export reservations');
     }
     function updateStatus(url) { 
         if (!confirm('Are you sure you want to change the status of this reservation?')) {
