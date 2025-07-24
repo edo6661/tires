@@ -1,7 +1,5 @@
-<!-- resources/views/admin/contact/index.blade.php -->
 <x-layouts.app>
     <div class="max-w-7xl mx-auto space-y-6" x-data="contactIndex()">
-        <!-- Header Section -->
         <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
             <div>
                 <h1 class="text-2xl font-bold text-gray-900">Contact Management</h1>
@@ -15,8 +13,6 @@
                 </a> --}}
             </div>
         </div>
-
-        <!-- Statistics Cards -->
         <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
             <div class="bg-white rounded-lg shadow-sm p-6">
                 <div class="flex items-center justify-between">
@@ -63,9 +59,6 @@
                 </div>
             </div>
         </div>
-
-        <!-- Rest of your template remains the same... -->
-        <!-- Alert Messages -->
         @if(session('success'))
             <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded-lg" x-data="{ show: true }" x-show="show">
                 <div class="flex items-center justify-between">
@@ -79,7 +72,6 @@
                 </div>
             </div>
         @endif
-
         @if(session('error'))
             <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded-lg" x-data="{ show: true }" x-show="show">
                 <div class="flex items-center justify-between">
@@ -93,7 +85,6 @@
                 </div>
             </div>
         @endif
-        <!-- Filters Section -->
         <div class="bg-white rounded-lg shadow-sm p-6">
             <div class="flex items-center justify-between mb-4">
                 <h3 class="text-lg font-semibold text-gray-900">Filter & Search</h3>
@@ -102,10 +93,8 @@
                     <span x-text="showFilters ? 'Hide Filters' : 'Show Filters'"></span>
                 </button>
             </div>
-            
             <div x-show="showFilters" x-cloak x-transition class="space-y-4">
                 <form method="GET" action="{{ route('admin.contact.index') }}" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                    <!-- Status Filter -->
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-1">Status</label>
                         <select name="status" class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent">
@@ -114,28 +103,21 @@
                             <option value="replied" {{ request('status') == 'replied' ? 'selected' : '' }}>Replied</option>
                         </select>
                     </div>
-
-                    <!-- Date Range -->
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-1">Start Date</label>
                         <input type="date" name="start_date" value="{{ request('start_date') }}" 
                                class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent">
                     </div>
-
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-1">End Date</label>
                         <input type="date" name="end_date" value="{{ request('end_date') }}" 
                                class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent">
                     </div>
-
-                    <!-- Search -->
                     <div class="lg:col-span-1">
                         <label class="block text-sm font-medium text-gray-700 mb-1">Search</label>
                         <input type="text" name="search" value="{{ request('search') }}" placeholder="Search name, email, subject..."
                                class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent">
                     </div>
-
-                    <!-- Buttons -->
                     <div class="lg:col-span-4 flex gap-2">
                         <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors duration-200 flex items-center gap-2">
                             <i class="fas fa-search"></i>
@@ -149,46 +131,34 @@
                 </form>
             </div>
         </div>
-
-        <!-- Bulk Actions -->
         <div x-cloak x-show="selectedItems.length > 0" 
              class="bg-blue-50 border border-blue-200 rounded-lg p-4 flex items-center justify-between">
             <span class="text-blue-700">
                 <span x-text="selectedItems.length"></span> items selected
             </span>
             <div class="flex gap-2">
-                {{-- <button @click="markAsRepliedSelected()" class="px-3 py-1 bg-green-600 text-white rounded hover:bg-green-700 transition-colors duration-200">
-                    <i class="fas fa-reply mr-1"></i>
-                    Mark as Replied
-                </button> --}}
                 <button @click="deleteSelected()" class="px-3 py-1 bg-red-600 text-white rounded hover:bg-red-700 transition-colors duration-200">
                     <i class="fas fa-trash mr-1"></i>
                     Delete
                 </button>
             </div>
         </div>
-
-        <!-- Table Section -->
         <div class="bg-white rounded-lg shadow-sm">
             <div class="p-6 border-b border-gray-200">
                 <div class="flex items-center justify-between">
                     <h3 class="text-lg font-semibold text-gray-900">Contact List</h3>
-                    <div class="flex items-center gap-2">
-                        <input type="checkbox" @change="toggleSelectAll($event.target.checked)" 
-                               class="rounded border-gray-300 text-blue-600 focus:ring-blue-500">
-                        <label class="text-sm text-gray-700">Select All</label>
-                    </div>
                 </div>
             </div>
-
             @if($contacts->count() > 0)
                 <div class="overflow-x-auto">
                     <table class="w-full">
                         <thead class="bg-gray-50">
                             <tr>
                                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                    <input type="checkbox" @change="toggleSelectAll($event.target.checked)" 
-                                           class="rounded border-gray-300 text-blue-600 focus:ring-blue-500">
+                                <input type="checkbox" 
+                                    @change="toggleSelectAll($event.target.checked)" 
+                                    :checked="allItemIds.length > 0 && selectedItems.length === allItemIds.length"
+                                    class="rounded border-gray-300 text-blue-600 focus:ring-blue-500">
                                 </th>
                                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Sender</th>
                                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Subject</th>
@@ -282,8 +252,6 @@
                         </tbody>
                     </table>
                 </div>
-
-                <!-- Pagination -->
                 <div class="px-6 py-4 border-t border-gray-200">
                     {{ $contacts->appends(request()->query())->links() }}
                 </div>
@@ -300,8 +268,6 @@
                 </div>
             @endif
         </div>
-
-        <!-- Quick Reply Modal -->
         <div x-show="showReplyModal" 
              x-transition:enter="transition ease-out duration-300"
              x-transition:enter-start="opacity-0"
@@ -332,8 +298,6 @@
                 </div>
             </div>
         </div>
-
-        <!-- Delete Confirmation Modal -->
         <div x-show="showDeleteModal" 
              x-transition:enter="transition ease-out duration-300"
              x-transition:enter-start="opacity-0"
@@ -365,9 +329,7 @@
                 </div>
             </div>
         </div>
-
     </div>
-
     <script>
         function contactIndex() {
             return {
@@ -375,31 +337,23 @@
                 showDeleteModal: false,
                 showReplyModal: false,
                 selectedItems: [],
+                allItemIds: [],
                 deleteTarget: null,
                 deleteMessage: '',
                 replyTarget: null,
                 replyMessage: '',
-
                 init() {
-                    // Stats are now passed from the backend, no need to calculate here
+                    this.allItemIds = Array.from(document.querySelectorAll('tbody input[type="checkbox"][value]')).map(cb => parseInt(cb.value));
                 },
-
                 toggleSelectAll(checked) {
-                    const checkboxes = document.querySelectorAll('input[type="checkbox"][value]');
-                    checkboxes.forEach(checkbox => {
-                        checkbox.checked = checked;
-                        const id = parseInt(checkbox.value);
-                        if (checked && !this.selectedItems.includes(id)) {
-                            this.selectedItems.push(id);
-                        } else if (!checked) {
-                            const index = this.selectedItems.indexOf(id);
-                            if (index > -1) {
-                                this.selectedItems.splice(index, 1);
-                            }
-                        }
-                    });
+                    const checkboxes = document.querySelectorAll('tbody input[type="checkbox"][value]');
+                    if (checked) {
+                        this.selectedItems = [...this.allItemIds];
+                    } else {
+                        this.selectedItems = [];
+                    }
+                    checkboxes.forEach(checkbox => checkbox.checked = checked);
                 },
-
                 toggleSelect(id, checked) {
                     if (checked && !this.selectedItems.includes(id)) {
                         this.selectedItems.push(id);
@@ -410,31 +364,26 @@
                         }
                     }
                 },
-
                 deleteSingle(id) {
                     this.deleteTarget = [id];
                     this.deleteMessage = 'Are you sure you want to delete this contact?';
                     this.showDeleteModal = true;
                 },
-
                 deleteSelected() {
                     this.deleteTarget = [...this.selectedItems];
                     this.deleteMessage = `Are you sure you want to delete ${this.selectedItems.length} contacts?`;
                     this.showDeleteModal = true;
                 },
-
                 quickReply(id) {
                     this.replyTarget = id;
                     this.replyMessage = '';
                     this.showReplyModal = true;
                 },
-
                 async submitQuickReply() {
                     if (!this.replyMessage.trim()) {
                         alert('Reply message cannot be empty');
                         return;
                     }
-
                     try {
                         const response = await fetch(`/admin/contact/${this.replyTarget}/reply`, {
                             method: 'POST',
@@ -446,9 +395,7 @@
                                 admin_reply: this.replyMessage
                             })
                         });
-
                         const result = await response.json();
-
                         if (result.success) {
                             window.location.reload();
                         } else {
@@ -458,30 +405,24 @@
                         console.error('Error:', error);
                         alert('An error occurred while sending the reply');
                     }
-
                     this.showReplyModal = false;
                 },
-
                 async confirmDelete() {
                     try {
                         if (this.deleteTarget.length === 1) {
-                            // Single delete
                             const response = await fetch(`/admin/contact/${this.deleteTarget[0]}`, {
                                 method: 'DELETE',
                                 headers: {
                                     'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
                                 }
                             });
-
                             const result = await response.json();
-
                             if (result.success || response.ok) {
                                 window.location.reload();
                             } else {
                                 alert(result.message || 'An error occurred while deleting');
                             }
                         } else {
-                            // Bulk delete
                             const response = await fetch('/admin/contact/bulk-delete', {
                                 method: 'POST',
                                 headers: {
@@ -492,9 +433,7 @@
                                     ids: this.deleteTarget
                                 })
                             });
-
                             const result = await response.json();
-
                             if (result.success) {
                                 window.location.reload();
                             } else {
@@ -505,7 +444,6 @@
                         console.error('Error:', error);
                         alert('An error occurred while deleting');
                     }
-
                     this.showDeleteModal = false;
                 }
             }
