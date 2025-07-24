@@ -11,8 +11,8 @@
         @vite(['resources/css/app.css', 'resources/js/app.js'])
     @endif
 </head>
-<body class="bg-gray-50 font-sans">
-    <div class="min-h-screen relative" x-data="{ sidebarOpen: false }">
+<body class="font-en">
+    <div class=" relative" x-data="{ sidebarOpen: false }">
         @auth
             @if(auth()->user()->isAdmin())
                 <x-layouts.header.admin-nav />
@@ -29,7 +29,7 @@
             @endif
         @endauth
         <div class="flex-1 flex flex-col">
-            <main class="flex-1 w-full mx-auto px-2 md:px-4 py-8">
+            <main class="flex-1 w-full mx-auto min-h-screen">
                 {{ $slot }}
             </main>
             <x-layouts.footer.customer-footer />

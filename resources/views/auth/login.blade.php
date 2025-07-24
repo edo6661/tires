@@ -1,5 +1,5 @@
 <x-layouts.app>
-    <div class="flex flex-col items-center justify-center min-h-screen bg-gray-50 py-8">
+    <div class="flex flex-col items-center justify-center  bg-gray-50 py-8">
         <div class="w-full max-w-md bg-white p-6 rounded-lg shadow-sm border border-gray-200">
             <div class="text-center mb-8">
                 <h1 class="text-2xl font-bold text-gray-800">RESERVATION ID</h1>
