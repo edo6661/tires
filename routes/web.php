@@ -5,10 +5,8 @@ use App\Http\Controllers\HomeController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', [HomeController::class, 'index'])->name('home');
+Route::get('/inquiry', [HomeController::class, 'inquiry'])->name('inquiry');
 
-Route::get('/inquiry', function () {
-    return view('inquiry');
-})->name('inquiry');
 
 require __DIR__ . '/auth.php';
 require __DIR__ . '/customer/booking.php';

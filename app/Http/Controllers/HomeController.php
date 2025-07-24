@@ -22,4 +22,9 @@ class HomeController extends Controller
         
         return view('home', compact('businessSettings', 'menus'));    
     }
+    public function inquiry()
+    {
+        $businessSettings = $this->businessSettingService->getBusinessSettings();
+        return view('inquiry', compact('businessSettings'));   
+    }
 }
