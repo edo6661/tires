@@ -34,6 +34,15 @@
                         position="bottom"
                         action="{{ route('logout') }}"
                     />
+                    <x-shared.link-hint-icon 
+                        href="{{ route('customer.reservation.index') }}"
+                        label="Reservations"
+                        icon="fa-solid fa-book"
+                        position="bottom"
+                        activePath="reservation*"
+                        
+                    />
+                    
                 @endif
             @endauth
             

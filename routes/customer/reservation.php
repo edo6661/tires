@@ -7,5 +7,6 @@ Route::prefix('reservation')
     ->name('reservation.')
     ->controller(ReservationController::class)
     ->group(function () {
-        
+        Route::get('/', 'index')->name('index');
+        Route::get('/{id}', 'show')->name('show');
     });
