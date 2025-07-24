@@ -2,9 +2,11 @@
 
 namespace App\Http\Controllers;
 
+use App\Events\InquirySubmitted;
 use App\Services\BusinessSettingServiceInterface;
 use App\Services\MenuServiceInterface;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Validator;
 
 class HomeController extends Controller
 {
@@ -22,9 +24,38 @@ class HomeController extends Controller
         
         return view('home', compact('businessSettings', 'menus'));    
     }
+
     public function inquiry()
     {
         $businessSettings = $this->businessSettingService->getBusinessSettings();
         return view('inquiry', compact('businessSettings'));   
+    }
+
+    public function submitInquiry(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'name' => 'required|string|max:255',
+            'email' => 'required|email|max:255',
+            'phone' => 'nullable|string|max:20',
+            'subject' => 'required|string|max:255',
+            'message' => 'required|string|max:2000',
+        ]);
+
+        if ($validator->fails()) {
+            return back()
+                ->withErrors($validator)
+                ->withInput()
+                ->with('error', 'Please check your input and try again.');
+        }
+
+        event(new InquirySubmitted(
+            name: $request->name,
+            email: $request->email,
+            phone: $request->phone ?? '',
+            subject: $request->subject,
+            message: $request->message
+        ));
+
+        return back()->with('success', 'Thank you for your inquiry! We will get back to you soon.');
     }
 }

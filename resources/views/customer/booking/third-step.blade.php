@@ -18,7 +18,6 @@
         </div>
         <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6" x-data="thirdStepHandler()">
             @guest
-                <!-- Guest Form Section -->
                 <div x-show="!showConfirmation" class="space-y-6">
                     <div class="border-b border-gray-200 pb-6">
                         <h2 class="text-lg font-semibold text-gray-900 mb-4">Contact Information</h2>
@@ -91,13 +90,10 @@
                     </div>
                 </div>
             @endguest
-            <!-- Confirmation Section -->
             <div x-show="@auth true @else showConfirmation @endauth" class="space-y-6">
-                <!-- Booking Summary -->
                 <div class="bg-gray-50 rounded-lg p-6">
                     <h2 class="text-lg font-semibold text-gray-900 mb-4">Reservation Summary</h2>
                     <div class="grid md:grid-cols-2 gap-6">
-                        <!-- Service Details -->
                         <div class="space-y-3">
                             <h3 class="font-medium text-gray-900 border-b border-gray-200 pb-2">Service Details</h3>
                             <div class="space-y-2 text-sm">
@@ -119,7 +115,6 @@
                                 </div>
                             </div>
                         </div>
-                        <!-- Customer Details -->
                         <div class="space-y-3">
                             <h3 class="font-medium text-gray-900 border-b border-gray-200 pb-2">Customer Information</h3>
                             <div class="space-y-2 text-sm">
@@ -170,7 +165,6 @@
                         </div>
                     </div>
                 </div>
-                <!-- Important Notes -->
                 <div class="bg-yellow-50 border-l-4 border-yellow-400 p-4">
                     <div class="flex">
                         <div class="flex-shrink-0">
@@ -189,7 +183,6 @@
                         </div>
                     </div>
                 </div>
-                <!-- Terms and Conditions -->
                 <div class="border-t border-gray-200 pt-6">
                     <div class="flex items-start space-x-3">
                         <input type="checkbox" 
@@ -204,7 +197,6 @@
                     </div>
                     <span x-show="errors.terms" class="text-sm text-red-600 mt-1 block" x-text="errors.terms"></span>
                 </div>
-                <!-- Action Buttons -->
                 <div class="flex justify-between pt-6 border-t border-gray-200">
                     <button type="button" 
                             @click="goBack()"
