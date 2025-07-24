@@ -246,7 +246,7 @@
                 agreedToTerms: false,
                 errors: {},
                 loading: false,
-                init() {
+                 init() {
                     const storedBookingData = sessionStorage.getItem('bookingData');
                     if (!storedBookingData) {
                         alert('Booking information not found. Please start over.');
@@ -254,11 +254,31 @@
                         return;
                     }
                     this.bookingData = JSON.parse(storedBookingData);
-                    this.loadMenuInfo();
+                    this.loadMenuInfo(); 
                 },
                 async loadMenuInfo() {
-                    this.bookingData.serviceName = 'Sample Service'; 
-                    this.bookingData.duration = '60'; 
+                    if (!this.bookingData.menuId) {
+                        console.error('Menu ID not found in session.');
+                        this.bookingData.serviceName = 'Error: Service not found';
+                        this.bookingData.duration = 'N/A';
+                        return;
+                    }
+                    try {
+                        const url = `{{ route('booking.menu-details', ['menuId' => '__MENU_ID__']) }}`.replace('__MENU_ID__', this.bookingData.menuId);
+                        const response = await fetch(url);
+                        if (!response.ok) throw new Error('Failed to fetch menu details');
+                        const data = await response.json();
+                        if (data.success) {
+                            this.bookingData.serviceName = data.menu.name;
+                            this.bookingData.duration = data.menu.required_time;
+                        } else {
+                            throw new Error(data.message);
+                        }
+                    } catch (error) {
+                        console.error('Error fetching menu info:', error);
+                        this.bookingData.serviceName = 'Error Loading Service';
+                        this.bookingData.duration = 'N/A';
+                    }
                 },
                 @guest
                 validateAndProceed() {

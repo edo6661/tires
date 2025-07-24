@@ -12,6 +12,9 @@ Route::prefix('booking')
         Route::get('available-hours', 'getAvailableHours')->name('available-hours');
         Route::get('second-step', 'secondStep')->name('second-step');
         Route::get('third-step', 'thirdStep')->name('third-step');
+        
+        Route::get('menu-details/{menuId}', 'getMenuDetails')->name('menu-details');
+
         Route::get('final-step', 'finalStep')->name('final-step');
         Route::post('create-reservation', 'createReservation')->name('create-reservation');
     });

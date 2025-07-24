@@ -213,9 +213,6 @@ class BookingController extends Controller
         $hours = [];
         for ($i = 8; $i <= 20; $i++) {
             $hours[] = sprintf('%02d:00', $i);
-            if ($i < 20) {
-                $hours[] = sprintf('%02d:30', $i);
-            }
         }
         return $hours;
     }
@@ -244,6 +241,24 @@ class BookingController extends Controller
                 'success' => false,
                 'message' => 'Failed to create reservation: ' . $e->getMessage()
             ], 500);    
+        }
+    }
+     public function getMenuDetails($menuId): JsonResponse
+    {
+        try {
+            $menu = $this->menuService->findMenu($menuId);
+            return response()->json([
+                'success' => true,
+                'menu' => [
+                    'name' => $menu->name,
+                    'required_time' => $menu->required_time,
+                ]
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Menu not found.'
+            ], 404);
         }
     }
     
