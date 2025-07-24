@@ -24,7 +24,7 @@
         <form action="{{ route('admin.business-setting.update') }}" method="POST" enctype="multipart/form-data">
             @csrf
             @method('PUT')
-            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <div class="grid grid-cols-1  gap-6">
                 <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
                     <h2 class="text-lg font-semibold text-gray-900 mb-4 flex items-center">
                         <i class="fas fa-store text-blue-600 mr-2"></i>
@@ -180,7 +180,10 @@
                         </div>
                     </div>
                 </div>
-                <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+                <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6" 
+                    x-data="{
+                        imageUrl: '{{ $businessSettings && $businessSettings->top_image_path ? $businessSettings->path_top_image_url : '' }}'
+                    }">
                     <h2 class="text-lg font-semibold text-gray-900 mb-4 flex items-center">
                         <i class="fas fa-image text-orange-600 mr-2"></i>
                         Description & Image
@@ -189,34 +192,41 @@
                         <div>
                             <label for="shop_description" class="block text-sm font-medium text-gray-700 mb-1">Shop Description</label>
                             <textarea id="shop_description" 
-                                      name="shop_description" 
-                                      rows="4"
-                                      class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                                      placeholder="Describe your business...">{{ old('shop_description', $businessSettings->shop_description ?? '') }}</textarea>
+                                    name="shop_description" 
+                                    rows="4"
+                                    class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                    placeholder="Describe your business...">{{ old('shop_description', $businessSettings->shop_description ?? '') }}</textarea>
                         </div>
                         <div>
                             <label for="access_information" class="block text-sm font-medium text-gray-700 mb-1">Access Information</label>
                             <textarea id="access_information" 
-                                      name="access_information" 
-                                      rows="3"
-                                      class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                                      placeholder="How to get to your business...">{{ old('access_information', $businessSettings->access_information ?? '') }}</textarea>
+                                    name="access_information" 
+                                    rows="3"
+                                    class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                    placeholder="How to get to your business...">{{ old('access_information', $businessSettings->access_information ?? '') }}</textarea>
                         </div>
                         <div>
                             <label for="top_image" class="block text-sm font-medium text-gray-700 mb-1">Top Image</label>
                             <input type="file" 
-                                   id="top_image" 
-                                   name="top_image" 
-                                   accept="image/*"
-                                   class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
-                            @if($businessSettings && $businessSettings->top_image_path)
-                                <div class="mt-2">
-                                    <img src="{{ $businessSettings->path_top_image_url }}" 
-                                         alt="Current image" 
-                                         class="h-20 w-32 object-cover rounded">
-                                    <p class="text-xs text-gray-500 mt-1">Current image</p>
-                                </div>
-                            @endif
+                                id="top_image" 
+                                name="top_image" 
+                                accept="image/*"
+                                @change="
+                                    const reader = new FileReader();
+                                    reader.onload = (e) => {
+                                        imageUrl = e.target.result;
+                                    };
+                                    reader.readAsDataURL($event.target.files[0]);
+                                "
+                                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100">
+                            
+                            {{-- Bagian pratinjau gambar yang dinamis --}}
+                            <div x-show="imageUrl" class="mt-2">
+                                <p class="text-xs text-gray-500 mb-1">Image Preview</p>
+                                <img :src="imageUrl" 
+                                    alt="Image preview" 
+                                    class="h-20 w-32 object-cover rounded shadow">
+                            </div>
                         </div>
                     </div>
                 </div>

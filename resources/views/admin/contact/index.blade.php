@@ -157,10 +157,10 @@
                 <span x-text="selectedItems.length"></span> items selected
             </span>
             <div class="flex gap-2">
-                <button @click="markAsRepliedSelected()" class="px-3 py-1 bg-green-600 text-white rounded hover:bg-green-700 transition-colors duration-200">
+                {{-- <button @click="markAsRepliedSelected()" class="px-3 py-1 bg-green-600 text-white rounded hover:bg-green-700 transition-colors duration-200">
                     <i class="fas fa-reply mr-1"></i>
                     Mark as Replied
-                </button>
+                </button> --}}
                 <button @click="deleteSelected()" class="px-3 py-1 bg-red-600 text-white rounded hover:bg-red-700 transition-colors duration-200">
                     <i class="fas fa-trash mr-1"></i>
                     Delete

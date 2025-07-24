@@ -161,7 +161,7 @@
                             <label class="block text-sm font-medium text-gray-700 mb-1">Top Image</label>
                             @if($businessSettings->top_image_path)
                                 <div class="mt-2">
-                                    <img src="{{ asset($businessSettings->top_image_path) }}" 
+                                    <img src="{{ asset($businessSettings->path_top_image_url) }}" 
                                          alt="Top Image" 
                                          class="h-32 w-full object-cover rounded-lg">
                                 </div>
