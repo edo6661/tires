@@ -146,6 +146,7 @@
                 availableHours: [],
                 loading: false,
                 selectDate(day) {
+                    // Hilangkan pengecekan 'blocked' status
                     if (day.bookingStatus !== 'available' || !day.isCurrentMonth) {
                         return;
                     }
@@ -233,6 +234,7 @@
                         alert('Please select both date and time');
                         return;
                     }
+                    // Store booking data in sessionStorage for next step
                     const bookingData = {
                         menuId: this.menuId,
                         date: this.selectedDate,
@@ -240,6 +242,7 @@
                         datetime: this.selectedDate + ' ' + this.selectedTime
                     };
                     sessionStorage.setItem('bookingData', JSON.stringify(bookingData));
+                    // Redirect to second step
                     window.location.href = '{{ route("booking.second-step") }}';
                 }
             }

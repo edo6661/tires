@@ -72,9 +72,10 @@ class BookingController extends Controller
     {
         $startDate = $currentMonth->copy()->startOfMonth();
         $endDate = $currentMonth->copy()->endOfMonth();
-        $reservations = $this->reservationService->getReservationsByDateRange(
+        $reservations = $this->reservationService->getReservationsByDateRangeAndMenu(
             $startDate->format('Y-m-d H:i:s'),
-            $endDate->format('Y-m-d H:i:s')
+            $endDate->format('Y-m-d H:i:s'),
+            $menuId
         );
         $reservationsByDate = $reservations->groupBy(function ($reservation) {
             return $reservation->reservation_datetime->format('Y-m-d');
@@ -134,13 +135,20 @@ class BookingController extends Controller
     }
     private function hasAvailableHoursForDate(Carbon $date, int $menuId, $blockedHours, $reservationsByDate): bool
     {
+        $menu = $this->menuService->findMenu($menuId);
+        $requiredTime = $menu->required_time;
         $dateString = $date->format('Y-m-d');
         $now = Carbon::now();
         $operatingHours = $this->getOperatingHours();
+        $closingTime = Carbon::parse($dateString . ' 21:00:00');
         foreach ($operatingHours as $hour) {
             $dateTime = Carbon::parse($dateString . ' ' . $hour);
             if ($dateTime->isBefore($now)) {
                 continue;
+            }
+            $endTime = $dateTime->copy()->addMinutes($requiredTime);
+            if ($endTime->gt($closingTime)) {
+                continue; 
             }
             if (isset($blockedHours[$dateString]) && in_array($hour, $blockedHours[$dateString])) {
                 continue;
@@ -153,7 +161,7 @@ class BookingController extends Controller
                 return true; 
             }
         }
-        return false;
+        return false; 
     }
     private function getDateBookingStatus(Carbon $date, bool $isPastDate, bool $hasAvailableHours): string
     {
@@ -167,6 +175,8 @@ class BookingController extends Controller
     }
     private function generateAvailableHours(Carbon $selectedDate, int $menuId): array
     {
+        $menu = $this->menuService->findMenu($menuId);
+        $requiredTime = $menu->required_time;
         $dateString = $selectedDate->format('Y-m-d');
         $now = Carbon::now();
         $availableHours = [];
@@ -174,18 +184,24 @@ class BookingController extends Controller
             $selectedDate->format('Y-m-d H:i:s'),
             $selectedDate->format('Y-m-d H:i:s')
         );
-        $reservations = $this->reservationService->getReservationsByDateRange(
+        $reservations = $this->reservationService->getReservationsByDateRangeAndMenu(
             $selectedDate->format('Y-m-d H:i:s'),
-            $selectedDate->format('Y-m-d H:i:s')
+            $selectedDate->format('Y-m-d H:i:s'),
+            $menuId
         );
         $reservationsByHour = $reservations->groupBy(function ($reservation) {
             return $reservation->reservation_datetime->format('H:i');
         });
         $operatingHours = $this->getOperatingHours();
+        $closingTime = Carbon::parse($dateString . ' 21:00:00');
         foreach ($operatingHours as $hour) {
             $dateTime = Carbon::parse($dateString . ' ' . $hour);
             if ($dateTime->isBefore($now)) {
                 continue;
+            }
+            $endTime = $dateTime->copy()->addMinutes($requiredTime);
+            if ($endTime->gt($closingTime)) {
+                continue; 
             }
             $isBlocked = isset($blockedHours[$dateString]) && in_array($hour, $blockedHours[$dateString]);
             $hasReservation = $reservationsByHour->has($hour);
@@ -240,10 +256,10 @@ class BookingController extends Controller
             return response()->json([
                 'success' => false,
                 'message' => 'Failed to create reservation: ' . $e->getMessage()
-            ], 500);    
+            ], 500);   
         }
     }
-     public function getMenuDetails($menuId): JsonResponse
+    public function getMenuDetails($menuId): JsonResponse
     {
         try {
             $menu = $this->menuService->findMenu($menuId);
@@ -261,5 +277,4 @@ class BookingController extends Controller
             ], 404);
         }
     }
-    
 }
