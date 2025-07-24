@@ -1,5 +1,7 @@
 <?php
 namespace App\Http\Controllers\Customer;
+
+use App\Events\BookingCompleted;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\ReservationRequest;
 use App\Services\ReservationServiceInterface;
@@ -247,16 +249,20 @@ class BookingController extends Controller
     public function createReservation(ReservationRequest $request): JsonResponse
     {
         try {
-            $this->reservationService->createReservation($request->validated());
+            $reservation = $this->reservationService->createReservation($request->validated());
+            
+            BookingCompleted::dispatch($reservation);
+            
             return response()->json([
                 'success' => true,
                 'message' => 'Reservation created successfully',
+                'reservation_number' => $reservation->reservation_number,
             ]);
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
                 'message' => 'Failed to create reservation: ' . $e->getMessage()
-            ], 500);   
+            ], 500);    
         }
     }
     public function getMenuDetails($menuId): JsonResponse

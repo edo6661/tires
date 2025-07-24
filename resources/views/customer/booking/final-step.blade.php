@@ -105,7 +105,7 @@
                             Print Confirmation
                         </button>
                         @auth
-                        <a href="#" 
+                        <a href="{{ route('customer.reservation.index') }}" 
                            class="px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition-colors text-center">
                             <i class="fas fa-calendar-alt mr-2"></i>
                             View My Reservations
