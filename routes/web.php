@@ -20,6 +20,7 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/dashboard', function () {
             return view('customer.dashboard');
         })->name('dashboard');
+        require __DIR__ . '/customer/reservation.php';
     });
     
     Route::middleware('admin')->group(function () {

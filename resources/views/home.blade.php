@@ -1,10 +1,6 @@
 <x-layouts.app>
     <section aria-label="Main Image and Introduction" class="mb-8 rounded-lg overflow-hidden shadow-lg">
-        @if($businessSettings && $businessSettings->top_image_path)
-        <img src="{{ $businessSettings->path_top_image_url }}" alt="{{ $businessSettings->shop_name ?? 'Shop Image' }}" class="w-full max-h-[420px] object-cover object-center"/>
-        @else
-            <img src="{{ asset('images/hero.jpg') }}" alt="Close-up of a car wheel illuminated by the sunset" class="w-full h-auto object-cover object-center"/>
-        @endif
+        <img src="{{ asset('images/hero.jpg') }}" alt="Close-up of a car wheel illuminated by the sunset" class="w-full h-auto object-cover object-center"/>
     </section>
 
     <div class="grid md:grid-cols-[250px_1fr] gap-10">
