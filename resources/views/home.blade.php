@@ -1,4 +1,7 @@
 <x-layouts.app>
+    <p class="text-brand">
+        test
+    </p>
     <section aria-label="Main Image and Introduction" class="mb-8 rounded-lg overflow-hidden shadow-lg">
         <img src="{{ asset('images/hero.jpg') }}" alt="Close-up of a car wheel illuminated by the sunset" class="w-full h-auto object-cover object-center"/>
     </section>

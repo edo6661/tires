@@ -1,6 +1,6 @@
 @import 'tailwindcss';
 @import '@fortawesome/fontawesome-free/css/all.min.css';
-
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@100..900&family=Noto+Sans:ital,wght@0,100..900;1,100..900&display=swap');
 @source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
 @source '../../storage/framework/views/*.php';
 @source '../**/*.blade.php';
@@ -9,8 +9,31 @@
 @theme {
     --font-sans: 'Instrument Sans', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji',
         'Segoe UI Symbol', 'Noto Color Emoji';
-    --color-primary: #4abaa7;
-    --color-brand: #004080;
+    --font-jp: 'Noto Sans JP', sans-serif;
+    --font-en: 'Noto Sans', sans-serif;
+
+    --color-brand: #004080; 
+    --color-sub: #E6F0FA; 
+    --color-main-button: #FF9900;
+    --color-secondary-button: #CCCCCC; 
+    --color-main-text: #333333; 
+    --color-link: #004080; 
+    --color-link-hover: #002244; 
+    --color-disabled: #E0E0E0;
+
+    --color-footer-bg: #004080;
+    --color-footer-text: #FFFFFF;
+
+    --text-title-lg: 24px;
+    --text-title-md: 20px;
+    --text-heading-lg: 18px;
+    --text-heading-md: 16px;
+    --text-body-lg: 16px;
+    --text-body-md: 14px;
+    --text-button-lg: 16px;
+    --text-button-md: 14px;
+
+    --btn-main-hover: #e68a00; 
 }
 @utility container {
     @apply mx-auto px-6 py-4;
