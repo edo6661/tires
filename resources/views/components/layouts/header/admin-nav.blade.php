@@ -4,18 +4,20 @@
                 class="p-2 text-gray-600 hover:bg-gray-100 rounded-md transition-colors duration-200">
             <i class="fas fa-bars text-lg"></i>
         </button>
-        
-        {{-- <div class="flex flex-col md:flex-row md:items-center gap-4 md:gap-12 text-xs select-none whitespace-nowrap">
-            <a href="{{ route('admin.dashboard') }}" class="flex items-center gap-3 text-gray-700 select-text">
-                <img src="{{ asset('images/logo.jpg') }}" alt="Logo for X Change Tire Installation Reservation" class="object-cover w-16" />
-            </a>
-        </div> --}}
-
+         <div class="flex items-center gap-4">
+        <x-shared.link-hint-icon
+            href="{{ route('profile.show') }}"
+            label="Profil"
+            icon="fa-solid fa-circle-user"
+            position="bottom"
+            activePath="profile*"
+        />
         <x-shared.form-hint-icon
             label="Logout"
             icon="fa-solid fa-right-from-bracket"  
             position="bottom"
             action="{{ route('logout') }}"
         />
+         </div>
     </div>
 </header>

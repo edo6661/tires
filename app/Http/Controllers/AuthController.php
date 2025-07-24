@@ -33,7 +33,7 @@ class AuthController extends Controller
             if ($user->isAdmin()) {
                 return redirect()->route('admin.dashboard');
             }
-            return redirect()->route('customer.dashboard');
+            return redirect()->route('home');
         }
         return back()->withErrors([
             'email' => 'Email or password is incorrect.',
@@ -56,7 +56,7 @@ class AuthController extends Controller
         if ($user->isAdmin()) {
             return redirect()->route('admin.dashboard');
         }
-        return redirect()->route('customer.dashboard');
+        return redirect()->route('home');
     }
     public function showForgotPasswordForm(): View
     {

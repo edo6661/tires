@@ -28,19 +28,25 @@
             />
             @auth
                 @if(auth()->user()->isCustomer())
-                    <x-shared.form-hint-icon
-                        label="Logout"
-                        icon="fa-solid fa-right-from-bracket"  
-                        position="bottom"
-                        action="{{ route('logout') }}"
-                    />
                     <x-shared.link-hint-icon 
                         href="{{ route('customer.reservation.index') }}"
                         label="Reservations"
                         icon="fa-solid fa-book"
                         position="bottom"
                         activePath="reservation*"
-                        
+                    />
+                     <x-shared.link-hint-icon
+                        href="{{ route('profile.show') }}"
+                        label="Profil"
+                        icon="fa-solid fa-circle-user"
+                        position="bottom"
+                        activePath="profile*"
+                    />
+                    <x-shared.form-hint-icon
+                        label="Logout"
+                        icon="fa-solid fa-right-from-bracket"  
+                        position="bottom"
+                        action="{{ route('logout') }}"
                     />
                     
                 @endif

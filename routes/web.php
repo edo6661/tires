@@ -15,10 +15,11 @@ require __DIR__ . '/customer/booking.php';
 
 
 Route::middleware(['auth'])->group(function () {
+    require __DIR__ . '/profile.php';
     
     Route::name('customer.')->group(function () {
         Route::get('/dashboard', function () {
-            return view('customer.dashboard');
+            return view('home');
         })->name('dashboard');
         require __DIR__ . '/customer/reservation.php';
     });
