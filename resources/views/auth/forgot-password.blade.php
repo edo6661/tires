@@ -1,6 +1,6 @@
 <x-layouts.app>
-    <div class="flex flex-col items-center justify-center min-h-[50vh] bg-sub/30 py-8">
-        <div class="w-full max-w-md bg-white p-6 rounded-lg shadow-sm border border-disabled hover:shadow-lg transition-shadow duration-300">
+    <div class="flex flex-col items-center justify-center py-8">
+        <div class="w-full max-w-xl bg-white p-6 rounded-lg shadow-sm border border-disabled hover:shadow-lg transition-shadow duration-300">
             <div class="text-center mb-8">
                 <h1 class="text-title-lg font-bold text-brand">Forgot Password</h1>
             </div>

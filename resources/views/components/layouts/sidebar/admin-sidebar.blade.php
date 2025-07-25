@@ -5,12 +5,13 @@
      x-transition:leave="transition ease-in-out duration-300 transform"
      x-transition:leave-start="translate-x-0"
      x-transition:leave-end="-translate-x-full"
-     class="fixed left-0 top-0 bottom-0 w-72 bg-white border-r border-gray-200 flex flex-col z-50 mt-[73px]"
+     class="fixed left-0 top-0 bottom-0 w-72 bg-white border-r border-disabled flex flex-col z-50 mt-[73px] shadow-lg"
      x-cloak
      >
     <div class="p-4 overflow-y-auto flex-1">
         <div class="mb-4">
-            <a href="{{ route('admin.dashboard') }}" class="flex items-center gap-3 text-gray-700 hover:bg-gray-50 p-2 rounded-md transition-colors duration-200">
+            <a href="{{ route('admin.dashboard') }}" 
+               class="flex items-center gap-3 text-main-text hover:bg-sub hover:text-brand p-2 rounded-md transition-all duration-300 hover:shadow-sm hover:scale-[1.02] transform">
                 <img src="{{ asset('images/logo.jpg') }}" alt="Admin Logo" class="object-contain w-8 h-8 rounded flex-shrink-0" />
                 <span class="text-base font-semibold whitespace-nowrap">Dashboard</span>
             </a>
