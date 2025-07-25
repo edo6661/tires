@@ -5,7 +5,7 @@
                 class="w-full h-auto object-cover object-center" />
         </section>
         <div class="grid md:grid-cols-[250px_1fr] gap-10">
-            <aside class="sticky top-8 self-start text-main-text md:border-r md:border-disabled/50 md:pr-6 space-y-8">
+            <aside class="sm:sticky top-8 self-start text-main-text md:border-r md:border-disabled/50 md:pr-6 space-y-8">
                 <div>
                     <p class="text-heading-md font-semibold mb-2 text-brand">Location</p>
                     <p class="text-body-md">
