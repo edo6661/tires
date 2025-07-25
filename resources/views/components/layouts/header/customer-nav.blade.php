@@ -81,14 +81,14 @@
                 label="Calendar" 
                 icon="fa-solid fa-calendar-days" 
                 position="bottom"
-                href="/"
+                href="{{ route('home') }}"
                 activePath="/"
             />
             <x-shared.link-hint-icon 
                 label="Inquiry" 
                 icon="fa-solid fa-envelope" 
                 position="bottom"
-                href="/inquiry"
+                :href="route('inquiry')"
                 activePath="inquiry*"
             />
             @auth
@@ -121,7 +121,7 @@
                     label="Login" 
                     icon="fa-solid fa-user" 
                     position="bottom"
-                    href="/login"
+                    href="{{ route('login') }}"
                     activePath="login*"
                 />
             @endguest

@@ -13,6 +13,15 @@
 </head>
 <body class="font-en">
     <div class=" relative" x-data="{ sidebarOpen: false }">
+        <h1>{{ __('app.welcome') }}</h1>
+        <a href="#">{{ __('app.dashboard') }}</a>
+
+        <hr>
+
+        <a href="{{ route(Route::currentRouteName(), 'en') }}" style="{{ app()->getLocale() == 'en' ? 'font-weight:bold;' : '' }}">English</a>
+        |
+        <a href="{{ route(Route::currentRouteName(), 'ja') }}" style="{{ app()->getLocale() == 'ja' ? 'font-weight:bold;' : '' }}">日本語</a>
+
         @auth
             @if(auth()->user()->isAdmin())
                 <x-layouts.header.admin-nav />
