@@ -1,5 +1,5 @@
 <x-layouts.app>
-    <div class="max-w-7xl mx-auto space-y-6" x-data="menuIndex()">
+    <div class="container space-y-6" x-data="menuIndex()">
         <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
             <div>
                 <h1 class="text-2xl font-bold text-gray-900">Menu Management</h1>

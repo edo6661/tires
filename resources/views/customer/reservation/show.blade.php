@@ -1,6 +1,6 @@
 <x-layouts.app>
     <div class="bg-gradient-to-br from-gray-50 to-sub py-8">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="container px-4 sm:px-6 lg:px-8">
             <div class="mb-8">
                 <div class="flex items-center gap-4 mb-6">
                     <a href="{{ route('customer.reservation.index') }}" 

@@ -1,5 +1,5 @@
 <x-layouts.app>
-    <div class="max-w-7xl mx-auto space-y-6">
+    <div class="container space-y-6">
         <x-features.reservation.calendar.header :view="$view ?? 'month'" />
         <!-- Calendar Navigation -->
         <div class="bg-white rounded-lg shadow-sm sm:p-6 p-0 space-y-4">

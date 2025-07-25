@@ -209,6 +209,7 @@
                     </div>
                 </div>
                 <div x-show="alertMessage" 
+                     x-cloak
                      x-transition:enter="transition ease-out duration-300"
                      x-transition:enter-start="opacity-0 transform translate-y-2"
                      x-transition:enter-end="opacity-100 transform translate-y-0"

@@ -1,5 +1,5 @@
 <x-layouts.app>
-    <div class="max-w-7xl mx-auto space-y-6" x-data="customerShow()">
+    <div class="container space-y-6" x-data="customerShow()">
         <!-- Header -->
         <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
             <div class="flex items-center gap-4">

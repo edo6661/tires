@@ -1,5 +1,5 @@
 <x-layouts.app>
-    <div class="max-w-7xl mx-auto">
+    <div class="container">
         <div class="mb-6">
             <div class="flex justify-between items-center">
                 <div>

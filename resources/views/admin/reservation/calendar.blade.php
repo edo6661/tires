@@ -1,5 +1,5 @@
 <x-layouts.app>
-    <div class="max-w-7xl mx-auto space-y-6">
+    <div class="container space-y-6">
         <div class="bg-white rounded-lg shadow-sm overflow-hidden">
             <x-features.reservation.calendar.header-tabs
                 :activeTab="request('tab', 'calendar')"

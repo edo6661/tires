@@ -1,5 +1,5 @@
 <x-layouts.app>
-    <div class="max-w-7xl mx-auto space-y-6">
+    <div class="container space-y-6">
         <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
             <div>
                 <div class="flex items-center gap-3 mb-2">
