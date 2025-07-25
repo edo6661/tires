@@ -1,27 +1,27 @@
 <x-layouts.app>
-    <div class="flex flex-col items-center justify-center min-h-[50vh] bg-gray-50 py-8">
-        <div class="w-full max-w-md bg-white p-6 rounded-lg shadow-sm border border-gray-200">
+    <div class="flex flex-col items-center justify-center min-h-[50vh] bg-sub/30 py-8">
+        <div class="w-full max-w-md bg-white p-6 rounded-lg shadow-sm border border-disabled hover:shadow-lg transition-shadow duration-300">
             <div class="text-center mb-8">
-                <h1 class="text-2xl font-bold text-gray-800">Forgot Password</h1>
+                <h1 class="text-title-lg font-bold text-brand">Forgot Password</h1>
             </div>
             @if(session('status'))
-                <div class="mb-4 text-sm text-green-600">
+                <div class="bg-brand/10 text-brand p-4 rounded mb-4 border border-brand/20 text-sm">
                     {{ session('status') }}
                 </div>
             @endif
             <form method="POST" action="{{ route('forgot-password') }}" class="space-y-6">
                 @csrf
                 <div>
-                    <label for="email" class="block text-sm font-medium text-gray-700 mb-1">Email Address*</label>
+                    <label for="email" class="block text-body-md font-medium text-main-text mb-1">Email Address*</label>
                     <div class="relative">
                         <span class="absolute inset-y-0 left-0 flex items-center pl-3">
-                            <i class="fa-solid fa-envelope text-gray-400"></i>
+                            <i class="fa-solid fa-envelope text-secondary-button"></i>
                         </span>
                         <input
                             type="email"
                             id="email"
                             name="email"
-                            class="w-full px-3 py-2 pl-10 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                            class="w-full px-3 py-2 pl-10 border border-disabled rounded-md focus:outline-none focus:ring-2 focus:ring-brand/50 focus:border-brand transition-all duration-200"
                             placeholder="example@reservation.be"
                             value="{{ old('email') }}"
                             required
@@ -33,22 +33,18 @@
                         <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                     @enderror
                 </div>
-
-                <button type="submit" class="w-full bg-primary hover:bg-green-700 text-white font-medium py-2.5 px-4 rounded-md transition duration-200">
+                <button type="submit" class="w-full bg-main-button hover:bg-btn-main-hover text-footer-text font-semibold py-2.5 px-4 rounded-md transition-all duration-300 transform hover:scale-[1.01]">
                     Submit
                 </button>
-
             </form>
-
-            <div class="mt-8 pt-8 border-t border-gray-200 text-center">
-                <p class="text-gray-600">
-                    Don't have a RESERVATION account?
+            <div class="mt-8 pt-8 border-t border-disabled text-center">
+                <p class="text-main-text/80">
+                    Remember your password?
                 </p>
-                <a href="{{ route('register') }}" class="mt-2 inline-block text-primary hover:text-green-800 transition font-medium">
-                    Sign up now
+                <a href="{{ route('login') }}" class="mt-2 inline-block text-link hover:text-link-hover transition-colors duration-200 font-medium">
+                    Back to Login
                 </a>
             </div>
-            
         </div>
     </div>
 </x-layouts.app>
