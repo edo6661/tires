@@ -1,5 +1,5 @@
 <x-layouts.app>
-    <div class="max-w-7xl mx-auto space-y-6">
+    <div class="container space-y-6">
         <div class="bg-white rounded-lg shadow-sm p-6 border border-disabled/30 hover:shadow-md transition-shadow duration-300">
             <div class="flex items-center justify-between">
                 <div>
