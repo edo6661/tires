@@ -7,7 +7,7 @@
         <div class="bg-white rounded-lg shadow-sm border border-disabled/50 p-6 transform transition-all duration-300 hover:shadow-lg" x-data="secondStepHandler()">
             @auth
                 <div class="text-center py-8">
-                    <div class="mb-6 transform transition-all duration-500 hover:scale-105">
+                    <div class="mb-6 transform transition-all duration-500 ">
                         <i class="fas fa-user-check text-4xl text-brand mb-4 animate-pulse"></i>
                         <h2 class="text-title-md font-semibold text-main-text mb-2">Welcome back, {{ auth()->user()->full_name }}!</h2>
                         <p class="text-body-md text-main-text/70">You are logged in as a RESERVA member</p>
@@ -19,7 +19,7 @@
                         </div>
                     </div>
                     <button @click="proceedToThirdStep()" 
-                            class="px-8 py-2 bg-brand hover:bg-link-hover text-white rounded-lg font-medium transition-all duration-300 w-full transform hover:scale-105 shadow-md hover:shadow-lg text-button-lg">
+                            class="px-8 py-2 bg-brand hover:bg-link-hover text-white rounded-lg font-medium transition-all duration-300 w-full transform  shadow-md hover:shadow-lg text-button-lg">
                         Continue to Confirmation
                     </button>
                 </div>
@@ -27,7 +27,7 @@
                 <div class="space-y-8">
                     <div class="border-2 border-brand/30 rounded-lg p-6 bg-sub transform transition-all duration-300 hover:border-brand/50 hover:bg-sub/80">
                         <div class="text-center mb-6">
-                            <i class="fas fa-users text-3xl text-brand mb-3 transform transition-all duration-300 hover:scale-110"></i>
+                            <i class="fas fa-users text-3xl text-brand mb-3 transform transition-all duration-300 "></i>
                             <h2 class="text-title-md font-semibold text-main-text mb-2">RESERVA Members</h2>
                             <p class="text-body-md text-main-text/70 mb-4">Already have a RESERVA account? Login to continue</p>
                         </div>
@@ -50,14 +50,14 @@
                         </div>
                         <div class="text-center">
                             <a href="{{ route('login') . '?redirect=' . urlencode(route('booking.second-step')) }}" 
-                               class="inline-block px-8 py-3 bg-brand hover:bg-link-hover text-white rounded-lg font-medium transition-all duration-300 transform hover:scale-105 shadow-md hover:shadow-lg text-button-lg">
+                               class="inline-block px-8 py-3 bg-brand hover:bg-link-hover text-white rounded-lg font-medium transition-all duration-300 transform  shadow-md hover:shadow-lg text-button-lg">
                                 RESERVA Member Login
                             </a>
                         </div>
                     </div>
                     <div class="border-2 border-disabled/50 rounded-lg p-6 transform transition-all duration-300 hover:border-disabled hover:shadow-sm">
                         <div class="text-center mb-6">
-                            <i class="fas fa-user-plus text-3xl text-main-text/70 mb-3 transform transition-all duration-300 hover:scale-110 hover:text-main-text"></i>
+                            <i class="fas fa-user-plus text-3xl text-main-text/70 mb-3 transform transition-all duration-300  hover:text-main-text"></i>
                             <h2 class="text-title-md font-semibold text-main-text mb-2">Non-RESERVA Members</h2>
                             <p class="text-body-md text-main-text/70">Continue as guest or create a new account</p>
                         </div>
@@ -66,7 +66,7 @@
                                 <h3 class="font-medium text-main-text mb-2 text-heading-md">Continue as Guest</h3>
                                 <p class="text-body-md text-main-text/70 mb-4">Enter your contact information directly for this reservation</p>
                                 <button @click="proceedAsGuest()" 
-                                        class="w-full px-6 py-2 bg-secondary-button hover:bg-secondary-button/80 text-main-text rounded-lg font-medium transition-all duration-300 transform hover:scale-105 shadow-sm hover:shadow-md text-button-md">
+                                        class="w-full px-6 py-2 bg-secondary-button hover:bg-secondary-button/80 text-main-text rounded-lg font-medium transition-all duration-300 transform  shadow-sm hover:shadow-md text-button-md">
                                     Enter Contact Information
                                 </button>
                             </div>
@@ -74,7 +74,7 @@
                                 <h3 class="font-medium text-main-text mb-2 text-heading-md">Create New Account</h3>
                                 <p class="text-body-md text-main-text/70 mb-4">Register now to enjoy member benefits for future bookings</p>
                                 <a href="{{ route('register') . '?redirect=' . urlencode(route('booking.second-step')) }}" 
-                                   class="block w-full px-6 py-2 bg-main-button hover:bg-btn-main-hover text-white rounded-lg font-medium text-center transition-all duration-300 transform hover:scale-105 shadow-md hover:shadow-lg text-button-md">
+                                   class="block w-full px-6 py-2 bg-main-button hover:bg-btn-main-hover text-white rounded-lg font-medium text-center transition-all duration-300 transform  shadow-md hover:shadow-lg text-button-md">
                                     New Member Registration
                                 </a>
                             </div>
@@ -83,7 +83,7 @@
                     <div class="bg-main-button/10 border-l-4 border-main-button p-4 transform transition-all duration-300 hover:bg-main-button/20">
                         <div class="flex">
                             <div class="flex-shrink-0">
-                                <i class="fas fa-info-circle text-main-button transform transition-all duration-300 hover:scale-110"></i>
+                                <i class="fas fa-info-circle text-main-button transform transition-all duration-300 "></i>
                             </div>
                             <div class="ml-3">
                                 <p class="text-body-md text-main-text/80">

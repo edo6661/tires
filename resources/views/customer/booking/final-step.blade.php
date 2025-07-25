@@ -3,7 +3,7 @@
         <div class="bg-white rounded-lg shadow-sm border border-disabled/50 p-6 mb-6 transform transition-all duration-300 hover:shadow-lg" x-data="finalStepHandler()">
             <div class="text-center py-8">
                 <div class="mb-6">
-                    <div class="mx-auto flex items-center justify-center h-16 w-16 rounded-full bg-green-100 mb-4 transform transition-all duration-500 hover:scale-110 animate-pulse">
+                    <div class="mx-auto flex items-center justify-center h-16 w-16 rounded-full bg-green-100 mb-4 transform transition-all duration-500  animate-pulse">
                         <i class="fas fa-check text-2xl text-green-600 transform transition-all duration-300"></i>
                     </div>
                     <h1 class="text-title-lg font-bold text-main-text mb-2 transform transition-all duration-300 hover:text-brand">Booking Confirmed!</h1>
@@ -20,7 +20,7 @@
                 <div x-show="!loading && bookingSuccess" class="space-y-6" x-transition:enter="transition ease-out duration-500" x-transition:enter-start="opacity-0 translate-y-4" x-transition:enter-end="opacity-100 translate-y-0">
                     <div class="bg-green-50 border border-green-200 rounded-lg p-4 transform transition-all duration-300 hover:shadow-md hover:-translate-y-1">
                         <div class="flex items-center justify-center">
-                            <i class="fas fa-receipt text-green-600 mr-2 transform transition-all duration-300 hover:scale-110"></i>
+                            <i class="fas fa-receipt text-green-600 mr-2 transform transition-all duration-300 "></i>
                             <div>
                                 <p class="text-body-md text-green-700">Reservation Number</p>
                                 <p class="text-heading-lg font-bold text-green-800" x-text="reservationNumber"></p>
@@ -69,7 +69,7 @@
                                     </div>
                                     <div class="flex justify-between transition-all duration-200 hover:bg-white/50 p-1 rounded">
                                         <span class="text-main-text/70">Status:</span>
-                                        <span class="px-2 py-1 bg-brand/10 text-brand text-body-md rounded-full transform transition-all duration-300 hover:scale-105">Confirmed</span>
+                                        <span class="px-2 py-1 bg-brand/10 text-brand text-body-md rounded-full transform transition-all duration-300 ">Confirmed</span>
                                     </div>
                                 </div>
                             </div>
@@ -79,7 +79,7 @@
                     <div class="bg-brand/5 border-l-4 border-brand p-4 text-left transform transition-all duration-300 hover:bg-brand/10 hover:translate-x-1">
                         <div class="flex">
                             <div class="flex-shrink-0">
-                                <i class="fas fa-info-circle text-brand transform transition-all duration-300 hover:scale-110"></i>
+                                <i class="fas fa-info-circle text-brand transform transition-all duration-300 "></i>
                             </div>
                             <div class="ml-3">
                                 <h3 class="text-heading-md font-medium text-brand">What's Next?</h3>
@@ -114,13 +114,13 @@
                         
                         @auth
                         <a href="{{ route('customer.reservation.index') }}" 
-                           class="px-6 py-2 bg-brand hover:bg-link-hover text-white rounded-lg font-medium transition-all duration-300 text-center transform hover:scale-105 hover:shadow-lg text-button-md">
+                           class="px-6 py-2 bg-brand hover:bg-link-hover text-white rounded-lg font-medium transition-all duration-300 text-center transform  hover:shadow-lg text-button-md">
                             <i class="fas fa-calendar-alt mr-2"></i>
                             View My Reservations
                         </a>
                         @endauth
                         <a href="{{ route('home') }}" 
-                           class="px-6 py-2 bg-main-button hover:bg-btn-main-hover text-white rounded-lg font-medium transition-all duration-300 text-center transform hover:scale-105 hover:shadow-lg text-button-md">
+                           class="px-6 py-2 bg-main-button hover:bg-btn-main-hover text-white rounded-lg font-medium transition-all duration-300 text-center transform  hover:shadow-lg text-button-md">
                             <i class="fas fa-home mr-2"></i>
                             Back to Home
                         </a>
@@ -130,7 +130,7 @@
                 <div x-show="!loading && !bookingSuccess" class="space-y-6" x-transition:enter="transition ease-out duration-500" x-transition:enter-start="opacity-0 translate-y-4" x-transition:enter-end="opacity-100 translate-y-0">
                     {{-- <div class="bg-red-50 border border-red-200 rounded-lg p-4 transform transition-all duration-300 hover:shadow-md">
                         <div class="flex items-center justify-center text-red-700">
-                            <i class="fas fa-exclamation-triangle mr-2 transform transition-all duration-300 hover:scale-110"></i>
+                            <i class="fas fa-exclamation-triangle mr-2 transform transition-all duration-300 "></i>
                             <div>
                                 <p class="font-medium text-heading-md">Booking Failed</p>
                                 <p class="text-body-md mt-1" x-text="errorMessage"></p>
@@ -139,12 +139,12 @@
                     </div> --}}
                     <div class="flex flex-col sm:flex-row gap-4 justify-center">
                         <button @click="retryBooking()" 
-                                class="px-6 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg font-medium transition-all duration-300 transform hover:scale-105 hover:shadow-lg text-button-md">
+                                class="px-6 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg font-medium transition-all duration-300 transform  hover:shadow-lg text-button-md">
                             <i class="fas fa-redo mr-2"></i>
                             Try Again
                         </button>
                         <a href="{{ route('booking.third-step') }}" 
-                           class="px-6 py-2 bg-secondary-button hover:bg-secondary-button/80 text-main-text rounded-lg font-medium transition-all duration-300 text-center border border-disabled transform hover:scale-105 hover:shadow-md text-button-md">
+                           class="px-6 py-2 bg-secondary-button hover:bg-secondary-button/80 text-main-text rounded-lg font-medium transition-all duration-300 text-center border border-disabled transform  hover:shadow-md text-button-md">
                             <i class="fas fa-arrow-left mr-2"></i>
                             Go Back
                         </a>

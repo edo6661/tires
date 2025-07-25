@@ -24,13 +24,13 @@
             <h2 class="text-heading-lg font-semibold text-main-text mb-4">Select Date</h2>
             <div class="flex items-center justify-between mb-6">
                 <button @click="previousMonth()" 
-                        class="flex items-center px-3 py-2 text-main-text/70 hover:text-main-text hover:bg-sub rounded-md transition-all duration-200 transform hover:scale-105">
+                        class="flex items-center px-3 py-2 text-main-text/70 hover:text-main-text hover:bg-sub rounded-md transition-all duration-200 transform ">
                     <i class="fas fa-chevron-left mr-2"></i>
                     Previous Month
                 </button>
                 <h3 class="text-heading-lg font-semibold text-main-text transition-all duration-300" x-text="currentMonthDisplay"></h3>
                 <button @click="nextMonth()" 
-                        class="flex items-center px-3 py-2 text-main-text/70 hover:text-main-text hover:bg-sub rounded-md transition-all duration-200 transform hover:scale-105">
+                        class="flex items-center px-3 py-2 text-main-text/70 hover:text-main-text hover:bg-sub rounded-md transition-all duration-200 transform ">
                     Next Month
                     <i class="fas fa-chevron-right ml-2"></i>
                 </button>
@@ -46,7 +46,7 @@
                         <button @click="selectDate(day)" 
                                 :disabled="day.bookingStatus === 'past' || day.bookingStatus === 'full'"
                                 :class="{
-                                    'bg-white hover:bg-sub text-main-text cursor-pointer transform hover:scale-105': day.bookingStatus === 'available' && day.isCurrentMonth && selectedDate !== day.dateString,
+                                    'bg-white hover:bg-sub text-main-text cursor-pointer transform ': day.bookingStatus === 'available' && day.isCurrentMonth && selectedDate !== day.dateString,
                                     'bg-disabled text-main-text/40 cursor-not-allowed': day.bookingStatus === 'past' || !day.isCurrentMonth,
                                     'bg-main-button/20 text-main-button cursor-not-allowed': day.bookingStatus === 'full',
                                     'bg-brand text-white shadow-lg transform scale-105': selectedDate === day.dateString,
@@ -70,15 +70,15 @@
                 </template>
             </div>
             <div class="flex flex-wrap gap-4 mt-4 text-body-md">
-                <div class="flex items-center transition-all duration-200 hover:scale-105">
+                <div class="flex items-center transition-all duration-200 ">
                     <div class="w-3 h-3 bg-white border border-disabled rounded mr-2"></div>
                     <span class="text-main-text/70">Available</span>
                 </div>
-                <div class="flex items-center transition-all duration-200 hover:scale-105">
+                <div class="flex items-center transition-all duration-200 ">
                     <div class="w-3 h-3 bg-main-button/20 border border-main-button/30 rounded mr-2"></div>
                     <span class="text-main-text/70">Fully Booked</span>
                 </div>
-                <div class="flex items-center transition-all duration-200 hover:scale-105">
+                <div class="flex items-center transition-all duration-200 ">
                     <div class="w-3 h-3 bg-disabled border border-disabled rounded mr-2"></div>
                     <span class="text-main-text/70">Past Date</span>
                 </div>
@@ -94,7 +94,7 @@
                         <button @click="selectTime(hour)"
                                 :disabled="!hour.available"
                                 :class="{
-                                    'bg-sub border-brand text-brand hover:bg-brand/10 transform hover:scale-105': hour.available && selectedTime !== hour.time,
+                                    'bg-sub border-brand text-brand hover:bg-brand/10 transform ': hour.available && selectedTime !== hour.time,
                                     'bg-brand border-brand text-white shadow-lg transform scale-105': selectedTime === hour.time,
                                     'bg-disabled border-disabled text-main-text/40 cursor-not-allowed': !hour.available
                                 }"
@@ -135,7 +135,7 @@
             </div>
             <div class="flex justify-between mt-8">
                 <a href="{{ route('home') }}" 
-                   class="px-6 py-2 text-main-text/70 hover:text-main-text hover:bg-sub rounded-lg transition-all duration-200 transform hover:scale-105">
+                   class="px-6 py-2 text-main-text/70 hover:text-main-text hover:bg-sub rounded-lg transition-all duration-200 transform ">
                     Back to Services
                 </a>
                 <button x-show="selectedDate && selectedTime" 
@@ -143,7 +143,7 @@
                         x-transition:enter-start="opacity-0 transform translate-x-4"
                         x-transition:enter-end="opacity-100 transform translate-x-0"
                         @click="proceedToNextStep()"
-                        class="px-8 py-2 bg-main-button hover:bg-btn-main-hover text-white rounded-lg font-medium transition-all duration-200 transform hover:scale-105 shadow-md hover:shadow-lg text-button-lg">
+                        class="px-8 py-2 bg-main-button hover:bg-btn-main-hover text-white rounded-lg font-medium transition-all duration-200 transform  shadow-md hover:shadow-lg text-button-lg">
                     Proceed with Booking
                 </button>
             </div>

@@ -128,7 +128,7 @@
                                                 @click="selectTimeSlot(dayData.date, hourSlot.hour, hourSlot.available)"
                                                 // MODIFIED: Added class for 'blocked_period'
                                                 :class="{
-                                                    'bg-green-100 text-green-800 hover:bg-green-200 border-green-300 cursor-pointer transform hover:scale-105': hourSlot.available,
+                                                    'bg-green-100 text-green-800 hover:bg-green-200 border-green-300 cursor-pointer transform ': hourSlot.available,
                                                     'bg-yellow-100 text-yellow-800 cursor-not-allowed border-yellow-300': !hourSlot.available && hourSlot.blocked_by === 'existing_reservation',
                                                     'bg-red-100 text-red-800 cursor-not-allowed border-red-300': !hourSlot.available && hourSlot.blocked_by === 'blocked_period',
                                                     'ring-2 ring-blue-500 ring-opacity-50': selectedTimeSlot === `${dayData.date} ${hourSlot.hour}`

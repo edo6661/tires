@@ -141,7 +141,7 @@
                                        value="{{ $colorValue }}"
                                        {{ $selectedColor === $colorValue ? 'checked' : '' }}
                                        class="sr-only peer">
-                                <div class="w-12 h-12 rounded-full border-4 border-transparent peer-checked:border-gray-800 peer-checked:shadow-lg transition-all duration-200 flex items-center justify-center group-hover:scale-105"
+                                <div class="w-12 h-12 rounded-full border-4 border-transparent peer-checked:border-gray-800 peer-checked:shadow-lg transition-all duration-200 flex items-center justify-center group-"
                                      style="background-color: {{ $colorValue }}"
                                      title="{{ $colorName }}">
                                     <div class="opacity-0 peer-checked:opacity-100 transition-opacity duration-200">

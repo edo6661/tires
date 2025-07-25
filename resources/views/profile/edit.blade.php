@@ -47,10 +47,10 @@
                 @enderror
             </div>
             <div class="flex items-center justify-end space-x-4 pt-4 border-t border-disabled/50">
-                <a href="{{ route('profile.show') }}" class="bg-secondary-button hover:bg-disabled text-main-text font-bold py-2 px-4 rounded-lg transition-all duration-300 hover:scale-105 hover:-translate-y-0.5 text-button-md">
+                <a href="{{ route('profile.show') }}" class="bg-secondary-button hover:bg-disabled text-main-text font-bold py-2 px-4 rounded-lg transition-all duration-300  hover:-translate-y-0.5 text-button-md">
                     Cancel
                 </a>
-                <button type="submit" class="bg-main-button hover:bg-btn-main-hover text-white font-bold py-2 px-4 rounded-lg transition-all duration-300 hover:scale-105 hover:-translate-y-0.5 text-button-md">
+                <button type="submit" class="bg-main-button hover:bg-btn-main-hover text-white font-bold py-2 px-4 rounded-lg transition-all duration-300  hover:-translate-y-0.5 text-button-md">
                     Save Changes
                 </button>
             </div>

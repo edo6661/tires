@@ -137,7 +137,7 @@
                 
                 <div class="sm:hidden fixed bottom-6 right-6 z-10">
                     <a href="{{ route('home') }}" 
-                       class="inline-flex items-center justify-center w-14 h-14 bg-main-button text-white rounded-full shadow-lg hover:shadow-xl transition-all duration-200 transform hover:scale-110">
+                       class="inline-flex items-center justify-center w-14 h-14 bg-main-button text-white rounded-full shadow-lg hover:shadow-xl transition-all duration-200 transform ">
                         <i class="fas fa-plus text-xl"></i>
                     </a>
                 </div>

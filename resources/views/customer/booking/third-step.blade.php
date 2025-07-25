@@ -21,12 +21,12 @@
                 <div x-show="!showConfirmation" class="space-y-6" x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0 transform scale-95" x-transition:enter-end="opacity-100 transform scale-100">
                     <div class="border-b border-disabled/50 pb-6">
                         <h2 class="text-heading-lg font-semibold text-main-text mb-4 transform transition-all duration-300 hover:text-brand">
-                            <i class="fas fa-address-card text-brand mr-2 transform transition-all duration-300 hover:scale-110"></i>
+                            <i class="fas fa-address-card text-brand mr-2 transform transition-all duration-300 "></i>
                             Contact Information
                         </h2>
                         <form @submit.prevent="validateAndProceed()" class="space-y-4">
                             <div class="grid md:grid-cols-2 gap-4">
-                                <div class="transform transition-all duration-200 hover:scale-105">
+                                <div class="transform transition-all duration-200 ">
                                     <label for="full_name" class="block text-body-md font-medium text-main-text mb-2">
                                         Full Name <span class="text-red-500">*</span>
                                     </label>
@@ -38,7 +38,7 @@
                                            required>
                                     <span x-show="errors.full_name" class="text-body-md text-red-500 mt-1 block animate-pulse" x-text="errors.full_name"></span>
                                 </div>
-                                <div class="transform transition-all duration-200 hover:scale-105">
+                                <div class="transform transition-all duration-200 ">
                                     <label for="full_name_kana" class="block text-body-md font-medium text-main-text mb-2">
                                         Full Name (Kana) <span class="text-red-500">*</span>
                                     </label>
@@ -52,7 +52,7 @@
                                 </div>
                             </div>
                             <div class="grid md:grid-cols-2 gap-4">
-                                <div class="transform transition-all duration-200 hover:scale-105">
+                                <div class="transform transition-all duration-200 ">
                                     <label for="email" class="block text-body-md font-medium text-main-text mb-2">
                                         Email Address <span class="text-red-500">*</span>
                                     </label>
@@ -64,7 +64,7 @@
                                            required>
                                     <span x-show="errors.email" class="text-body-md text-red-500 mt-1 block animate-pulse" x-text="errors.email"></span>
                                 </div>
-                                <div class="transform transition-all duration-200 hover:scale-105">
+                                <div class="transform transition-all duration-200 ">
                                     <label for="phone_number" class="block text-body-md font-medium text-main-text mb-2">
                                         Phone Number <span class="text-red-500">*</span>
                                     </label>
@@ -80,11 +80,11 @@
                             <div class="flex justify-between pt-4">
                                 <button type="button" 
                                         @click="goBackToSecondStep()"
-                                        class="px-6 py-2 text-main-text/70 hover:text-main-text transition-all duration-300 transform hover:scale-105 text-button-md">
+                                        class="px-6 py-2 text-main-text/70 hover:text-main-text transition-all duration-300 transform  text-button-md">
                                     <i class="fas fa-arrow-left mr-2"></i>Back
                                 </button>
                                 <button type="submit" 
-                                        class="px-8 py-2 bg-brand hover:bg-link-hover text-white rounded-lg font-medium transition-all duration-300 transform hover:scale-105 shadow-md hover:shadow-lg text-button-lg">
+                                        class="px-8 py-2 bg-brand hover:bg-link-hover text-white rounded-lg font-medium transition-all duration-300 transform  shadow-md hover:shadow-lg text-button-lg">
                                     Continue to Confirmation
                                     <i class="fas fa-arrow-right ml-2"></i>
                                 </button>
@@ -96,11 +96,11 @@
             <div x-show="@auth true @else showConfirmation @endauth" class="space-y-6" x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0 transform scale-95" x-transition:enter-end="opacity-100 transform scale-100">
                 <div class="bg-sub rounded-lg p-6 transform transition-all duration-300 hover:shadow-md hover:-translate-y-1">
                     <h2 class="text-heading-lg font-semibold text-main-text mb-4 flex items-center">
-                        <i class="fas fa-clipboard-list text-brand mr-2 transform transition-all duration-300 hover:scale-110"></i>
+                        <i class="fas fa-clipboard-list text-brand mr-2 transform transition-all duration-300 "></i>
                         Reservation Summary
                     </h2>
                     <div class="grid md:grid-cols-2 gap-6">
-                        <div class="space-y-3 transform transition-all duration-200 hover:scale-105">
+                        <div class="space-y-3 transform transition-all duration-200 ">
                             <h3 class="font-medium text-main-text border-b border-disabled/50 pb-2 text-heading-md">Service Details</h3>
                             <div class="space-y-2 text-body-md">
                                 <div class="flex justify-between transition-all duration-200 hover:bg-white rounded px-2 py-1">
@@ -121,7 +121,7 @@
                                 </div>
                             </div>
                         </div>
-                        <div class="space-y-3 transform transition-all duration-200 hover:scale-105">
+                        <div class="space-y-3 transform transition-all duration-200 ">
                             <h3 class="font-medium text-main-text border-b border-disabled/50 pb-2 text-heading-md">Customer Information</h3>
                             <div class="space-y-2 text-body-md">
                                 @auth
@@ -143,7 +143,7 @@
                                     </div>
                                     <div class="flex justify-between transition-all duration-200 hover:bg-white rounded px-2 py-1">
                                         <span class="text-main-text/70">Member Status:</span>
-                                        <span class="px-2 py-1 bg-brand/10 text-brand text-body-md rounded-full transform transition-all duration-300 hover:scale-105">RESERVA Member</span>
+                                        <span class="px-2 py-1 bg-brand/10 text-brand text-body-md rounded-full transform transition-all duration-300 ">RESERVA Member</span>
                                     </div>
                                 @else
                                     <div class="flex justify-between transition-all duration-200 hover:bg-white rounded px-2 py-1">
@@ -164,7 +164,7 @@
                                     </div>
                                     <div class="flex justify-between transition-all duration-200 hover:bg-white rounded px-2 py-1">
                                         <span class="text-main-text/70">Member Status:</span>
-                                        <span class="px-2 py-1 bg-disabled/20 text-main-text text-body-md rounded-full transform transition-all duration-300 hover:scale-105">Guest</span>
+                                        <span class="px-2 py-1 bg-disabled/20 text-main-text text-body-md rounded-full transform transition-all duration-300 ">Guest</span>
                                     </div>
                                 @endauth
                             </div>
@@ -174,7 +174,7 @@
                 <div class="bg-main-button/10 border-l-4 border-main-button p-4 transform transition-all duration-300 hover:bg-main-button/20 hover:shadow-sm">
                     <div class="flex">
                         <div class="flex-shrink-0">
-                            <i class="fas fa-exclamation-triangle text-main-button transform transition-all duration-300 hover:scale-110"></i>
+                            <i class="fas fa-exclamation-triangle text-main-button transform transition-all duration-300 "></i>
                         </div>
                         <div class="ml-3">
                             <h3 class="text-body-md font-medium text-main-text">Important Notes</h3>
@@ -190,7 +190,7 @@
                     </div>
                 </div>
                 <div class="border-t border-disabled/50 pt-6">
-                    <div class="flex items-start space-x-3 transform transition-all duration-200 hover:scale-105">
+                    <div class="flex items-start space-x-3 transform transition-all duration-200 ">
                         <input type="checkbox" 
                                id="agree_terms" 
                                x-model="agreedToTerms"
@@ -206,7 +206,7 @@
                 <div class="flex justify-between pt-6 border-t border-disabled/50">
                     <button type="button" 
                             @click="goBack()"
-                            class="px-6 py-2 text-main-text/70 hover:text-main-text transition-all duration-300 transform hover:scale-105 text-button-md">
+                            class="px-6 py-2 text-main-text/70 hover:text-main-text transition-all duration-300 transform  text-button-md">
                         <i class="fas fa-arrow-left mr-2"></i>
                         @guest
                             <span x-text="showConfirmation ? 'Edit Information' : 'Back'"></span>
@@ -218,7 +218,7 @@
                             @click="completeBooking()"
                             :disabled="!agreedToTerms"
                             :class="agreedToTerms ? 'bg-brand hover:bg-link-hover shadow-md hover:shadow-lg' : 'bg-disabled cursor-not-allowed'"
-                            class="px-8 py-2 text-white rounded-lg font-medium transition-all duration-300 transform hover:scale-105 text-button-lg">
+                            class="px-8 py-2 text-white rounded-lg font-medium transition-all duration-300 transform  text-button-lg">
                         <i class="fas fa-check mr-2"></i>
                         Complete Booking
                     </button>

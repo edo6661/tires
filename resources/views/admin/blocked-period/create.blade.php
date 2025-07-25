@@ -7,45 +7,53 @@
             csrf_token: '{{ csrf_token() }}'
          })">
         <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
-            <div>
-                <h1 class="text-2xl font-bold text-gray-900">Create New Blocked Period</h1>
-                <p class="mt-1 text-sm text-gray-600">Set a time period during which a specific menu or all menus are unavailable for reservation.</p>
+            <div class="transform transition-all duration-500 hover:translate-x-2">
+                <h1 class="text-title-lg font-bold text-main-text">Create New Blocked Period</h1>
+                <p class="mt-1 text-body-md text-main-text/80">Set a time period during which a specific menu or all menus are unavailable for reservation.</p>
             </div>
             <a href="{{ route('admin.blocked-period.index') }}"
-               class="inline-flex items-center px-4 py-2 bg-white border border-gray-300 rounded-lg shadow-sm text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition">
-                <i class="fas fa-arrow-left mr-2"></i>
+               class="inline-flex items-center px-4 py-2 bg-white border border-disabled rounded-lg shadow-sm text-button-md font-medium text-main-text hover:bg-sub hover:text-brand hover:border-brand hover:shadow-md hover:-translate-y-1 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-brand transition-all duration-300 transform">
+                <i class="fas fa-arrow-left mr-2 transition-transform duration-300 group-hover:-translate-x-1"></i>
                 Back to List
             </a>
         </div>
+
         @if(session('error'))
-            <div class="bg-red-50 border-l-4 border-red-400 p-4 mb-6 rounded-md shadow-sm">
+            <div class="bg-red-50 border-l-4 border-red-400 p-4 mb-6 rounded-md shadow-sm transform transition-all duration-500 hover:shadow-lg animate-pulse">
                 <div class="flex">
                     <div class="flex-shrink-0">
-                        <i class="fas fa-times-circle text-red-400"></i>
+                        <i class="fas fa-times-circle text-red-400 animate-bounce"></i>
                     </div>
                     <div class="ml-3">
-                        <p class="text-sm text-red-700">
+                        <p class="text-body-md text-red-700">
                             {{ session('error') }}
                         </p>
                     </div>
                 </div>
             </div>
         @endif
-        <form action="{{ route('admin.blocked-period.store') }}" method="POST" class="bg-white p-6 md:p-8 rounded-lg shadow-md space-y-6">
+
+        <form action="{{ route('admin.blocked-period.store') }}" method="POST" class="bg-white p-6 md:p-8 rounded-lg shadow-md space-y-6 transform transition-all duration-500 hover:shadow-xl">
             @csrf
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div class="md:col-span-2 flex items-center">
+                <div class="md:col-span-2 flex items-center group">
                     <input id="all_menus" name="all_menus" type="checkbox" value="1" x-model="all_menus"
                            @if(old('all_menus')) checked @endif
-                           class="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500">
-                    <label for="all_menus" class="ml-3 block text-sm font-medium text-gray-900">
+                           class="h-4 w-4 rounded border-disabled text-brand focus:ring-brand transition-all duration-300 ">
+                    <label for="all_menus" class="ml-3 block text-body-md font-medium text-main-text group-hover:text-brand transition-colors duration-300 cursor-pointer">
                         Block All Menus?
                     </label>
                 </div>
-                <div class="md:col-span-2" x-show="!all_menus" x-transition>
-                    <label for="menu_id" class="block text-sm font-medium text-gray-700 mb-1">Select Specific Menu</label>
+                <div class="md:col-span-2" x-cloak x-show="!all_menus" 
+                     x-transition:enter="transition ease-out duration-300"
+                     x-transition:enter-start="opacity-0 transform -translate-y-4"
+                     x-transition:enter-end="opacity-100 transform translate-y-0"
+                     x-transition:leave="transition ease-in duration-200"
+                     x-transition:leave-start="opacity-100 transform translate-y-0"
+                     x-transition:leave-end="opacity-0 transform -translate-y-4">
+                    <label for="menu_id" class="block text-body-md font-medium text-main-text mb-1">Select Specific Menu</label>
                     <select id="menu_id" name="menu_id" x-model="menu_id" :disabled="all_menus" @change="checkConflict"
-                            class="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm disabled:bg-gray-100 disabled:cursor-not-allowed">
+                            class="block w-full rounded-md border-disabled shadow-sm focus:border-brand focus:ring-brand text-body-md disabled:bg-disabled disabled:cursor-not-allowed transition-all duration-300 hover:border-brand/50 hover:shadow-md">
                         <option value="">-- Select one menu --</option>
                         @foreach($menus as $menu)
                             <option value="{{ $menu->id }}" {{ old('menu_id') == $menu->id ? 'selected' : '' }}>
@@ -54,67 +62,79 @@
                         @endforeach
                     </select>
                     @error('menu_id')
-                        <p class="mt-2 text-sm text-red-600">{{ $message }}</p>
+                        <p class="mt-2 text-body-md text-red-600 animate-pulse">{{ $message }}</p>
                     @enderror
                 </div>
             </div>
-            <hr>
+            <hr class="border-disabled/50">
+
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div>
-                    <label for="start_datetime" class="block text-sm font-medium text-gray-700 mb-1">Start Time</label>
+                <div class="transform transition-all duration-300  hover:shadow-md rounded-lg p-2 -m-2">
+                    <label for="start_datetime" class="block text-body-md font-medium text-main-text mb-1">Start Time</label>
                     <input type="datetime-local" id="start_datetime" name="start_datetime" x-model="start_datetime" @input.debounce.750ms="checkConflict"
                            value="{{ old('start_datetime') }}"
-                           class="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm">
+                           class="block w-full rounded-md border-disabled shadow-sm focus:border-brand focus:ring-brand text-body-md transition-all duration-300 hover:border-brand/50 hover:shadow-md">
                     @error('start_datetime')
-                        <div class="mt-2 text-sm text-red-600 whitespace-pre-line">{{ $message }}</div>
+                        <div class="mt-2 text-body-md text-red-600 whitespace-pre-line animate-pulse">{{ $message }}</div>
                     @enderror
                 </div>
-                <div>
-                    <label for="end_datetime" class="block text-sm font-medium text-gray-700 mb-1">End Time</label>
+                <div class="transform transition-all duration-300  hover:shadow-md rounded-lg p-2 -m-2">
+                    <label for="end_datetime" class="block text-body-md font-medium text-main-text mb-1">End Time</label>
                     <input type="datetime-local" id="end_datetime" name="end_datetime" x-model="end_datetime" @input.debounce.750ms="checkConflict"
                            value="{{ old('end_datetime') }}"
-                           class="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm">
+                           class="block w-full rounded-md border-disabled shadow-sm focus:border-brand focus:ring-brand text-body-md transition-all duration-300 hover:border-brand/50 hover:shadow-md">
                     @error('end_datetime')
-                        <p class="mt-2 text-sm text-red-600">{{ $message }}</p>
+                        <p class="mt-2 text-body-md text-red-600 animate-pulse">{{ $message }}</p>
                     @enderror
                 </div>
             </div>
-            <div x-show="conflict.has_conflict" x-transition class="md:col-span-2 p-4 bg-red-50 border-l-4 border-red-400 rounded-md">
+
+            <div x-cloak x-show="conflict.has_conflict" 
+                 x-transition:enter="transition ease-out duration-300"
+                 x-transition:enter-start="opacity-0 transform scale-95"
+                 x-transition:enter-end="opacity-100 transform scale-100"
+                 x-transition:leave="transition ease-in duration-200"
+                 x-transition:leave-start="opacity-100 transform scale-100"
+                 x-transition:leave-end="opacity-0 transform scale-95"
+                 class="md:col-span-2 p-4 bg-red-50 border-l-4 border-red-400 rounded-md shadow-md animate-pulse">
                 <div class="flex">
                     <div class="flex-shrink-0">
-                        <i class="fas fa-exclamation-triangle text-red-400 mt-0.5"></i>
+                        <i class="fas fa-exclamation-triangle text-red-400 mt-0.5 animate-bounce"></i>
                     </div>
                     <div class="ml-3">
-                        <p class="text-sm text-red-800 font-semibold">Schedule Conflict Detected!</p>
-                        <p class="text-sm text-red-700 mt-1">The entered period overlaps with the following schedule(s):</p>
-                        <ul class="mt-2 list-disc list-inside text-sm text-red-700 space-y-1">
+                        <p class="text-body-md text-red-800 font-semibold">Schedule Conflict Detected!</p>
+                        <p class="text-body-md text-red-700 mt-1">The entered period overlaps with the following schedule(s):</p>
+                        <ul class="mt-2 list-disc list-inside text-body-md text-red-700 space-y-1">
                             <template x-for="detail in conflict.details" :key="detail.id">
-                                <li>
+                                <li class="transform transition-all duration-300 hover:translate-x-2">
                                     <strong x-text="detail.menu_name"></strong>:
                                     <span x-text="`${detail.start_datetime} - ${detail.end_datetime}`"></span>
-                                    <span x-text="`(${detail.reason})`" class="italic text-gray-600"></span>
+                                    <span x-text="`(${detail.reason})`" class="italic text-main-text/60"></span>
                                 </li>
                             </template>
                         </ul>
                     </div>
                 </div>
             </div>
-            <hr>
-            <div>
-                <label for="reason" class="block text-sm font-medium text-gray-700 mb-1">Reason</label>
+            <hr class="border-disabled/50">
+
+            <div class="transform transition-all duration-300  hover:shadow-md rounded-lg p-2 -m-2">
+                <label for="reason" class="block text-body-md font-medium text-main-text mb-1">Reason</label>
                 <textarea id="reason" name="reason" rows="4"
-                          class="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
+                          class="block w-full rounded-md border-disabled shadow-sm focus:border-brand focus:ring-brand text-body-md transition-all duration-300 hover:border-brand/50 hover:shadow-md resize-none"
                           placeholder="e.g., Regular maintenance, holiday, private event, etc.">{{ old('reason') }}</textarea>
                 @error('reason')
-                    <p class="mt-2 text-sm text-red-600">{{ $message }}</p>
+                    <p class="mt-2 text-body-md text-red-600 animate-pulse">{{ $message }}</p>
                 @enderror
             </div>
+
             <div class="flex justify-end pt-4">
                 <button type="submit"
                         :disabled="isLoading || (conflict.has_conflict && !isSubmittingOnPurpose)"
-                        class="inline-flex items-center justify-center px-6 py-2 border border-transparent text-sm font-medium rounded-lg shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:bg-gray-400 disabled:cursor-not-allowed transition">
-                    <i class="fas fa-spinner fa-spin mr-2" x-show="isLoading" x-cloak></i>
-                    <span x-text="isLoading ? 'Checking...' : 'Save Blocked Period'"></span>
+                        class="inline-flex items-center justify-center px-6 py-2 border border-transparent text-button-md font-medium rounded-lg shadow-sm text-white bg-brand hover:bg-link-hover focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-brand disabled:bg-disabled disabled:cursor-not-allowed transition-all duration-300 transform  hover:shadow-lg hover:-translate-y-1"
+                        :class="{ 'animate-pulse': isLoading }">
+                    <i class="fas fa-spinner fa-spin mr-2 transition-all duration-300" x-cloak x-show="isLoading" x-cloak></i>
+                    <span x-text="isLoading ? 'Checking...' : 'Save Blocked Period'" class="transition-all duration-300"></span>
                 </button>
             </div>
         </form>

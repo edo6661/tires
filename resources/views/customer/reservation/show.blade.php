@@ -5,7 +5,7 @@
                 <div class="flex items-center gap-4 mb-6">
                     <a href="{{ route('customer.reservation.index') }}" 
                        class="inline-flex items-center gap-2 text-main-text hover:text-link transition-colors duration-200 font-medium group">
-                        <div class="w-8 h-8 rounded-full bg-sub group-hover:bg-brand group-hover:text-white flex items-center justify-center transition-all duration-300 transform group-hover:scale-110">
+                        <div class="w-8 h-8 rounded-full bg-sub group-hover:bg-brand group-hover:text-white flex items-center justify-center transition-all duration-300 transform group-">
                             <i class="fas fa-arrow-left text-sm"></i>
                         </div>
                         Back to Reservations
@@ -26,7 +26,7 @@
                             </div>
                         </div>
                         <div class="flex items-center gap-4">
-                            <span class="px-6 py-3 rounded-full text-button-md font-bold shadow-lg transform hover:scale-105 transition-all duration-300
+                            <span class="px-6 py-3 rounded-full text-button-md font-bold shadow-lg transform  transition-all duration-300
                                 @if($reservation->status->value === 'pending')
                                     bg-gradient-to-r from-yellow-100 to-yellow-200 text-yellow-800 border border-yellow-300
                                 @elseif($reservation->status->value === 'confirmed')
@@ -70,7 +70,7 @@
                                 @endif
                                 
                                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                    <div class="bg-sub rounded-lg p-4 transform hover:scale-105 transition-all duration-300 hover:shadow-md">
+                                    <div class="bg-sub rounded-lg p-4 transform  transition-all duration-300 hover:shadow-md">
                                         <label class="block text-body-md font-semibold text-brand mb-1">Duration</label>
                                         <div class="flex items-center gap-2">
                                             <i class="fas fa-clock text-link"></i>
@@ -79,7 +79,7 @@
                                     </div>
                                     
                                     @if($reservation->amount)
-                                        <div class="bg-sub rounded-lg p-4 transform hover:scale-105 transition-all duration-300 hover:shadow-md">
+                                        <div class="bg-sub rounded-lg p-4 transform  transition-all duration-300 hover:shadow-md">
                                             <label class="block text-body-md font-semibold text-brand mb-1">Price</label>
                                             <div class="flex items-center gap-2">
                                                 <i class="fas fa-yen-sign text-link"></i>
@@ -101,7 +101,7 @@
                         </div>
                         <div class="p-8">
                             <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
-                                <div class="bg-sub rounded-xl p-6 text-center transform hover:scale-105 transition-all duration-300 hover:shadow-lg">
+                                <div class="bg-sub rounded-xl p-6 text-center transform  transition-all duration-300 hover:shadow-lg">
                                     <div class="w-12 h-12 bg-white rounded-full flex items-center justify-center mx-auto mb-3 shadow-md">
                                         <i class="fas fa-calendar-alt text-brand text-xl"></i>
                                     </div>
@@ -110,7 +110,7 @@
                                     <p class="text-body-md text-main-text/60 mt-1">{{ $reservation->reservation_datetime->format('l') }}</p>
                                 </div>
                                 
-                                <div class="bg-sub rounded-xl p-6 text-center transform hover:scale-105 transition-all duration-300 hover:shadow-lg">
+                                <div class="bg-sub rounded-xl p-6 text-center transform  transition-all duration-300 hover:shadow-lg">
                                     <div class="w-12 h-12 bg-white rounded-full flex items-center justify-center mx-auto mb-3 shadow-md">
                                         <i class="fas fa-clock text-brand text-xl"></i>
                                     </div>
@@ -119,7 +119,7 @@
                                     <p class="text-body-md text-main-text/60 mt-1">{{ $reservation->reservation_datetime->format('A') }}</p>
                                 </div>
                                 
-                                <div class="bg-sub rounded-xl p-6 text-center transform hover:scale-105 transition-all duration-300 hover:shadow-lg">
+                                <div class="bg-sub rounded-xl p-6 text-center transform  transition-all duration-300 hover:shadow-lg">
                                     <div class="w-12 h-12 bg-white rounded-full flex items-center justify-center mx-auto mb-3 shadow-md">
                                         <i class="fas fa-users text-brand text-xl"></i>
                                     </div>

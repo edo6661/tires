@@ -1,5 +1,5 @@
 <x-layouts.app>
-    <div class="max-w-7xl mx-auto space-y-6" x-data="dashboardData()">
+    <div class="container space-y-6" x-data="dashboardData()">
         <div class="bg-white rounded-lg shadow-sm p-6 border border-disabled/20 transform transition-all duration-500 ">
             <div class="space-y-3">
                 @foreach ($announcements as $announcement)

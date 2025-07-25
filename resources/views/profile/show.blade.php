@@ -9,7 +9,7 @@
         <div class="bg-white p-6 rounded-lg shadow-sm hover:shadow-lg transition-all duration-300 ease-in-out">
             <div class="border-b border-disabled/50 pb-4 mb-4 flex justify-between items-center">
                 <h2 class="text-heading-lg font-medium text-brand">Personal Information</h2>
-                <a href="{{ route('profile.edit') }}" class="text-button-md bg-main-button hover:bg-btn-main-hover text-white font-semibold py-2 px-4 rounded-lg transition-all duration-300 hover:scale-105 hover:-translate-y-0.5">
+                <a href="{{ route('profile.edit') }}" class="text-button-md bg-main-button hover:bg-btn-main-hover text-white font-semibold py-2 px-4 rounded-lg transition-all duration-300  hover:-translate-y-0.5">
                     Edit Profile
                 </a>
             </div>
@@ -66,7 +66,7 @@
                     <input type="password" name="new_password_confirmation" id="new_password_confirmation" required class="w-full md:w-1/2 px-3 py-2 border border-disabled rounded-lg focus:ring-2 focus:ring-brand focus:border-brand transition-all duration-300 hover:border-brand/50 text-body-md">
                 </div>
                 <div>
-                    <button type="submit" class="text-button-md bg-brand hover:bg-link-hover text-white font-semibold py-2 px-4 rounded-lg transition-all duration-300 hover:scale-105 hover:-translate-y-0.5">
+                    <button type="submit" class="text-button-md bg-brand hover:bg-link-hover text-white font-semibold py-2 px-4 rounded-lg transition-all duration-300  hover:-translate-y-0.5">
                         Change Password
                     </button>
                 </div>
