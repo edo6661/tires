@@ -29,7 +29,7 @@
             @endif
         @endauth
         <div class="flex-1 flex flex-col">
-            <main class="flex-1 w-full mx-auto">
+            <main class="flex-1 w-full mx-auto min-h-screen">
                 {{ $slot }}
             </main>
             <x-layouts.footer.customer-footer />
