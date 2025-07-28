@@ -1,36 +1,35 @@
 <?php
 namespace App\Repositories;
-
 use App\Models\BusinessSetting;
-use App\Repositories\BusinessSettingRepositoryInterface;
-
 class BusinessSettingRepository implements BusinessSettingRepositoryInterface
 {
     protected $model;
-
     public function __construct(BusinessSetting $model)
     {
         $this->model = $model;
     }
-
     public function getSettings(): ?BusinessSetting
     {
-        return $this->model->first();
+        return $this->model->withTranslations()->first();
     }
-    
-
     public function updateSettings(array $data): BusinessSetting
     {
         $settings = $this->getSettings();
         if ($settings) {
+            $translations = $data['translations'] ?? [];
+            unset($data['translations']);
             $settings->update($data);
-            return $settings;
+            $settings->setTranslations($translations); 
+            return $settings->fresh(['translations']);
         }
         return $this->createSettings($data);
     }
-
     public function createSettings(array $data): BusinessSetting
     {
-        return $this->model->create($data);
+        $translations = $data['translations'] ?? [];
+        unset($data['translations']);
+        $settings = $this->model->create($data);
+        $settings->setTranslations($translations); 
+        return $settings->fresh(['translations']);
     }
 }

@@ -29,6 +29,16 @@ return new class extends Migration
             $table->string('google_analytics_id')->nullable();
             $table->timestamps();
         });
+        Schema::table('business_settings', function (Blueprint $table) {
+            $table->dropColumn([
+                'shop_name',
+                'access_information',
+                'site_name',
+                'shop_description',
+                'terms_of_use',
+                'privacy_policy',
+            ]);
+        });
     }
 
     /**

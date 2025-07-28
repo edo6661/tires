@@ -61,7 +61,7 @@ class MenuRepository implements MenuRepositoryInterface
 
         $menu = $this->model->create($data);
 
-        // Set translations
+        
         foreach ($translations as $locale => $translationData) {
             $menu->setTranslation($locale, $translationData);
         }
@@ -81,7 +81,7 @@ class MenuRepository implements MenuRepositoryInterface
 
         $menu->update($data);
 
-        // Update translations
+        
         foreach ($translations as $locale => $translationData) {
             $menu->setTranslation($locale, $translationData);
         }
@@ -135,9 +135,6 @@ class MenuRepository implements MenuRepositoryInterface
         }
     }
 
-    /**
-     * Search menus by translated name
-     */
     public function searchByName(string $search, string $locale = null): Collection
     {
         $locale = $locale ?: App::getLocale();
