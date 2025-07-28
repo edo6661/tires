@@ -6,23 +6,24 @@
                     <a href="{{ route('admin.menu.index') }}" class="text-gray-500 hover:text-gray-700">
                         <i class="fas fa-arrow-left"></i>
                     </a>
-                    <h1 class="text-2xl font-bold text-gray-900">Menu Details</h1>
+                    <h1 class="text-2xl font-bold text-gray-900">{{ __('admin/menu.show_title') }}</h1>
                 </div>
-                <p class="text-gray-600">Detailed information for the menu item: {{ $menu->name }}</p>
+                <p class="text-gray-600">{{ __('admin/menu.show_subtitle', ['name' => $menu->name]) }}</p>
             </div>
             <div class="flex items-center gap-3">
                 <a href="{{ route('admin.menu.edit', $menu->id) }}"
                    class="px-4 py-2 bg-yellow-600 text-white rounded-lg hover:bg-yellow-700 transition-colors duration-200 flex items-center gap-2">
                     <i class="fas fa-edit"></i>
-                    Edit Menu
+                    {{ __('admin/menu.edit_menu_button') }}
                 </a>
                 <a href="{{ route('admin.menu.index') }}"
                    class="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors duration-200 flex items-center gap-2">
                     <i class="fas fa-list"></i>
-                    Back to List
+                    {{ __('admin/menu.back_to_list_button') }}
                 </a>
             </div>
         </div>
+
         @if(session('success'))
             <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded-lg" x-data="{ show: true }" x-show="show">
                 <div class="flex items-center justify-between">
@@ -36,6 +37,7 @@
                 </div>
             </div>
         @endif
+
         @if(session('error'))
             <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded-lg" x-data="{ show: true }" x-show="show">
                 <div class="flex items-center justify-between">
@@ -49,13 +51,14 @@
                 </div>
             </div>
         @endif
+
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
             <div class="lg:col-span-1">
                 <div class="bg-white rounded-lg shadow-sm p-6 space-y-6">
                     <div class="text-center">
                         @if($menu->photo_path)
-                            <img src="{{ asset('storage/' . $menu->photo_path) }}" 
-                                 alt="{{ $menu->name }}" 
+                            <img src="{{ asset('storage/' . $menu->photo_path) }}"
+                                 alt="{{ $menu->name }}"
                                  class="w-full max-w-sm mx-auto rounded-lg object-cover shadow-md">
                         @else
                             <div class="w-32 h-32 mx-auto rounded-lg flex items-center justify-center text-white font-bold text-4xl shadow-md"
@@ -68,55 +71,55 @@
                         @if($menu->is_active)
                             <span class="inline-flex items-center px-4 py-2 rounded-full text-sm font-medium bg-green-100 text-green-800">
                                 <i class="fas fa-check-circle text-green-500 mr-2"></i>
-                                Active Menu
+                                {{ __('admin/menu.status_active') }}
                             </span>
                         @else
                             <span class="inline-flex items-center px-4 py-2 rounded-full text-sm font-medium bg-red-100 text-red-800">
                                 <i class="fas fa-times-circle text-red-500 mr-2"></i>
-                                Inactive Menu
+                                {{ __('admin/menu.status_inactive') }}
                             </span>
                         @endif
                     </div>
                     <div class="flex flex-col gap-2">
-                        <button onclick="toggleStatus({{ $menu->id }})" 
+                        <button onclick="toggleStatus({{ $menu->id }})"
                                 class="w-full px-4 py-2 text-white rounded-lg transition-colors duration-200 flex items-center justify-center gap-2 {{ $menu->is_active ? 'bg-red-600 hover:bg-red-700' : 'bg-green-600 hover:bg-green-700' }}">
                             <i class="fas fa-{{ $menu->is_active ? 'pause' : 'play' }}"></i>
-                            {{ $menu->is_active ? 'Deactivate' : 'Activate' }} Menu
+                            {{ $menu->is_active ? __('admin/menu.deactivate_menu') : __('admin/menu.activate_menu') }}
                         </button>
-                        <button @click="showDeleteModal()" 
+                        <button @click="showDeleteModal()"
                                 class="w-full px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors duration-200 flex items-center justify-center gap-2">
                             <i class="fas fa-trash"></i>
-                            Delete Menu
+                            {{ __('admin/menu.delete_menu_button') }}
                         </button>
                     </div>
                 </div>
             </div>
             <div class="lg:col-span-2">
                 <div class="bg-white rounded-lg shadow-sm p-6">
-                    <h3 class="text-xl font-semibold text-gray-900 mb-6">Menu Information</h3>
+                    <h3 class="text-xl font-semibold text-gray-900 mb-6">{{ __('admin/menu.info_title') }}</h3>
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div class="space-y-4">
                             <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-1">Menu Name</label>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">{{ __('admin/menu.info_name') }}</label>
                                 <p class="text-lg font-semibold text-gray-900">{{ $menu->name }}</p>
                             </div>
                             <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-1">Price</label>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">{{ __('admin/menu.info_price') }}</label>
                                 <p class="text-2xl font-bold text-green-600">
                                     $ {{ number_format($menu->price, 0, '.', ',') }}
                                 </p>
                             </div>
                             <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-1">Required Time</label>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">{{ __('admin/menu.info_time') }}</label>
                                 <p class="text-lg text-gray-900 flex items-center gap-2">
                                     <i class="fas fa-clock text-blue-600"></i>
-                                    {{ $menu->required_time }} minutes
+                                    {{ $menu->required_time }} {{ __('admin/menu.time_unit_minutes') }}
                                 </p>
                             </div>
                         </div>
                         <div class="space-y-4">
                             <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-1">Display Order</label>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">{{ __('admin/menu.info_order') }}</label>
                                 <p class="text-lg text-gray-900">
                                     <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-gray-100 text-gray-800">
                                         #{{ $menu->display_order }}
@@ -124,21 +127,21 @@
                                 </p>
                             </div>
                             <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-1">Menu Color</label>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">{{ __('admin/menu.info_color') }}</label>
                                 <div class="flex items-center gap-2">
-                                    <div class="w-8 h-8 rounded-full border-2 border-gray-300" 
+                                    <div class="w-8 h-8 rounded-full border-2 border-gray-300"
                                          style="background-color: {{ $menu->color }}"></div>
                                     <p class="text-gray-900 font-mono">{{ $menu->color }}</p>
                                 </div>
                             </div>
                             <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-1">Date Created</label>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">{{ __('admin/menu.info_created_at') }}</label>
                                 <p class="text-gray-900">
                                     {{ $menu->created_at->format('F d, Y, H:i') }}
                                 </p>
                             </div>
                             <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-1">Last Updated</label>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">{{ __('admin/menu.info_updated_at') }}</label>
                                 <p class="text-gray-900">
                                     {{ $menu->updated_at->format('F d, Y, H:i') }}
                                 </p>
@@ -148,50 +151,51 @@
                 </div>
             </div>
         </div>
+
         @if($menu->description)
         <div class="bg-white rounded-lg shadow-sm p-6">
-            <h3 class="text-lg font-semibold text-gray-900 mb-4">Menu Description</h3>
+            <h3 class="text-lg font-semibold text-gray-900 mb-4">{{ __('admin/menu.description_title') }}</h3>
             <div class="prose max-w-none">
                 <p class="text-gray-700 leading-relaxed">{{ $menu->description }}</p>
             </div>
         </div>
         @endif
-        <div x-show="showDeleteConfirm" 
-             x-transition:enter="transition ease-out duration-300" 
-             x-transition:enter-start="opacity-0" 
-             x-transition:enter-end="opacity-100" 
-             x-transition:leave="transition ease-in duration-200" 
-             x-transition:leave-start="opacity-100" 
-             x-transition:leave-end="opacity-0" 
-             x-cloak 
+
+        <div x-show="showDeleteConfirm"
+             x-transition:enter="transition ease-out duration-300"
+             x-transition:enter-start="opacity-0"
+             x-transition:enter-end="opacity-100"
+             x-transition:leave="transition ease-in duration-200"
+             x-transition:leave-start="opacity-100"
+             x-transition:leave-end="opacity-0"
+             x-cloak
              class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
             <div class="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
                 <div class="mt-3 text-center">
                     <div class="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-red-100">
                         <i class="fas fa-exclamation-triangle text-red-600"></i>
                     </div>
-                    <h3 class="text-lg font-medium text-gray-900 mt-2">Konfirmasi Hapus Menu</h3>
+                    <h3 class="text-lg font-medium text-gray-900 mt-2">{{ __('admin/menu.delete_modal_title') }}</h3>
                     <div class="mt-2 px-7 py-3">
                         <p class="text-sm text-gray-500">
-                            Apakah Anda yakin ingin menghapus menu <strong>"{{ $menu->name }}"</strong>? 
-                            Tindakan ini tidak dapat dibatalkan.
+                            {!! __('admin/menu.delete_modal_text', ['name' => $menu->name]) !!}
                         </p>
                     </div>
                     <div class="items-center px-4 py-3 flex gap-2 justify-center">
-                        <button @click="showDeleteConfirm = false" 
+                        <button @click="showDeleteConfirm = false"
                                 class="px-4 py-2 bg-gray-200 text-gray-800 text-base font-medium rounded-md shadow-sm hover:bg-gray-300 transition-colors duration-200">
-                            Batal
+                            {{ __('admin/menu.cancel') }}
                         </button>
-                        <button @click="confirmDelete()" 
+                        <button @click="confirmDelete()"
                                 :disabled="isDeleting"
                                 class="px-4 py-2 bg-red-600 text-white text-base font-medium rounded-md shadow-sm hover:bg-red-700 transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed">
                             <span x-show="!isDeleting" class="flex items-center gap-2">
                                 <i class="fas fa-trash"></i>
-                                Hapus
+                                {{ __('admin/menu.delete') }}
                             </span>
                             <span x-show="isDeleting" class="flex items-center gap-2">
                                 <i class="fas fa-spinner fa-spin"></i>
-                                Menghapus...
+                                {{ __('admin/menu.deleting_text') }}
                             </span>
                         </button>
                     </div>
@@ -199,6 +203,7 @@
             </div>
         </div>
     </div>
+
     <script>
         function menuShow() {
             return {
@@ -210,11 +215,11 @@
                 async confirmDelete() {
                     this.isDeleting = true;
                     try {
-                        const response = await fetch(`/admin/menu/{{ $menu->id }}`, {
+                        const url = '{{ route("admin.menu.destroy", ["id" => "__ID__"]) }}'.replace('__ID__', {{ $menu->id }});
+                        const response = await fetch(url, {
                             method: 'DELETE',
                             headers: {
-                                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || 
-                                               document.querySelector('input[name="_token"]')?.value,
+                                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '',
                                 'Accept': 'application/json',
                                 'Content-Type': 'application/json',
                             }
@@ -227,7 +232,7 @@
                             successDiv.innerHTML = `
                                 <div class="flex items-center gap-2">
                                     <i class="fas fa-check-circle"></i>
-                                    Menu berhasil dihapus!
+                                    {{ __('admin/menu.js_messages.delete_success') }}
                                 </div>
                             `;
                             document.body.appendChild(successDiv);
@@ -235,7 +240,7 @@
                                 window.location.href = '{{ route("admin.menu.index") }}';
                             }, 1500);
                         } else {
-                            throw new Error(data.message || 'Gagal menghapus menu');
+                            throw new Error(data.message || "{{ __('admin/menu.js_messages.delete_failed') }}");
                         }
                     } catch (error) {
                         console.error('Error:', error);
@@ -245,9 +250,9 @@
                             <div class="flex items-center justify-between">
                                 <div class="flex items-center gap-2">
                                     <i class="fas fa-exclamation-circle"></i>
-                                    ${error.message || 'Terjadi kesalahan saat menghapus menu'}
+                                    <span>${error.message || "{{ __('admin/menu.js_messages.error_occurred_delete') }}"}</span>
                                 </div>
-                                <button onclick="this.parentElement.parentElement.remove()" class="text-red-700 hover:text-red-900">
+                                <button onclick="this.parentElement.parentElement.remove()" class="text-red-700 hover:text-red-900 ml-4">
                                     <i class="fas fa-times"></i>
                                 </button>
                             </div>
@@ -265,9 +270,11 @@
                 }
             }
         }
+
         async function toggleStatus(id) {
             try {
-                const response = await fetch(`/admin/menu/${id}/toggle-status`, {
+                const url = '{{ route("admin.menu.toggleStatus", ["id" => "__ID__"]) }}'.replace('__ID__', id);
+                const response = await fetch(url, {
                     method: 'PATCH',
                     headers: {
                         'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
@@ -277,11 +284,11 @@
                 if (result.success) {
                     window.location.reload();
                 } else {
-                    alert(result.error || 'An error occurred while changing the status.');
+                    alert(result.error || "{{ __('admin/menu.js_messages.error_occurred_status') }}");
                 }
             } catch (error) {
                 console.error('Error:', error);
-                alert('An error occurred while changing the status.');
+                alert("{{ __('admin/menu.js_messages.error_occurred_status') }}");
             }
         }
     </script>

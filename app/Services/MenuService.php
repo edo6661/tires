@@ -1,6 +1,5 @@
 <?php
 
-
 namespace App\Services;
 
 use App\Models\Menu;
@@ -8,6 +7,7 @@ use App\Repositories\MenuRepositoryInterface;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Carbon\Carbon;
+
 class MenuService implements MenuServiceInterface
 {
     protected $menuRepository;
@@ -39,20 +39,36 @@ class MenuService implements MenuServiceInterface
 
     public function createMenu(array $data): Menu
     {
-        
         if (!isset($data['is_active'])) {
             $data['is_active'] = true;
         }
-        
         if (!isset($data['color'])) {
-            $data['color'] = '#3B82F6'; 
+            $data['color'] = '#3B82F6';
         }
-
+        if (!isset($data['translations']) ||
+            !isset($data['translations']['en']) ||
+            !isset($data['translations']['ja'])) {
+            throw new \InvalidArgumentException('Translations for English and Japanese are required.');
+        }
+        if (empty($data['translations']['en']['name']) ||
+            empty($data['translations']['ja']['name'])) {
+            throw new \InvalidArgumentException('Menu names for English and Japanese are required.');
+        }
         return $this->menuRepository->create($data);
     }
 
     public function updateMenu(int $id, array $data): ?Menu
     {
+        if (isset($data['translations'])) {
+            if (!isset($data['translations']['en']) ||
+                !isset($data['translations']['ja'])) {
+                throw new \InvalidArgumentException('Translations for English and Japanese are required.');
+            }
+            if (empty($data['translations']['en']['name']) ||
+                empty($data['translations']['ja']['name'])) {
+                throw new \InvalidArgumentException('Menu names for English and Japanese are required.');
+            }
+        }
         return $this->menuRepository->update($id, $data);
     }
 
@@ -82,26 +98,23 @@ class MenuService implements MenuServiceInterface
         if (!$menu) {
             return null;
         }
-
         $startDateTime = Carbon::parse($startTime);
         $endDateTime = $startDateTime->copy()->addMinutes($menu->required_time);
-
         return $endDateTime->format('Y-m-d H:i:s');
     }
 
-    
     public function getMenuColorsMapping(): array
     {
         return $this->menuRepository->getAll()
             ->pluck('color', 'id')
             ->toArray();
     }
+
     public function bulkDeleteMenus(array $ids): bool
     {
         if (empty($ids)) {
-            throw new \InvalidArgumentException('ID tidak boleh kosong');
+            throw new \InvalidArgumentException('IDs cannot be empty.');
         }
-
         return $this->menuRepository->bulkDelete($ids);
     }
 }
