@@ -60,22 +60,22 @@ class BusinessSettingService implements BusinessSettingServiceInterface
         $businessHours = $this->getBusinessHours();
         $displayHours = [];
         $days = [
-            'monday' => 'Senin',
-            'tuesday' => 'Selasa', 
-            'wednesday' => 'Rabu',
-            'thursday' => 'Kamis',
-            'friday' => 'Jumat',
-            'saturday' => 'Sabtu',
-            'sunday' => 'Minggu'
+            'monday' => 'Monday',
+            'tuesday' => 'Tuesday', 
+            'wednesday' => 'Wednesday',
+            'thursday' => 'Thursday',
+            'friday' => 'Friday',
+            'saturday' => 'Saturday',
+            'sunday' => 'Sunday'
         ];
         foreach ($days as $day => $dayName) {
             $hours = $businessHours[$day] ?? null;
             if ($hours && isset($hours['closed']) && $hours['closed']) {
-                $displayHours[$dayName] = 'Tutup';
+                $displayHours[$dayName] = 'Closed';
             } elseif ($hours && isset($hours['open']) && isset($hours['close'])) {
                 $displayHours[$dayName] = $hours['open'] . ' - ' . $hours['close'];
             } else {
-                $displayHours[$dayName] = 'Tutup';
+                $displayHours[$dayName] = 'Closed';
             }
         }
         return $displayHours;

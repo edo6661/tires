@@ -1,15 +1,11 @@
 <?php
-
 namespace App\Models;
-
 use App\Traits\Translatable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-
 class Menu extends Model
 {
     use HasFactory, Translatable;
-
     protected $fillable = [
         'required_time',
         'price',
@@ -18,35 +14,23 @@ class Menu extends Model
         'is_active',
         'color', 
     ];
-
     protected $casts = [
         'price' => 'decimal:2',
         'is_active' => 'boolean',
     ];
-
-    protected $with = ['translations']; // Eager load translations by default
-
-    /**
-     * Fields yang bisa ditranslate
-     */
+    protected $with = ['translations']; 
     protected function getTranslatableFields(): array
     {
         return ['name', 'description'];
     }
-
-    /**
-     * Override default translation untuk empty values
-     */
     protected function getDefaultTranslation(string $attribute)
     {
         $defaults = [
             'name' => 'Unnamed Menu',
             'description' => 'No description available',
         ];
-
         return $defaults[$attribute] ?? null;
     }
-
     public static function getAvailableColors(): array
     {
         return [
@@ -62,74 +46,47 @@ class Menu extends Model
             '#6B7280' => 'Gray',
         ];
     }
-
     public function getColorWithOpacity(int $opacity = 10): string
     {
         $hex = str_replace('#', '', $this->color);
         $r = hexdec(substr($hex, 0, 2));
         $g = hexdec(substr($hex, 2, 2));
         $b = hexdec(substr($hex, 4, 2));
-        
         return "rgba({$r}, {$g}, {$b}, 0.{$opacity})";
     }
-
     public function getTextColor(): string
     {
         $hex = str_replace('#', '', $this->color);
         $r = hexdec(substr($hex, 0, 2));
         $g = hexdec(substr($hex, 2, 2));
         $b = hexdec(substr($hex, 4, 2));
-        
         $luminance = (0.299 * $r + 0.587 * $g + 0.114 * $b) / 255;
-        
         return $luminance > 0.5 ? '#000000' : '#ffffff';
     }
-
     public function reservations()
     {
         return $this->hasMany(Reservation::class);
     }
-
     public function blockedPeriods()
     {
         return $this->hasMany(BlockedPeriod::class);
     }
-
-    /**
-     * Scope untuk load dengan translations sesuai locale
-     */
-    public function scopeTranslated($query, string $locale = null)
+    public function scopeTranslated($query, ?string $locale = null)
     {
         return $query->withTranslations($locale);
     }
-
-    /**
-     * Scope untuk active menus dengan translations
-     */
     public function scopeActive($query)
     {
         return $query->where('is_active', true);
     }
-
-    /**
-     * Scope untuk sort by display order
-     */
     public function scopeOrdered($query)
     {
         return $query->orderBy('display_order');
     }
-
-    /**
-     * Get menu name dalam locale tertentu (method helper)
-     */
     public function getNameInLocale(string $locale): ?string
     {
         return $this->getTranslatedAttribute('name', $locale);
     }
-
-    /**
-     * Get menu description dalam locale tertentu (method helper)  
-     */
     public function getDescriptionInLocale(string $locale): ?string
     {
         return $this->getTranslatedAttribute('description', $locale);
