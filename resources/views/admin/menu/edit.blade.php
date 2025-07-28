@@ -1,187 +1,189 @@
 <x-layouts.app>
-    <div class="max-w-4xl mx-auto space-y-6" x-data="menuEdit()">
-        <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-            <div>
-                <div class="flex items-center gap-2 text-sm text-gray-600 mb-2">
-                    <a href="{{ route('admin.menu.index') }}" class="hover:text-blue-600">{{ __('admin/menu.title') }}</a>
-                    <i class="fas fa-chevron-right text-xs"></i>
-                    <span class="text-gray-900">{{ __('admin/menu.edit') }}</span>
+    <div class="container" x-data="menuEdit()">
+        <div class="bg-white rounded-lg shadow-sm border border-disabled/50 p-6 mb-6 transform transition-all duration-300 hover:shadow-lg">
+            <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                <div>
+                    <div class="flex items-center gap-2 text-body-md text-main-text/70 mb-2">
+                        <a href="{{ route('admin.menu.index') }}" class="hover:text-brand transition-colors duration-300">{{ __('admin/menu.title') }}</a>
+                        <i class="fas fa-chevron-right text-xs"></i>
+                        <span class="text-main-text">{{ __('admin/menu.edit') }}</span>
+                    </div>
+                    <h1 class="text-title-lg font-bold text-main-text mb-2">{{ __('admin/menu.edit_title') }}</h1>
+                    <p class="text-body-md text-main-text/70">{{ __('admin/menu.edit_subtitle') }}</p>
                 </div>
-                <h1 class="text-2xl font-bold text-gray-900">{{ __('admin/menu.edit_title') }}</h1>
-                <p class="text-gray-600 mt-1">{{ __('admin/menu.edit_subtitle') }}</p>
-            </div>
-            <div class="flex items-center gap-3">
-                <a href="{{ route('admin.menu.show', $menu->id) }}"
-                   class="px-4 py-2 bg-blue-100 text-blue-700 rounded-lg hover:bg-blue-200 transition-colors duration-200 flex items-center gap-2">
-                    <i class="fas fa-eye"></i>
-                    {{ __('admin/menu.view_menu') }}
-                </a>
-                <a href="{{ route('admin.menu.index') }}"
-                   class="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors duration-200 flex items-center gap-2">
-                    <i class="fas fa-arrow-left"></i>
-                    {{ __('admin/menu.back') }}
-                </a>
+                <div class="flex items-center gap-3">
+                    <a href="{{ route('admin.menu.show', $menu->id) }}"
+                       class="px-4 py-2 bg-sub text-brand rounded-lg hover:bg-sub/80 transition-all duration-300 transform hover:-translate-y-0.5 flex items-center gap-2 text-button-md">
+                        <i class="fas fa-eye"></i>
+                        {{ __('admin/menu.view_menu') }}
+                    </a>
+                    <a href="{{ route('admin.menu.index') }}"
+                       class="px-4 py-2 bg-secondary-button text-main-text rounded-lg hover:bg-secondary-button/80 transition-all duration-300 transform hover:-translate-y-0.5 flex items-center gap-2 text-button-md">
+                        <i class="fas fa-arrow-left"></i>
+                        {{ __('admin/menu.back') }}
+                    </a>
+                </div>
             </div>
         </div>
-
         @if(session('success'))
-            <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded-lg" x-data="{ show: true }" x-show="show">
+            <div class="bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-lg mb-6 transform transition-all duration-300 hover:shadow-sm" x-data="{ show: true }" x-show="show">
                 <div class="flex items-center justify-between">
                     <div class="flex items-center gap-2">
-                        <i class="fas fa-check-circle"></i>
-                        {{ session('success') }}
+                        <i class="fas fa-check-circle text-green-500"></i>
+                        <span class="text-body-md">{{ session('success') }}</span>
                     </div>
-                    <button @click="show = false" class="text-green-700 hover:text-green-900">
+                    <button @click="show = false" class="text-green-700 hover:text-green-900 transition-colors duration-200">
                         <i class="fas fa-times"></i>
                     </button>
                 </div>
             </div>
         @endif
         @if(session('error'))
-            <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded-lg" x-data="{ show: true }" x-show="show">
+            <div class="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg mb-6 transform transition-all duration-300 hover:shadow-sm" x-data="{ show: true }" x-show="show">
                 <div class="flex items-center justify-between">
                     <div class="flex items-center gap-2">
-                        <i class="fas fa-exclamation-circle"></i>
-                        {{ session('error') }}
+                        <i class="fas fa-exclamation-circle text-red-500"></i>
+                        <span class="text-body-md">{{ session('error') }}</span>
                     </div>
-                    <button @click="show = false" class="text-red-700 hover:text-red-900">
+                    <button @click="show = false" class="text-red-700 hover:text-red-900 transition-colors duration-200">
                         <i class="fas fa-times"></i>
                     </button>
                 </div>
             </div>
         @endif
-
         <form action="{{ route('admin.menu.update', $menu->id) }}" method="POST" class="space-y-6">
             @csrf
             @method('PUT')
-
-            <div class="bg-white rounded-lg shadow-sm p-6">
-                <div class="flex items-center gap-3 mb-4">
-                    <div class="w-8 h-5 bg-blue-600 rounded-sm flex items-center justify-center">
+            <div class="bg-white rounded-lg shadow-sm border border-disabled/50 p-6 transform transition-all duration-300 hover:shadow-lg">
+                <div class="flex items-center gap-3 mb-6">
+                    <div class="w-8 h-5 bg-brand rounded-sm flex items-center justify-center transform transition-all duration-300 ">
                         <span class="text-white text-xs font-bold">EN</span>
                     </div>
-                    <h3 class="text-lg font-semibold text-gray-900">{{ __('admin/menu.english_info') }}</h3>
+                    <h3 class="text-heading-lg font-semibold text-main-text">{{ __('admin/menu.english_info') }}</h3>
                 </div>
                 <div class="grid grid-cols-1 gap-6">
-                    <div>
-                        <label for="translations_en_name" class="block text-sm font-medium text-gray-700 mb-2">
+                    <div class="transform transition-all duration-200 ">
+                        <label for="translations_en_name" class="block text-body-md font-medium text-main-text mb-2">
                             {{ __('admin/menu.menu_name_en') }} <span class="text-red-500">*</span>
                         </label>
                         @php
                             $enTranslation = $menu->translations->where('locale', 'en')->first();
                         @endphp
-                        <input type="text"
-                               name="translations[en][name]"
+                        <input type="text" 
+                               name="translations[en][name]" 
                                id="translations_en_name"
                                value="{{ old('translations.en.name', $enTranslation->name ?? '') }}"
-                               class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent @error('translations.en.name') border-red-500 @enderror"
+                               class="w-full border border-disabled rounded-lg px-3 py-2 focus:ring-2 focus:ring-brand focus:border-brand transition-all duration-300 hover:border-brand/50 text-body-md @error('translations.en.name') border-red-500 @enderror"
                                placeholder="{{ __('admin/menu.placeholder_name_en') }}"
                                required>
                         @error('translations.en.name')
-                            <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
+                            <p class="text-red-500 text-body-md mt-1 animate-pulse">{{ $message }}</p>
                         @enderror
                     </div>
-                    <div>
-                        <label for="translations_en_description" class="block text-sm font-medium text-gray-700 mb-2">
+                    <div class="transform transition-all duration-200 ">
+                        <label for="translations_en_description" class="block text-body-md font-medium text-main-text mb-2">
                             {{ __('admin/menu.description_en') }}
                         </label>
-                        <textarea name="translations[en][description]"
+                        <textarea name="translations[en][description]" 
                                   id="translations_en_description"
                                   rows="4"
-                                  class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent @error('translations.en.description') border-red-500 @enderror"
+                                  class="w-full border border-disabled rounded-lg px-3 py-2 focus:ring-2 focus:ring-brand focus:border-brand transition-all duration-300 hover:border-brand/50 text-body-md @error('translations.en.description') border-red-500 @enderror"
                                   placeholder="{{ __('admin/menu.placeholder_desc_en') }}">{{ old('translations.en.description', $enTranslation->description ?? '') }}</textarea>
                         @error('translations.en.description')
-                            <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
+                            <p class="text-red-500 text-body-md mt-1 animate-pulse">{{ $message }}</p>
                         @enderror
                     </div>
                 </div>
             </div>
-
-            <div class="bg-white rounded-lg shadow-sm p-6">
-                <div class="flex items-center gap-3 mb-4">
-                    <div class="w-8 h-5 bg-red-600 rounded-sm flex items-center justify-center">
+            <div class="bg-white rounded-lg shadow-sm border border-disabled/50 p-6 transform transition-all duration-300 hover:shadow-lg">
+                <div class="flex items-center gap-3 mb-6">
+                    <div class="w-8 h-5 bg-red-600 rounded-sm flex items-center justify-center transform transition-all duration-300 ">
                         <span class="text-white text-xs font-bold">JA</span>
                     </div>
-                    <h3 class="text-lg font-semibold text-gray-900">{{ __('admin/menu.japanese_info') }}</h3>
+                    <h3 class="text-heading-lg font-semibold text-main-text">{{ __('admin/menu.japanese_info') }}</h3>
                 </div>
                 <div class="grid grid-cols-1 gap-6">
-                    <div>
-                        <label for="translations_ja_name" class="block text-sm font-medium text-gray-700 mb-2">
+                    <div class="transform transition-all duration-200 ">
+                        <label for="translations_ja_name" class="block text-body-md font-medium text-main-text mb-2">
                             {{ __('admin/menu.menu_name_ja') }} <span class="text-red-500">*</span>
                         </label>
                         @php
                             $jaTranslation = $menu->translations->where('locale', 'ja')->first();
                         @endphp
-                        <input type="text"
-                               name="translations[ja][name]"
+                        <input type="text" 
+                               name="translations[ja][name]" 
                                id="translations_ja_name"
                                value="{{ old('translations.ja.name', $jaTranslation->name ?? '') }}"
-                               class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent @error('translations.ja.name') border-red-500 @enderror"
+                               class="w-full border border-disabled rounded-lg px-3 py-2 focus:ring-2 focus:ring-brand focus:border-brand transition-all duration-300 hover:border-brand/50 text-body-md @error('translations.ja.name') border-red-500 @enderror"
                                placeholder="{{ __('admin/menu.placeholder_name_ja') }}"
                                required>
                         @error('translations.ja.name')
-                            <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
+                            <p class="text-red-500 text-body-md mt-1 animate-pulse">{{ $message }}</p>
                         @enderror
                     </div>
-                    <div>
-                        <label for="translations_ja_description" class="block text-sm font-medium text-gray-700 mb-2">
+                    <div class="transform transition-all duration-200 ">
+                        <label for="translations_ja_description" class="block text-body-md font-medium text-main-text mb-2">
                             {{ __('admin/menu.description_ja') }}
                         </label>
-                        <textarea name="translations[ja][description]"
+                        <textarea name="translations[ja][description]" 
                                   id="translations_ja_description"
                                   rows="4"
-                                  class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent @error('translations.ja.description') border-red-500 @enderror"
+                                  class="w-full border border-disabled rounded-lg px-3 py-2 focus:ring-2 focus:ring-brand focus:border-brand transition-all duration-300 hover:border-brand/50 text-body-md @error('translations.ja.description') border-red-500 @enderror"
                                   placeholder="{{ __('admin/menu.placeholder_desc_ja') }}">{{ old('translations.ja.description', $jaTranslation->description ?? '') }}</textarea>
                         @error('translations.ja.description')
-                            <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
+                            <p class="text-red-500 text-body-md mt-1 animate-pulse">{{ $message }}</p>
                         @enderror
                     </div>
                 </div>
             </div>
-
-            <div class="bg-white rounded-lg shadow-sm p-6">
-                <h3 class="text-lg font-semibold text-gray-900 mb-4">{{ __('admin/menu.basic_settings') }}</h3>
+            <div class="bg-white rounded-lg shadow-sm border border-disabled/50 p-6 transform transition-all duration-300 hover:shadow-lg">
+                <h3 class="text-heading-lg font-semibold text-main-text mb-6 flex items-center">
+                    <i class="fas fa-cog text-brand mr-2 transform transition-all duration-300"></i>
+                    {{ __('admin/menu.basic_settings') }}
+                </h3>
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div>
-                        <label for="required_time" class="block text-sm font-medium text-gray-700 mb-2">
+                    <div class="transform transition-all duration-200 ">
+                        <label for="required_time" class="block text-body-md font-medium text-main-text mb-2">
                             {{ __('admin/menu.form_required_time') }} <span class="text-red-500">*</span>
                         </label>
-                        <input type="number"
-                               name="required_time"
+                        <input type="number" 
+                               name="required_time" 
                                id="required_time"
                                value="{{ old('required_time', $menu->required_time) }}"
                                min="1"
-                               class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent @error('required_time') border-red-500 @enderror"
+                               class="w-full border border-disabled rounded-lg px-3 py-2 focus:ring-2 focus:ring-brand focus:border-brand transition-all duration-300 hover:border-brand/50 text-body-md @error('required_time') border-red-500 @enderror"
                                placeholder="30"
                                required>
                         @error('required_time')
-                            <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
+                            <p class="text-red-500 text-body-md mt-1 animate-pulse">{{ $message }}</p>
                         @enderror
-                        <p class="text-sm text-gray-500 mt-1">{{ __('admin/menu.help_required_time') }}</p>
+                        <p class="text-body-md text-main-text/70 mt-1">{{ __('admin/menu.help_required_time') }}</p>
                     </div>
-                    <div>
-                        <label for="price" class="block text-sm font-medium text-gray-700 mb-2">
+                    <div class="transform transition-all duration-200 ">
+                        <label for="price" class="block text-body-md font-medium text-main-text mb-2">
                             {{ __('admin/menu.form_price') }}
                         </label>
-                        <input type="number"
-                               name="price"
+                        <input type="number" 
+                               name="price" 
                                id="price"
                                value="{{ old('price', $menu->price) }}"
                                min="0"
                                step="0.01"
-                               class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent @error('price') border-red-500 @enderror"
+                               class="w-full border border-disabled rounded-lg px-3 py-2 focus:ring-2 focus:ring-brand focus:border-brand transition-all duration-300 hover:border-brand/50 text-body-md @error('price') border-red-500 @enderror"
                                placeholder="0.00">
                         @error('price')
-                            <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
+                            <p class="text-red-500 text-body-md mt-1 animate-pulse">{{ $message }}</p>
                         @enderror
                     </div>
                 </div>
             </div>
-
-            <div class="bg-white rounded-lg shadow-sm p-6">
-                <h3 class="text-lg font-semibold text-gray-900 mb-4">{{ __('admin/menu.visual_settings') }}</h3>
+            <div class="bg-white rounded-lg shadow-sm border border-disabled/50 p-6 transform transition-all duration-300 hover:shadow-lg">
+                <h3 class="text-heading-lg font-semibold text-main-text mb-6 flex items-center">
+                    <i class="fas fa-palette text-brand mr-2 transform transition-all duration-300"></i>
+                    {{ __('admin/menu.visual_settings') }}
+                </h3>
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-3">
+                    <label class="block text-body-md font-medium text-main-text mb-3">
                         {{ __('admin/menu.info_color') }}
                     </label>
                     <div class="grid grid-cols-5 gap-3">
@@ -201,13 +203,13 @@
                             $selectedColor = old('color', $menu->color ?? '#3B82F6');
                         @endphp
                         @foreach($colors as $colorValue => $colorKey)
-                            <label class="relative cursor-pointer group">
-                                <input type="radio"
-                                       name="color"
+                            <label class="relative cursor-pointer group transform transition-all duration-200 hover:scale-110">
+                                <input type="radio" 
+                                       name="color" 
                                        value="{{ $colorValue }}"
                                        {{ $selectedColor === $colorValue ? 'checked' : '' }}
                                        class="sr-only peer">
-                                <div class="w-12 h-12 rounded-full border-4 border-transparent peer-checked:border-gray-800 peer-checked:shadow-lg transition-all duration-200 flex items-center justify-center"
+                                <div class="w-12 h-12 rounded-full border-4 border-transparent peer-checked:border-main-text peer-checked:shadow-lg transition-all duration-300 flex items-center justify-center hover:shadow-md"
                                      style="background-color: {{ $colorValue }}"
                                      title="{{ __('admin/menu.colors.' . $colorKey) }}">
                                     <div class="opacity-0 peer-checked:opacity-100 transition-opacity duration-200">
@@ -216,51 +218,55 @@
                                         </svg>
                                     </div>
                                 </div>
-                                <span class="block text-xs text-center text-gray-600 mt-1 font-medium">{{ __('admin/menu.colors.' . $colorKey) }}</span>
+                                <span class="block text-xs text-center text-main-text/70 mt-1 font-medium">{{ __('admin/menu.colors.' . $colorKey) }}</span>
                             </label>
                         @endforeach
                     </div>
                     @error('color')
-                        <p class="text-red-500 text-sm mt-2">{{ $message }}</p>
+                        <p class="text-red-500 text-body-md mt-2 animate-pulse">{{ $message }}</p>
                     @enderror
-                    <p class="text-sm text-gray-500 mt-3">{{ __('admin/menu.help_color') }}</p>
+                    <p class="text-body-md text-main-text/70 mt-3">{{ __('admin/menu.help_color') }}</p>
                 </div>
             </div>
-
-            <div class="bg-white rounded-lg shadow-sm p-6">
-                <h3 class="text-lg font-semibold text-gray-900 mb-4">{{ __('admin/menu.status_settings') }}</h3>
+            <div class="bg-white rounded-lg shadow-sm border border-disabled/50 p-6 transform transition-all duration-300 hover:shadow-lg">
+                <h3 class="text-heading-lg font-semibold text-main-text mb-6 flex items-center">
+                    <i class="fas fa-toggle-on text-brand mr-2 transform transition-all duration-300"></i>
+                    {{ __('admin/menu.status_settings') }}
+                </h3>
                 <div class="space-y-4">
-                    <div class="flex items-center justify-between">
+                    <div class="flex items-center justify-between p-4 bg-sub rounded-lg transform transition-all duration-300 hover:shadow-sm">
                         <div>
-                            <label class="text-sm font-medium text-gray-700">{{ __('admin/menu.form_active_status') }}</label>
-                            <p class="text-sm text-gray-500">{{ __('admin/menu.help_active_status') }}</p>
+                            <label class="text-body-md font-medium text-main-text">{{ __('admin/menu.form_active_status') }}</label>
+                            <p class="text-body-md text-main-text/70 mt-1">{{ __('admin/menu.help_active_status') }}</p>
                         </div>
                         <label class="relative inline-flex items-center cursor-pointer">
                             <input type="hidden" name="is_active" value="0">
-                            <input type="checkbox"
-                                   name="is_active"
+                            <input type="checkbox" 
+                                   name="is_active" 
                                    value="1"
                                    {{ old('is_active', $menu->is_active) ? 'checked' : '' }}
                                    class="sr-only peer">
-                            <div class="relative w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+                            <div class="relative w-11 h-6 bg-disabled peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-brand/30 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-brand"></div>
                         </label>
                     </div>
                 </div>
             </div>
-
-            <div class="bg-gray-50 rounded-lg shadow-sm p-6">
-                <h3 class="text-lg font-semibold text-gray-900 mb-4">{{ __('admin/menu.current_info') }}</h3>
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
-                    <div>
-                        <span class="text-gray-600">{{ __('admin/menu.info_created_at') }}:</span>
-                        <div class="font-medium">{{ $menu->created_at->format('d M Y, H:i') }}</div>
+            <div class="bg-white rounded-lg shadow-sm border border-disabled/50 p-6 transform transition-all duration-300 hover:shadow-lg">
+                <h3 class="text-heading-lg font-semibold text-main-text mb-6 flex items-center">
+                    <i class="fas fa-info-circle text-brand mr-2 transform transition-all duration-300"></i>
+                    {{ __('admin/menu.current_info') }}
+                </h3>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-body-md">
+                    <div class="p-4 bg-sub/50 rounded-lg">
+                        <span class="text-main-text/70">{{ __('admin/menu.info_created_at') }}:</span>
+                        <div class="font-medium text-main-text">{{ $menu->created_at->format('d M Y, H:i') }}</div>
                     </div>
-                    <div>
-                        <span class="text-gray-600">{{ __('admin/menu.info_updated_at') }}:</span>
-                        <div class="font-medium">{{ $menu->updated_at->format('d M Y, H:i') }}</div>
+                    <div class="p-4 bg-sub/50 rounded-lg">
+                        <span class="text-main-text/70">{{ __('admin/menu.info_updated_at') }}:</span>
+                        <div class="font-medium text-main-text">{{ $menu->updated_at->format('d M Y, H:i') }}</div>
                     </div>
-                    <div>
-                        <span class="text-gray-600">{{ __('admin/menu.status') }}:</span>
+                    <div class="p-4 bg-sub/50 rounded-lg">
+                        <span class="text-main-text/70">{{ __('admin/menu.status') }}:</span>
                         <div class="font-medium">
                             <span class="px-2 py-1 rounded-full text-xs {{ $menu->is_active ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800' }}">
                                 {{ $menu->is_active ? __('admin/menu.active') : __('admin/menu.inactive') }}
@@ -269,69 +275,71 @@
                     </div>
                 </div>
             </div>
-
-            <div class="bg-white rounded-lg shadow-sm p-6" x-show="previewData.en.name || previewData.ja.name">
-                <h3 class="text-lg font-semibold text-gray-900 mb-4">{{ __('admin/menu.menu_preview') }}</h3>
-                <div class="flex border-b border-gray-200 mb-4">
-                    <button type="button"
+            <div class="bg-white rounded-lg shadow-sm border border-disabled/50 p-6 transform transition-all duration-300 hover:shadow-lg" x-show="previewData.en.name || previewData.ja.name">
+                <h3 class="text-heading-lg font-semibold text-main-text mb-6 flex items-center">
+                    <i class="fas fa-eye text-brand mr-2 transform transition-all duration-300"></i>
+                    {{ __('admin/menu.menu_preview') }}
+                </h3>
+                <div class="flex border-b border-disabled/50 mb-4">
+                    <button type="button" 
                             @click="previewLang = 'en'"
-                            :class="previewLang === 'en' ? 'border-blue-500 text-blue-600' : 'border-transparent text-gray-500'"
-                            class="px-4 py-2 border-b-2 font-medium text-sm">
+                            :class="previewLang === 'en' ? 'border-brand text-brand' : 'border-transparent text-main-text/70'"
+                            class="px-4 py-2 border-b-2 font-medium text-button-md transition-all duration-300 hover:text-brand">
                         {{ __('admin/menu.english_preview') }}
                     </button>
                     <button type="button"
                             @click="previewLang = 'ja'"
-                            :class="previewLang === 'ja' ? 'border-blue-500 text-blue-600' : 'border-transparent text-gray-500'"
-                            class="px-4 py-2 border-b-2 font-medium text-sm">
+                            :class="previewLang === 'ja' ? 'border-brand text-brand' : 'border-transparent text-main-text/70'"
+                            class="px-4 py-2 border-b-2 font-medium text-button-md transition-all duration-300 hover:text-brand">
                         {{ __('admin/menu.japanese_preview') }}
                     </button>
                 </div>
                 <div class="max-w-sm">
-                    <div class="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow">
+                    <div class="border border-disabled/50 rounded-lg p-4 hover:shadow-md transition-all duration-300 hover:-translate-y-1 bg-sub/30">
                         <div class="flex items-center gap-3 mb-3">
-                            <div class="w-12 h-12 rounded-lg flex items-center justify-center text-white font-bold text-sm shadow-sm"
+                            <div class="w-12 h-12 rounded-lg flex items-center justify-center text-white font-bold text-body-md shadow-sm transform transition-all duration-300"
                                  :style="'background-color: ' + selectedColor">
-                                <span x-text="(previewLang === 'en' ? previewData.en.name : previewData.ja.name) ?
+                                <span x-text="(previewLang === 'en' ? previewData.en.name : previewData.ja.name) ? 
                                              (previewLang === 'en' ? previewData.en.name : previewData.ja.name).substring(0, 2).toUpperCase() : 'MN'"></span>
                             </div>
                             <div class="flex-1">
-                                <div class="text-sm font-medium text-gray-900"
-                                     x-text="previewLang === 'en' ? (previewData.en.name || 'Menu Name') : (previewData.ja.name || 'メニュー名')"></div>
-                                <div class="text-xs text-gray-500"
+                                <div class="text-body-md font-medium text-main-text" 
+                                     x-text="previewLang === 'en' ? (previewData.en.name || '{{ __('admin/menu.info_name') }}') : (previewData.ja.name || '{{ __('admin/menu.info_name') }}')"></div>
+                                <div class="text-body-md text-main-text/70" 
                                      x-text="previewData.time ? previewData.time + ' {{ __('admin/menu.time_unit_minutes_full') }}' : '- {{ __('admin/menu.time_unit_minutes_full') }}'"></div>
                             </div>
                         </div>
-                        <div class="text-sm font-medium text-gray-900"
+                        <div class="text-body-md font-medium text-main-text" 
                              x-text="previewData.price ? '$' + parseFloat(previewData.price).toLocaleString() : '$0'"></div>
-                        <div class="text-xs text-gray-500 mt-1 line-clamp-2"
+                        <div class="text-body-md text-main-text/70 mt-1 line-clamp-2" 
                              x-text="previewLang === 'en' ? (previewData.en.description || '{{ __('admin/menu.no_description') }}') : (previewData.ja.description || '{{ __('admin/menu.no_description') }}')"></div>
                     </div>
                 </div>
             </div>
-
-            <div class="flex items-center justify-between">
-                <div class="flex items-center gap-4">
-                     <a href="{{ route('admin.menu.index') }}"
-                       class="px-6 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors duration-200">
-                        {{ __('admin/menu.cancel') }}
-                    </a>
-                </div>
-                <div class="flex items-center gap-4">
-                    <button type="button"
-                            @click="showDeleteConfirmation()"
-                            class="px-6 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors duration-200 flex items-center gap-2">
-                        <i class="fas fa-trash"></i>
-                        {{ __('admin/menu.delete_menu_button') }}
-                    </button>
-                    <button type="submit"
-                            class="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors duration-200 flex items-center gap-2">
-                        <i class="fas fa-save"></i>
-                        {{ __('admin/menu.update_menu') }}
-                    </button>
+            <div class="bg-white rounded-lg shadow-sm border border-disabled/50 p-6 transform transition-all duration-300 hover:shadow-lg">
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center gap-4">
+                        <a href="{{ route('admin.menu.index') }}" 
+                           class="px-6 py-2 bg-secondary-button text-main-text rounded-lg hover:bg-secondary-button/80 transition-all duration-300 transform hover:-translate-y-0.5 text-button-md">
+                            {{ __('admin/menu.cancel') }}
+                        </a>
+                    </div>
+                    <div class="flex items-center gap-4">
+                        <button type="button"
+                                @click="showDeleteConfirmation()"
+                                class="px-6 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-all duration-300 transform hover:-translate-y-0.5 shadow-md hover:shadow-lg flex items-center gap-2 text-button-md">
+                            <i class="fas fa-trash"></i>
+                            {{ __('admin/menu.delete_menu_button') }}
+                        </button>
+                        <button type="submit" 
+                                class="px-8 py-2 bg-main-button text-white rounded-lg hover:bg-btn-main-hover transition-all duration-300 transform hover:-translate-y-0.5 shadow-md hover:shadow-lg flex items-center gap-2 text-button-lg">
+                            <i class="fas fa-save"></i>
+                            {{ __('admin/menu.update_menu') }}
+                        </button>
+                    </div>
                 </div>
             </div>
         </form>
-
         <div x-show="showDeleteModal"
              x-transition:enter="transition ease-out duration-300"
              x-transition:enter-start="opacity-0"
@@ -346,19 +354,19 @@
                     <div class="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-red-100">
                         <i class="fas fa-exclamation-triangle text-red-600"></i>
                     </div>
-                    <h3 class="text-lg font-medium text-gray-900 mt-2" x-text="lang.confirm_delete_title"></h3>
+                    <h3 class="text-heading-lg font-medium text-main-text mt-2" x-text="lang.confirm_delete_title"></h3>
                     <div class="mt-2 px-7 py-3">
-                        <p class="text-sm text-gray-500" 
+                        <p class="text-body-md text-main-text/70" 
                            x-html="lang.confirm_delete_text.replace(':name', `<strong>${previewData.en.name || previewData.ja.name || ''}</strong>`)"></p>
                     </div>
                     <div class="items-center px-4 py-3 flex gap-2 justify-center">
                         <button @click="showDeleteModal = false"
-                                class="px-4 py-2 bg-gray-200 text-gray-800 text-base font-medium rounded-md shadow-sm hover:bg-gray-300">
+                                class="px-4 py-2 bg-secondary-button text-main-text text-button-md font-medium rounded-md shadow-sm hover:bg-secondary-button/80 transition-all duration-300">
                             {{ __('admin/menu.cancel') }}
                         </button>
                         <button @click="confirmDelete()"
                                 :disabled="isDeleting"
-                                class="px-4 py-2 bg-red-600 text-white text-base font-medium rounded-md shadow-sm hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed">
+                                class="px-4 py-2 bg-red-600 text-white text-button-md font-medium rounded-md shadow-sm hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300">
                             <span x-show="!isDeleting">{{ __('admin/menu.delete_menu_button') }}</span>
                             <span x-show="isDeleting" class="flex items-center gap-2">
                                 <i class="fas fa-spinner fa-spin"></i>
@@ -369,7 +377,6 @@
                 </div>
             </div>
         </div>
-
         <div x-show="showSuccessModal"
              x-transition:enter="transition ease-out duration-300"
              x-transition:enter-start="opacity-0"
@@ -384,20 +391,19 @@
                     <div class="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-green-100">
                         <i class="fas fa-check-circle text-green-600"></i>
                     </div>
-                    <h3 class="text-lg font-medium text-gray-900 mt-2" x-text="lang.success_title"></h3>
+                    <h3 class="text-heading-lg font-medium text-main-text mt-2" x-text="lang.success_title"></h3>
                     <div class="mt-2 px-7 py-3">
-                        <p class="text-sm text-gray-500" x-text="successMessage"></p>
+                        <p class="text-body-md text-main-text/70" x-text="successMessage"></p>
                     </div>
                     <div class="items-center px-4 py-3">
                         <button @click="redirectToIndex()"
-                                class="px-4 py-2 bg-blue-600 text-white text-base font-medium rounded-md shadow-sm hover:bg-blue-700 w-full">
+                                class="px-4 py-2 bg-brand text-white text-button-md font-medium rounded-md shadow-sm hover:bg-link-hover w-full transition-all duration-300">
                             {{ __('admin/menu.js_messages.ok') }}
                         </button>
                     </div>
                 </div>
             </div>
         </div>
-        
         <div x-show="showErrorModal"
              x-transition:enter="transition ease-out duration-300"
              x-transition:enter-start="opacity-0"
@@ -412,20 +418,19 @@
                     <div class="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-red-100">
                         <i class="fas fa-exclamation-circle text-red-600"></i>
                     </div>
-                    <h3 class="text-lg font-medium text-gray-900 mt-2" x-text="lang.error_title"></h3>
+                    <h3 class="text-heading-lg font-medium text-main-text mt-2" x-text="lang.error_title"></h3>
                     <div class="mt-2 px-7 py-3">
-                        <p class="text-sm text-gray-500" x-text="errorMessage"></p>
+                        <p class="text-body-md text-main-text/70" x-text="errorMessage"></p>
                     </div>
                     <div class="items-center px-4 py-3">
                         <button @click="showErrorModal = false"
-                                class="px-4 py-2 bg-red-600 text-white text-base font-medium rounded-md shadow-sm hover:bg-red-700 w-full">
+                                class="px-4 py-2 bg-red-600 text-white text-button-md font-medium rounded-md shadow-sm hover:bg-red-700 w-full transition-all duration-300">
                             {{ __('admin/menu.js_messages.close') }}
                         </button>
                     </div>
                 </div>
             </div>
         </div>
-
     </div>
     <script>
         function menuEdit() {
