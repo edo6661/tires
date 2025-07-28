@@ -5,6 +5,7 @@ use App\Http\Middleware\SetLocale;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
@@ -17,11 +18,21 @@ return Application::configure(basePath: dirname(__DIR__))
             'admin' => AdminMiddleware::class,
             'setLocale' => SetLocale::class,
         ]);
-        $middleware->redirectGuestsTo(function (){
-            return route('login');
+        
+        $middleware->redirectGuestsTo(function () {
+            $locale = app()->getLocale() ?? config('app.fallback_locale', 'en');
+            return route('login', ['locale' => $locale]);
         });
 
     })
     ->withExceptions(function (Exceptions $exceptions): void {
-        //
+        $exceptions->render(function (NotFoundHttpException $e, $request) {
+            $locale = $request->route('locale') ?? config('app.fallback_locale', 'en');
+            
+            if (view()->exists("errors.{$locale}.404")) {
+                return response()->view("errors.{$locale}.404", [], 404);
+            }
+            
+            return response()->view('errors.404', ['locale' => $locale], 404);
+        });
     })->create();

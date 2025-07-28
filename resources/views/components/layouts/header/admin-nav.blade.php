@@ -29,6 +29,7 @@
             <i class="fas fa-bars text-lg"></i>
         </button>
          <div class="flex items-center gap-4">
+            
             <x-shared.link-hint-icon
                 href="{{ route('profile.show') }}"
                 label="Profil"
@@ -41,6 +42,13 @@
                 icon="fa-solid fa-right-from-bracket"  
                 position="bottom"
                 action="{{ route('logout') }}"
+            />
+            <x-shared.language-switcher 
+                style="dropdown" 
+                position="bottom-right" 
+                :show-flag="true" 
+                :show-name="false" 
+                :compact="true" 
             />
          </div>
     </div>

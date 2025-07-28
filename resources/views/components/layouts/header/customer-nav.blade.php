@@ -77,6 +77,7 @@
             </a>
         </div>
         <nav class="mt-4 md:mt-0 flex items-center gap-6">
+            
             <x-shared.link-hint-icon 
                 label="Calendar" 
                 icon="fa-solid fa-calendar-days" 
@@ -125,6 +126,13 @@
                     activePath="login*"
                 />
             @endguest
+            <x-shared.language-switcher 
+                style="dropdown" 
+                position="bottom-right" 
+                :show-flag="true" 
+                :show-name="false" 
+                :compact="true" 
+            />
         </nav>
     </div>
 </header>

@@ -3,9 +3,9 @@
 namespace App\Repositories;
 
 use App\Models\Menu;
-use App\Repositories\MenuRepositoryInterface;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Pagination\LengthAwarePaginator;
+use Illuminate\Support\Facades\App;
 
 class MenuRepository implements MenuRepositoryInterface
 {
@@ -18,25 +18,36 @@ class MenuRepository implements MenuRepositoryInterface
 
     public function getAll(): Collection
     {
-        return $this->model->orderBy('display_order')->get();
+        return $this->model->withTranslations()
+            ->ordered()
+            ->get();
     }
 
     public function getActive(): Collection
     {
-        return $this->model->where('is_active', true)
-            ->orderBy('display_order')
+        return $this->model->active()
+            ->withTranslations()
+            ->ordered()
             ->get();
     }
 
     public function getPaginated(int $perPage = 15): LengthAwarePaginator
     {
-        return $this->model->orderBy('display_order')
+        return $this->model->withTranslations()
+            ->ordered()
             ->paginate($perPage);
     }
 
     public function findById(int $id): ?Menu
     {
-        return $this->model->find($id);
+        return $this->model->withTranslations()
+            ->find($id);
+    }
+
+    public function findByIdWithLocale(int $id, string $locale = null): ?Menu
+    {
+        return $this->model->withTranslations($locale)
+            ->find($id);
     }
 
     public function create(array $data): Menu
@@ -44,17 +55,38 @@ class MenuRepository implements MenuRepositoryInterface
         if (!isset($data['display_order'])) {
             $data['display_order'] = $this->model->max('display_order') + 1;
         }
-        return $this->model->create($data);
+
+        $translations = $data['translations'] ?? [];
+        unset($data['translations']);
+
+        $menu = $this->model->create($data);
+
+        // Set translations
+        foreach ($translations as $locale => $translationData) {
+            $menu->setTranslation($locale, $translationData);
+        }
+
+        return $menu->fresh(['translations']);
     }
 
     public function update(int $id, array $data): ?Menu
     {
         $menu = $this->findById($id);
-        if ($menu) {
-            $menu->update($data);
-            return $menu;
+        if (!$menu) {
+            return null;
         }
-        return null;
+
+        $translations = $data['translations'] ?? [];
+        unset($data['translations']);
+
+        $menu->update($data);
+
+        // Update translations
+        foreach ($translations as $locale => $translationData) {
+            $menu->setTranslation($locale, $translationData);
+        }
+
+        return $menu->fresh(['translations']);
     }
 
     public function delete(int $id): bool
@@ -87,10 +119,12 @@ class MenuRepository implements MenuRepositoryInterface
 
     public function getByDisplayOrder(): Collection
     {
-        return $this->model->where('is_active', true)
-            ->orderBy('display_order')
+        return $this->model->active()
+            ->withTranslations()
+            ->ordered()
             ->get();
     }
+
     public function bulkDelete(array $ids): bool
     {
         try {
@@ -99,5 +133,18 @@ class MenuRepository implements MenuRepositoryInterface
         } catch (\Exception $e) {
             return false;
         }
+    }
+
+    /**
+     * Search menus by translated name
+     */
+    public function searchByName(string $search, string $locale = null): Collection
+    {
+        $locale = $locale ?: App::getLocale();
+        
+        return $this->model->whereTranslation('name', 'ILIKE', "%{$search}%", $locale)
+            ->withTranslations($locale)
+            ->ordered()
+            ->get();
     }
 }
