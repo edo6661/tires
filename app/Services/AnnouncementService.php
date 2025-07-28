@@ -1,6 +1,5 @@
 <?php
 
-
 namespace App\Services;
 
 use App\Models\Announcement;
@@ -27,6 +26,11 @@ class AnnouncementService implements AnnouncementServiceInterface
         return $this->announcementRepository->getActive();
     }
 
+    public function getPublishedAnnouncements(): Collection
+    {
+        return $this->announcementRepository->getPublished();
+    }
+
     public function getPaginatedAnnouncements(int $perPage = 15): LengthAwarePaginator
     {
         return $this->announcementRepository->getPaginated($perPage);
@@ -39,6 +43,18 @@ class AnnouncementService implements AnnouncementServiceInterface
 
     public function createAnnouncement(array $data): Announcement
     {
+        // Validasi bahwa translations untuk EN dan JA harus ada
+        if (!isset($data['translations']) ||
+            !isset($data['translations']['en']) ||
+            !isset($data['translations']['ja'])) {
+            throw new \InvalidArgumentException('Translations untuk English dan Japanese wajib diisi.');
+        }
+
+        if (empty($data['translations']['en']['title']) ||
+            empty($data['translations']['ja']['title'])) {
+            throw new \InvalidArgumentException('Title untuk English dan Japanese wajib diisi.');
+        }
+
         if (!isset($data['published_at'])) {
             $data['published_at'] = now();
         }
@@ -48,6 +64,19 @@ class AnnouncementService implements AnnouncementServiceInterface
 
     public function updateAnnouncement(int $id, array $data): ?Announcement
     {
+        // Validasi translations jika ada
+        if (isset($data['translations'])) {
+            if (!isset($data['translations']['en']) ||
+                !isset($data['translations']['ja'])) {
+                throw new \InvalidArgumentException('Translations untuk English dan Japanese wajib diisi.');
+            }
+
+            if (empty($data['translations']['en']['title']) ||
+                empty($data['translations']['ja']['title'])) {
+                throw new \InvalidArgumentException('Title untuk English dan Japanese wajib diisi.');
+            }
+        }
+
         return $this->announcementRepository->update($id, $data);
     }
 
@@ -59,5 +88,18 @@ class AnnouncementService implements AnnouncementServiceInterface
     public function toggleAnnouncementStatus(int $id): bool
     {
         return $this->announcementRepository->toggleActive($id);
+    }
+
+    public function bulkDeleteAnnouncements(array $ids): bool
+    {
+        if (empty($ids)) {
+            throw new \InvalidArgumentException('IDs tidak boleh kosong.');
+        }
+        return $this->announcementRepository->bulkDelete($ids);
+    }
+
+    public function searchAnnouncementsByTitle(string $search, ?string $locale = null): Collection
+    {
+        return $this->announcementRepository->searchByTitle($search, $locale);
     }
 }

@@ -17,4 +17,6 @@ interface AnnouncementRepositoryInterface
     public function update(int $id, array $data): ?Announcement;
     public function delete(int $id): bool;
     public function toggleActive(int $id): bool;
+    public function bulkDelete(array $ids): bool;
+    public function searchByTitle(string $search, ?string $locale = null): Collection;
 }

@@ -16,4 +16,7 @@ interface AnnouncementServiceInterface
     public function updateAnnouncement(int $id, array $data): ?Announcement;
     public function deleteAnnouncement(int $id): bool;
     public function toggleAnnouncementStatus(int $id): bool;
+    public function bulkDeleteAnnouncements(array $ids): bool;
+
+    public function searchAnnouncementsByTitle(string $search, ?string $locale = null): Collection;
 }
