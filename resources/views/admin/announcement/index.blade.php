@@ -283,6 +283,13 @@
                 allItemIds: [], 
                 deleteTarget: null,
                 deleteMessage: '',
+                translations: {
+                    deleteSingleConfirm: "Are you sure you want to delete this announcement?",
+                    deleteMultipleConfirm: "Are you sure you want to delete :count announcement(s)?",
+                    selectAtLeastOne: "Please select at least one announcement",
+                    errorStatus: "An error occurred while changing the status",
+                    errorDelete: "An error occurred while deleting",
+                },
                 init() {
                     this.allItemIds = Array.from(document.querySelectorAll('tbody input[type="checkbox"][value]'))
                                         .map(cb => parseInt(cb.value));
@@ -292,25 +299,26 @@
                 },
                 deleteSingle(id) {
                     this.deleteTarget = [id];
-                    this.deleteMessage = 'Are you sure you want to delete this announcement?';
+                    this.deleteMessage = this.translations.deleteSingleConfirm;
                     this.showDeleteModal = true;
                 },
                 deleteSelected() {
                     if (this.selectedItems.length === 0) return;
                     this.deleteTarget = [...this.selectedItems];
-                    this.deleteMessage = `Are you sure you want to delete ${this.selectedItems.length} announcement(s)?`;
+                    this.deleteMessage = this.translations.deleteMultipleConfirm.replace(':count', this.selectedItems.length);
                     this.showDeleteModal = true;
                 },
                 async toggleStatusSelected(status) {
                     if (this.selectedItems.length === 0) {
-                        alert('Please select at least one announcement');
+                        alert(this.translations.selectAtLeastOne);
                         return;
                     }
                     try {
                         const formData = new FormData();
                         formData.append('ids', JSON.stringify(this.selectedItems));
                         formData.append('status', status);
-                        const response = await fetch('/admin/announcement/bulk-toggle-status', {
+                        
+                        const response = await fetch('{{ route("admin.announcement.bulkToggleStatus") }}', {
                             method: 'POST',
                             headers: {
                                 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
@@ -321,35 +329,35 @@
                         if (result.success) {
                             window.location.reload();
                         } else {
-                            alert(result.message || 'An error occurred while changing the status');
+                            alert(result.message || this.translations.errorStatus);
                         }
                     } catch (error) {
                         console.error('Error:', error);
-                        alert('An error occurred while changing the status');
+                        alert(this.translations.errorStatus);
                     }
                 },
                 async confirmDelete() {
                     try {
                         if (this.deleteTarget.length === 1) {
-                            const formData = new FormData();
-                            formData.append('ids', JSON.stringify(this.deleteTarget));
-
-                            const response = await fetch('/admin/announcement/bulk-delete', {
-                                method: 'POST',
+                            const url = '{{ route("admin.announcement.destroy", ["announcement" => "__ID__"]) }}'.replace('__ID__', this.deleteTarget[0]);
+                            const response = await fetch(url, {
+                                method: 'DELETE',
                                 headers: {
                                     'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
-                                },
-                                body: formData
+                                }
                             });
-                            if (response.ok) {
+                            const result = await response.json();
+                            if (result.success || response.ok) {
                                 window.location.reload();
                             } else {
-                                alert('An error occurred while deleting');
+                                alert(result.message || this.translations.errorDelete);
                             }
                         } else {
                             const formData = new FormData();
-                            formData.append('ids', JSON.stringify(this.deleteTarget));
-                            const response = await fetch('/admin/announcement/bulk-delete', {
+                            this.deleteTarget.forEach(id => {
+                                    formData.append('ids[]', id);
+                                });                            
+                            const response = await fetch('{{ route("admin.announcement.bulkDelete") }}', {
                                 method: 'POST',
                                 headers: {
                                     'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
@@ -360,35 +368,37 @@
                             if (result.success) {
                                 window.location.reload();
                             } else {
-                                alert(result.message || 'An error occurred while deleting');
+                                alert(result.message || this.translations.errorDelete);
                             }
                         }
                     } catch (error) {
                         console.error('Error:', error);
-                        alert('An error occurred while deleting');
+                        alert(this.translations.errorDelete);
                     }
                     this.showDeleteModal = false;
                 }
             }
         }
+
         async function toggleStatus(id) {
             try {
                 const formData = new FormData();
-                const response = await fetch(`/admin/announcement/${id}/toggle-status`, {
+                const response = await fetch('{{ route("admin.announcement.toggleStatus", ["id" => "__ID__"]) }}'.replace('__ID__', id), {
                     method: 'POST',
                     headers: {
                         'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
                     },
                     body: formData
                 });
-                if (response.ok) {
+                const result = await response.json();
+                if (result.success) {
                     window.location.reload();
                 } else {
-                    alert('An error occurred while changing the status');
+                    alert(result.error || "An error occurred while changing the status");
                 }
             } catch (error) {
                 console.error('Error:', error);
-                alert('An error occurred while changing the status');
+                alert("An error occurred while changing the status");
             }
         }
     </script>

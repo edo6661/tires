@@ -7,6 +7,7 @@ use App\Services\AnnouncementServiceInterface;
 use App\Http\Requests\AnnouncementRequest;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Support\Facades\Log;
 
 class AnnouncementController extends Controller
 {
@@ -141,6 +142,7 @@ class AnnouncementController extends Controller
 
     public function bulkDelete(Request $request): JsonResponse
     {
+        Log::info("Bulk delete request received with IDs: " . json_encode($request->ids));
         try {
             $request->validate([
                 'ids' => 'required|array',

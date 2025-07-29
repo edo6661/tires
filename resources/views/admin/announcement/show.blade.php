@@ -198,16 +198,19 @@
     </div>
     <script>
         let deleteId = null;
+        
         async function toggleStatus(id) {
             try {
                 const formData = new FormData();
-                const response = await fetch(`/admin/announcement/${id}/toggle-status`, {
+                const url = '{{ route("admin.announcement.toggleStatus", ["id" => "__ID__"]) }}'.replace('__ID__', id);
+                const response = await fetch(url, {
                     method: 'POST',
                     headers: {
                         'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
                     },
                     body: formData
                 });
+                
                 if (response.ok) {
                     window.location.reload();
                 } else {
@@ -218,25 +221,31 @@
                 alert('An error occurred while changing the status');
             }
         }
+        
         function confirmDelete(id) {
             deleteId = id;
             document.getElementById('deleteModal').classList.remove('hidden');
         }
+        
         function hideDeleteModal() {
             deleteId = null;
             document.getElementById('deleteModal').classList.add('hidden');
         }
+        
         async function executeDelete() {
             if (!deleteId) return;
+            
             try {
-                const response = await fetch(`/admin/announcement/${deleteId}`, {
+                const url = '{{ route("admin.announcement.destroy", ["announcement" => "__ID__"]) }}'.replace('__ID__', deleteId);
+                const response = await fetch(url, {
                     method: 'DELETE',
                     headers: {
                         'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
                     }
                 });
+                
                 if (response.ok) {
-                    window.location.href = '{{ route('admin.announcement.index') }}';
+                    window.location.href = '{{ route("admin.announcement.index") }}';
                 } else {
                     alert('An error occurred while deleting the announcement');
                 }
@@ -244,9 +253,11 @@
                 console.error('Error:', error);
                 alert('An error occurred while deleting the announcement');
             }
+            
             hideDeleteModal();
         }
-        document.getElementById('deleteModal').addEventListener('click', function(e) {
+        
+        document.getElementById('deleteModal')?.addEventListener('click', function(e) {
             if (e.target === this) {
                 hideDeleteModal();
             }

@@ -13,10 +13,6 @@
 </head>
 <body class="font-en">
     <div class=" relative" x-data="{ sidebarOpen: false }">
-        <h1>{{ __('app.welcome') }}</h1>
-        <a href="#">{{ __('app.dashboard') }}</a>
-
-        <hr>
         @auth
             @if(auth()->user()->isAdmin())
                 <x-layouts.header.admin-nav />
