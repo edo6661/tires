@@ -2,7 +2,7 @@
     <div class="flex flex-col items-center justify-center py-8">
         <div class="w-full max-w-xl bg-white p-6 rounded-lg shadow-sm border border-disabled hover:shadow-lg transition-shadow duration-300">
             <div class="text-center mb-8">
-                <h1 class="text-title-lg font-bold text-brand">RESERVATION ID</h1>
+                <h1 class="text-title-lg font-bold text-brand">{{ __('login.title') }}</h1>
             </div>
             @if(session('status'))
                 <div class="bg-brand/10 text-brand p-4 rounded mb-4 border border-brand/20">
@@ -15,7 +15,7 @@
                     <input type="hidden" name="redirect" value="{{ request('redirect') }}">
                 @endif
                 <div>
-                    <label for="email" class="block text-body-md font-medium text-main-text mb-1">Email Address*</label>
+                    <label for="email" class="block text-body-md font-medium text-main-text mb-1">{{ __('login.email_label') }}</label>
                     <div class="relative">
                         <span class="absolute inset-y-0 left-0 flex items-center pl-3">
                             <i class="fa-solid fa-envelope text-secondary-button"></i>
@@ -25,7 +25,7 @@
                             id="email"
                             name="email"
                             class="w-full px-3 py-2 pl-10 border border-disabled rounded-md focus:outline-none focus:ring-2 focus:ring-brand/50 focus:border-brand transition-all duration-200"
-                            placeholder="example@reservation.be"
+                            placeholder="{{ __('login.email_placeholder') }}"
                             value="{{ old('email') }}"
                             required
                             autocomplete="email"
@@ -37,7 +37,7 @@
                     @enderror
                 </div>
                 <div x-data="{ showPassword: false }">
-                    <label for="password" class="block text-body-md font-medium text-main-text mb-1">Password*</label>
+                    <label for="password" class="block text-body-md font-medium text-main-text mb-1">{{ __('login.password_label') }}</label>
                     <div class="relative">
                         <span class="absolute inset-y-0 left-0 flex items-center pl-3">
                              <i class="fa-solid fa-lock text-secondary-button"></i>
@@ -47,7 +47,7 @@
                             id="password"
                             name="password"
                             class="w-full px-3 py-2 pl-10 border border-disabled rounded-md focus:outline-none focus:ring-2 focus:ring-brand/50 focus:border-brand transition-all duration-200 pr-10"
-                            placeholder="••••••••"
+                            placeholder="{{ __('login.password_placeholder') }}"
                             required
                             autocomplete="current-password"
                         >
@@ -73,24 +73,24 @@
                             {{ old('remember') ? 'checked' : '' }}
                         >
                         <label for="remember" class="ml-2 block text-body-md text-main-text">
-                           Remember me
+                            {{ __('login.remember_me') }}
                         </label>
                     </div>
                     <a href="{{ route('forgot-password') }}" class="text-sm text-link hover:text-link-hover transition-colors duration-200">
-                        Forgot your password?
+                        {{ __('login.forgot_password') }}
                     </a>
                 </div>
                 <button type="submit" class="w-full bg-main-button hover:bg-btn-main-hover text-footer-text font-semibold py-2.5 px-4 rounded-md transition-all duration-300 transform hover:scale-[1.01]">
-                    Login
+                    {{ __('login.login_button') }}
                 </button>
             </form>
             <div class="mt-8 pt-8 border-t border-disabled text-center">
                 <p class="text-main-text/80">
-                    Don't have a RESERVATION account?
+                    {{ __('login.no_account_prompt') }}
                 </p>
                 <a href="{{ route('register') . (request('redirect') ? '?redirect=' . urlencode(request('redirect')) : '') }}" 
                    class="mt-2 inline-block text-link hover:text-link-hover transition-colors duration-200 font-medium">
-                    Sign up now
+                    {{ __('login.signup_link') }}
                 </a>
             </div>
         </div>
