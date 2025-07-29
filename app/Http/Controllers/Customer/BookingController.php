@@ -20,7 +20,7 @@ class BookingController extends Controller
         protected MenuService $menuService,
         protected UserService $userService,
     ) {}
-    public function firstStep($menuId): View
+    public function firstStep($locale, $menuId): View
     {
         $menu = $this->menuService->findMenu($menuId);
         $currentMonth = Carbon::now()->startOfMonth();
@@ -265,7 +265,7 @@ class BookingController extends Controller
             ], 500);    
         }
     }
-    public function getMenuDetails($menuId): JsonResponse
+    public function getMenuDetails($locale, $menuId): JsonResponse
     {
         try {
             $menu = $this->menuService->findMenu($menuId);
