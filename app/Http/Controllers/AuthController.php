@@ -70,7 +70,7 @@ class AuthController extends Controller
         }
         return back()->withErrors(['email' => 'Terjadi kesalahan saat mengirim email reset password.']);
     }
-    public function showResetPasswordForm(Request $request, string $token): View
+    public function showResetPasswordForm(Request $request, $locale, string $token): View
     {
         return view('auth.reset-password', [
             'token' => $token,
