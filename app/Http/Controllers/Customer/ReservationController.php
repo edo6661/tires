@@ -13,7 +13,7 @@ class ReservationController extends Controller
         $reservations = $this->reservationService->getReservationsByUser(auth()->id());
         return view('customer.reservation.index', compact('reservations'));
     }
-    public function show($id)
+    public function show($locale, $id)
     {
         $reservation = $this->reservationService->findReservation($id);
         if (!$reservation || $reservation->user_id !== auth()->id()) {

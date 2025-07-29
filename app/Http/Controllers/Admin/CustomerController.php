@@ -31,7 +31,7 @@ class CustomerController extends Controller
         return view('admin.customer.index', compact('customers', 'customerTypeCounts'));
     }
 
-    public function show(int $id)
+    public function show($locale, int $id)
     {
         $customerDetail = $this->customerService->getCustomerDetail($id);
         

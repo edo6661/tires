@@ -38,7 +38,7 @@ class PaymentController extends Controller
         }
     }
 
-    public function show(int $id)
+    public function show($locale, int $id)
     {
         $payment = $this->paymentService->findPayment($id);
         if (!$payment) {
@@ -48,7 +48,7 @@ class PaymentController extends Controller
         return view('admin.payment.show', compact('payment'));
     }
 
-    public function edit(int $id)
+    public function edit($locale, int $id)
     {
         $payment = $this->paymentService->findPayment($id);
         if (!$payment) {
@@ -58,7 +58,7 @@ class PaymentController extends Controller
         return view('admin.payment.edit', compact('payment'));
     }
 
-    public function update(PaymentRequest $request, int $id)
+    public function update(PaymentRequest $request, $locale, int $id)
     {
         try {
             $payment = $this->paymentService->updatePayment($id, $request->validated());
@@ -75,7 +75,7 @@ class PaymentController extends Controller
         }
     }
 
-    public function destroy(int $id)
+    public function destroy($locale, int $id)
     {
         try {
             $deleted = $this->paymentService->deletePayment($id);

@@ -42,7 +42,7 @@ class QuestionnaireController extends Controller
         }
     }
 
-    public function show(int $id)
+    public function show($locale, int $id)
     {
         $questionnaire = $this->questionnaireService->findQuestionnaire($id);
         if (!$questionnaire) {
@@ -52,7 +52,7 @@ class QuestionnaireController extends Controller
         return view('admin.questionnaire.show', compact('questionnaire'));
     }
 
-    public function edit(int $id)
+    public function edit($locale, int $id)
     {
         $questionnaire = $this->questionnaireService->findQuestionnaire($id);
         if (!$questionnaire) {
@@ -62,7 +62,7 @@ class QuestionnaireController extends Controller
         return view('admin.questionnaire.edit', compact('questionnaire'));
     }
 
-    public function update(QuestionnaireRequest $request, int $id)
+    public function update(QuestionnaireRequest $request, $locale, int $id)
     {
         try {
             $questionnaire = $this->questionnaireService->updateQuestionnaire($id, $request->validated());
@@ -83,7 +83,7 @@ class QuestionnaireController extends Controller
         }
     }
 
-    public function destroy(int $id)
+    public function destroy($locale, int $id)
     {
         try {
             $deleted = $this->questionnaireService->deleteQuestionnaire($id);

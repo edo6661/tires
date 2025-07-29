@@ -44,7 +44,7 @@ class UserController extends Controller
         }
     }
 
-    public function show(int $id): View
+    public function show($locale, int $id): View
     {
         $user = $this->userService->findUser($id);
         
@@ -55,7 +55,7 @@ class UserController extends Controller
         return view('admin.users.show', compact('user'));
     }
 
-    public function edit(int $id): View
+    public function edit($locale, int $id): View
     {
         $user = $this->userService->findUser($id);
         
@@ -66,7 +66,7 @@ class UserController extends Controller
         return view('admin.users.edit', compact('user'));
     }
 
-    public function update(UserRequest $request, int $id): RedirectResponse
+    public function update(UserRequest $request, $locale, int $id): RedirectResponse
     {
         try {
             $user = $this->userService->updateUser($id, $request->validated());
@@ -85,7 +85,7 @@ class UserController extends Controller
         }
     }
 
-    public function destroy(int $id): RedirectResponse
+    public function destroy($locale, int $id): RedirectResponse
     {
         try {
             $success = $this->userService->deleteUser($id);
@@ -195,7 +195,7 @@ class UserController extends Controller
     //     return view('admin.users.by-type', compact('users', 'type'));
     // }
 
-    // public function resetPassword(Request $request, int $id): JsonResponse
+    // public function resetPassword(Request $request, $locale, int $id): JsonResponse
     // {
     //     $request->validate([
     //         'new_password' => 'required|string|min:8|confirmed'
@@ -223,7 +223,7 @@ class UserController extends Controller
     //     }
     // }
 
-    // public function changePassword(Request $request, int $id): JsonResponse
+    // public function changePassword(Request $request, $locale, int $id): JsonResponse
     // {
     //     $request->validate([
     //         'current_password' => 'required|string',

@@ -53,7 +53,7 @@ class BlockedPeriodController extends Controller
                 ->withInput();
         }
     }
-    public function show(int $id)
+    public function show($locale,int $id)
     {
         $blockedPeriod = $this->blockedPeriodService->findBlockedPeriod($id);
         if (!$blockedPeriod) {
@@ -62,7 +62,7 @@ class BlockedPeriodController extends Controller
         }
         return view('admin.blocked-period.show', compact('blockedPeriod'));
     }
-    public function edit(int $id)
+    public function edit($locale,int $id)
     {
         $blockedPeriod = $this->blockedPeriodService->findBlockedPeriod($id);
         if (!$blockedPeriod) {
@@ -72,7 +72,7 @@ class BlockedPeriodController extends Controller
         $menus = $this->menuService->getActiveMenus();
         return view('admin.blocked-period.edit', compact('blockedPeriod', 'menus'));
     }
-    public function update(BlockedPeriodRequest $request, int $id)
+    public function update(BlockedPeriodRequest $request, $locale,int $id)
     {
         try {
             $validated = $request->validated();
@@ -98,7 +98,7 @@ class BlockedPeriodController extends Controller
                 ->withInput();
         }
     }
-    public function destroy(int $id)
+    public function destroy($locale,int $id)
     {
         try {
             $deleted = $this->blockedPeriodService->deleteBlockedPeriod($id);

@@ -22,7 +22,7 @@ class ContactController extends Controller
         $stats = $this->contactService->getContactStats();
         return view('admin.contact.index', compact('contacts', 'stats'));
     }
-    public function show(int $id)
+    public function show($locale,int $id)
     {
         $contact = $this->contactService->findContact($id);
         if (!$contact) {
@@ -31,7 +31,7 @@ class ContactController extends Controller
         }
         return view('admin.contact.show', compact('contact'));
     }
-    public function update(Request $request, int $id)
+    public function update(Request $request, $locale,int $id)
     {
         try {
             $validatedData = $request->validate([
@@ -51,7 +51,7 @@ class ContactController extends Controller
                 ->withInput();
         }
     }
-    public function destroy(int $id): JsonResponse
+    public function destroy($locale,int $id): JsonResponse
     {
         try {
             $deleted = $this->contactService->deleteContact($id);
@@ -72,7 +72,7 @@ class ContactController extends Controller
             ], 500);
         }
     }
-    public function reply(Request $request, int $id): JsonResponse
+    public function reply(Request $request, $locale,int $id): JsonResponse
     {
         try {
             $request->validate([

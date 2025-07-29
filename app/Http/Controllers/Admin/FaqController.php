@@ -38,7 +38,7 @@ class FaqController extends Controller
         }
     }
 
-    public function show(int $id)
+    public function show($locale, int $id)
     {
         $faq = $this->faqService->findFaq($id);
         if (!$faq) {
@@ -48,7 +48,7 @@ class FaqController extends Controller
         return view('admin.faq.show', compact('faq'));
     }
 
-    public function edit(int $id)
+    public function edit($locale, int $id)
     {
         $faq = $this->faqService->findFaq($id);
         if (!$faq) {
@@ -58,7 +58,7 @@ class FaqController extends Controller
         return view('admin.faq.edit', compact('faq'));
     }
 
-    public function update(FaqRequest $request, int $id)
+    public function update(FaqRequest $request, $locale, int $id)
     {
         try {
             $faq = $this->faqService->updateFaq($id, $request->validated());
@@ -75,7 +75,7 @@ class FaqController extends Controller
         }
     }
 
-    public function destroy(int $id)
+    public function destroy($locale, int $id)
     {
         try {
             $deleted = $this->faqService->deleteFaq($id);
@@ -91,7 +91,7 @@ class FaqController extends Controller
         }
     }
 
-    public function toggleStatus(int $id)
+    public function toggleStatus($locale, int $id)
     {
         try {
             $toggled = $this->faqService->toggleFaqStatus($id);

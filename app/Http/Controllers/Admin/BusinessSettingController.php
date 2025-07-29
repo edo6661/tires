@@ -20,7 +20,7 @@ class BusinessSettingController extends Controller
         return view('admin.business-setting.index', compact('businessSettings'));
     }
 
-    public function edit(int $id)
+    public function edit($locale, int $id)
     {
         $businessSettings = $this->businessSettingService->getBusinessSettings();
         return view('admin.business-setting.edit', compact('businessSettings'));

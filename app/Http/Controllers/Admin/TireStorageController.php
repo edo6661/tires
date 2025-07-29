@@ -58,7 +58,7 @@ class TireStorageController extends Controller
         }
     }
 
-    public function show(int $id): View
+    public function show($locale, int $id): View
     {
         $tireStorage = $this->tireStorageService->findTireStorage($id);
         
@@ -69,7 +69,7 @@ class TireStorageController extends Controller
         return view('admin.tire-storages.show', compact('tireStorage'));
     }
 
-    public function edit(int $id): View
+    public function edit($locale, int $id): View
     {
         $tireStorage = $this->tireStorageService->findTireStorage($id);
         $users = $this->userService->getCustomers();
@@ -82,7 +82,7 @@ class TireStorageController extends Controller
         return view('admin.tire-storages.edit', compact('tireStorage', 'users'));
     }
 
-    public function update(TireStorageRequest $request, int $id): RedirectResponse
+    public function update(TireStorageRequest $request, $locale, int $id): RedirectResponse
     {
         try {
             $tireStorage = $this->tireStorageService->updateTireStorage($id, $request->validated());
@@ -101,7 +101,7 @@ class TireStorageController extends Controller
         }
     }
 
-    public function destroy(int $id): RedirectResponse
+    public function destroy($locale, int $id): RedirectResponse
     {
         try {
             $success = $this->tireStorageService->deleteTireStorage($id);
@@ -119,7 +119,7 @@ class TireStorageController extends Controller
         }
     }
 
-    public function end(int $id): JsonResponse
+    public function end($locale, int $id): JsonResponse
     {
         try {
             $success = $this->tireStorageService->endTireStorage($id);
