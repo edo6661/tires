@@ -1,5 +1,5 @@
 <x-layouts.app>
-    <div class="max-w-4xl mx-auto space-y-6">
+    <div class="container space-y-6">
         <div class="flex items-center justify-between">
             <div class="flex items-center gap-4">
                 <a href="{{ route('admin.announcement.index') }}"

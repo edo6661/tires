@@ -1,5 +1,5 @@
 <x-layouts.app>
-    <div class="max-w-4xl mx-auto">
+    <div class="container">
         <div class="bg-white rounded-lg shadow-sm border border-disabled/50 p-6 mb-6" x-data="finalStepHandler()">
             <div class="text-center py-8">
                 <div x-show="loading || bookingSuccess" class="mb-6">

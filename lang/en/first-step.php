@@ -45,5 +45,12 @@ return [
         'tooltip_past_date' => 'Past date - unavailable',
         'alert_select_date_time' => 'Please select both date and time',
         'date_locale' => 'en-US',
-    ]
+    ],
+
+    'indicator' => [
+        'blocked' => 'Blocked',
+        'reserved' => 'Reserved',
+    ],
+
+
 ];

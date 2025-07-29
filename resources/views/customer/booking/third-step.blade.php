@@ -1,5 +1,5 @@
 <x-layouts.app>
-    <div class="max-w-4xl mx-auto">
+    <div class="container">
         <div class="bg-white rounded-lg shadow-sm border border-disabled/50 p-6 mb-6 transform transition-all duration-300 hover:shadow-lg">
             <h1 class="text-title-lg font-bold text-main-text mb-2">
                 @auth

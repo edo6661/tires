@@ -45,5 +45,9 @@ return [
         'tooltip_past_date' => '過去の日付 - 選択不可',
         'alert_select_date_time' => '日付と時間を選択してください',
         'date_locale' => 'ja-JP',
-    ]
+    ],
+      'indicator' => [
+        'blocked' => 'ブロック',
+        'reserved' => '予約済み',
+    ],
 ];

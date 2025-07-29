@@ -1,6 +1,6 @@
 {{-- resources/views/admin/tire-storages/edit.blade.php --}}
 <x-layouts.app>
-    <div class="max-w-4xl mx-auto space-y-6">
+    <div class="container space-y-6">
         <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
             <div>
                 <h1 class="text-2xl font-bold text-gray-900">Edit Tire Storage</h1>

@@ -211,10 +211,10 @@ class BookingController extends Controller
             $indicator = '';
             if ($isBlocked) {
                 $status = 'blocked';
-                $indicator = 'Blocked';
+                $indicator = __('first-step.indicator.blocked'); 
             } elseif ($hasReservation) {
                 $status = 'reserved';
-                $indicator = 'Reserved';
+                $indicator = __('first-step.indicator.reserved');
             }
             $availableHours[] = [
                 'time' => $hour,

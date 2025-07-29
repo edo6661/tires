@@ -1,5 +1,5 @@
 <x-layouts.app>
-    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8"
+    <div class="container px-4 sm:px-6 lg:px-8 py-8"
          x-data="blockedPeriodForm({
             menus: {{ Js::from($menus) }},
             old_input: {{ Js::from(session()->getOldInput()) }},

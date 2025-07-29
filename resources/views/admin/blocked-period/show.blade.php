@@ -1,5 +1,5 @@
 <x-layouts.app>
-    <div class="max-w-4xl mx-auto py-8 px-4 sm:px-6 lg:px-8" x-data="{ loaded: false }" x-init="setTimeout(() => loaded = true, 100)">
+    <div class="container py-8 px-4 sm:px-6 lg:px-8" x-data="{ loaded: false }" x-init="setTimeout(() => loaded = true, 100)">
         <div class="flex justify-between items-center mb-6" 
              x-show="loaded"
              x-transition:enter="transition-all ease-out duration-500"
