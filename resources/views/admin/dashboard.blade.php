@@ -98,6 +98,7 @@
                             <thead class="bg-sub/40">
                                 <tr>
                                     <th class="px-4 py-3 text-left text-brand font-semibold rounded-tl-lg">{{ __('admin/dashboard.reservation.time') }}</th>
+                                    <th class="px-4 py-3 text-left text-brand font-semibold">{{ __('admin/dashboard.reservation.service') }}</th>
                                     <th class="px-4 py-3 text-left text-brand font-semibold rounded-tr-lg">{{ __('admin/dashboard.reservation.customer_name') }}</th>
                                 </tr>
                             </thead>
@@ -105,6 +106,7 @@
                                 @forelse($todayReservations as $reservation)
                                     <tr class="hover:bg-sub/20 transition-all duration-300 transform">
                                         <td class="px-4 py-3 text-main-text">{{ $reservation->reservation_datetime->format('m/d H:i') }}</td>
+                                        <td class="px-4 py-3 text-main-text/80">{{ $reservation->menu->name }}</td>
                                         <td class="px-4 py-3 text-main-text font-medium">
                                             {{ $reservation->getFullName() }}
                                         </td>
