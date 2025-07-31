@@ -14,7 +14,6 @@
                 </a>
             </div>
         </div>
-
         {{-- Stats Cards --}}
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
             <div class="bg-white rounded-lg shadow-sm p-6">
@@ -68,7 +67,6 @@
                 </div>
             </div>
         </div>
-
         {{-- Session Messages --}}
         @if(session('success'))
             <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded-lg" x-data="{ show: true }" x-show="show">
@@ -96,7 +94,6 @@
                 </div>
             </div>
         @endif
-
         {{-- Filter & Search --}}
         <div class="bg-white rounded-lg shadow-sm p-6">
             <div class="flex items-center justify-between mb-4">
@@ -140,7 +137,6 @@
                 </form>
             </div>
         </div>
-
         {{-- Bulk Actions Bar --}}
         <div x-show="selectedItems.length > 0" class="bg-blue-50 border border-blue-200 rounded-lg p-4 flex items-center justify-between" x-cloak>
             <span class="text-blue-700" x-text="translations.selected_text.replace(':count', selectedItems.length)">
@@ -160,7 +156,6 @@
                 </button>
             </div>
         </div>
-
         {{-- Announcements Table --}}
         <div class="bg-white rounded-lg shadow-sm">
             <div class="p-6 border-b border-gray-200">
@@ -261,7 +256,6 @@
                 </div>
             @endif
         </div>
-
         {{-- Delete Confirmation Modal --}}
         <div x-show="showDeleteModal" x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100" x-transition:leave="transition ease-in duration-200" x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0" x-cloak class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
             <div class="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
@@ -319,10 +313,9 @@
                         return;
                     }
                     try {
-                        const formData = new FormData();
+                    const formData = new FormData();
                         formData.append('ids', JSON.stringify(this.selectedItems));
                         formData.append('status', status);
-                        
                         const response = await fetch('{{ route("admin.announcement.bulkToggleStatus") }}', {
                             method: 'POST',
                             headers: {
@@ -358,8 +351,9 @@
                                 alert(result.message || this.translations.error_delete);
                             }
                         } else {
-                            const formData = new FormData();
-                            formData.append('ids', JSON.stringify(this.deleteTarget));                            
+                            this.deleteTarget.forEach(id => {
+                                formData.append('ids[]', id);
+                            });
                             const response = await fetch('{{ route("admin.announcement.bulkDelete") }}', {
                                 method: 'POST',
                                 headers: {
@@ -382,7 +376,6 @@
                 }
             }
         }
-
         async function toggleStatus(id) {
             try {
                 const formData = new FormData();
