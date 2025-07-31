@@ -4,31 +4,31 @@
             <div>
                 <div class="flex items-center gap-3 mb-2">
                     <a href="{{ route('admin.tire-storage.index') }}"
-                       class="text-gray-500 hover:text-gray-700 transition-colors duration-200">
+                        class="text-gray-500 hover:text-gray-700 transition-colors duration-200">
                         <i class="fas fa-arrow-left"></i>
                     </a>
-                    <h1 class="text-2xl font-bold text-gray-900">Tire Storage Details</h1>
+                    <h1 class="text-2xl font-bold text-gray-900">{{ __('admin/tire-storage/show.header.title') }}</h1>
                 </div>
-                <p class="text-gray-600">Complete details of the customer's tire storage.</p>
+                <p class="text-gray-600">{{ __('admin/tire-storage/show.header.description') }}</p>
             </div>
             <div class="flex items-center gap-3">
                 @if($tireStorage->status->value === 'active')
                     <button onclick="endStorage({{ $tireStorage->id }})"
                             class="px-4 py-2 bg-orange-600 text-white rounded-lg hover:bg-orange-700 transition-colors duration-200 flex items-center gap-2">
                         <i class="fas fa-stop"></i>
-                        End Storage
+                        {{ __('admin/tire-storage/show.buttons.end_storage') }}
                     </button>
                 @endif
                 <a href="{{ route('admin.tire-storage.edit', $tireStorage->id) }}"
-                   class="px-4 py-2 bg-yellow-600 text-white rounded-lg hover:bg-yellow-700 transition-colors duration-200 flex items-center gap-2">
+                    class="px-4 py-2 bg-yellow-600 text-white rounded-lg hover:bg-yellow-700 transition-colors duration-200 flex items-center gap-2">
                     <i class="fas fa-edit"></i>
-                    Edit
+                    {{ __('admin/tire-storage/show.buttons.edit') }}
                 </a>
                 @if($tireStorage->status->value === 'ended')
                     <button onclick="deleteStorage({{ $tireStorage->id }})"
                             class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors duration-200 flex items-center gap-2">
                         <i class="fas fa-trash"></i>
-                        Delete
+                        {{ __('admin/tire-storage/show.buttons.delete') }}
                     </button>
                 @endif
             </div>
@@ -66,12 +66,12 @@
             @if($tireStorage->status->value === 'active')
                 <span class="inline-flex items-center px-6 py-3 rounded-full text-lg font-medium bg-green-100 text-green-800">
                     <i class="fas fa-play-circle text-green-500 mr-2"></i>
-                    {{ $tireStorage->status->label() }}
+                    {{ __('admin/tire-storage/show.status.active') }}
                 </span>
             @else
                 <span class="inline-flex items-center px-6 py-3 rounded-full text-lg font-medium bg-gray-100 text-gray-800">
                     <i class="fas fa-stop-circle text-gray-500 mr-2"></i>
-                    {{ $tireStorage->status->label() }}
+                    {{ __('admin/tire-storage/show.status.ended') }}
                 </span>
             @endif
         </div>
@@ -81,7 +81,7 @@
                 <div class="bg-white rounded-lg shadow-sm p-6">
                     <h3 class="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
                         <i class="fas fa-user text-blue-600"></i>
-                        Customer Information
+                        {{ __('admin/tire-storage/show.customer_info.title') }}
                     </h3>
                     <div class="space-y-4">
                         <div class="flex items-center gap-4">
@@ -109,7 +109,7 @@
                             <div class="flex items-center gap-3">
                                 <i class="fas fa-calendar text-gray-400 w-5"></i>
                                 <span class="text-sm text-gray-700">
-                                    Joined on {{ $tireStorage->user->created_at->format('d M Y') }}
+                                    {{ __('admin/tire-storage/show.customer_info.joined_on', ['date' => $tireStorage->user->created_at->format('d M Y')]) }}
                                 </span>
                             </div>
                         </div>
@@ -121,28 +121,28 @@
                 <div class="bg-white rounded-lg shadow-sm p-6">
                     <h3 class="text-lg font-semibold text-gray-900 mb-6 flex items-center gap-2">
                         <i class="fas fa-archive text-blue-600"></i>
-                        Storage Details
+                        {{ __('admin/tire-storage/show.storage_details.title') }}
                     </h3>
                     
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div class="space-y-4">
-                            <h4 class="font-medium text-gray-900 border-b pb-2">Tire Information</h4>
+                            <h4 class="font-medium text-gray-900 border-b pb-2">{{ __('admin/tire-storage/show.storage_details.tire_info_title') }}</h4>
                             <div class="space-y-3">
                                 <div>
-                                    <label class="block text-sm font-medium text-gray-700">Tire Brand</label>
+                                    <label class="block text-sm font-medium text-gray-700">{{ __('admin/tire-storage/show.storage_details.tire_brand_label') }}</label>
                                     <div class="mt-1 p-3 bg-gray-50 rounded-lg">
                                         <span class="text-sm font-medium text-gray-900">{{ $tireStorage->tire_brand }}</span>
                                     </div>
                                 </div>
                                 <div>
-                                    <label class="block text-sm font-medium text-gray-700">Tire Size</label>
+                                    <label class="block text-sm font-medium text-gray-700">{{ __('admin/tire-storage/show.storage_details.tire_size_label') }}</label>
                                     <div class="mt-1 p-3 bg-gray-50 rounded-lg">
                                         <span class="text-sm font-medium text-gray-900">{{ $tireStorage->tire_size }}</span>
                                     </div>
                                 </div>
                                 @if($tireStorage->tire_type)
                                     <div>
-                                        <label class="block text-sm font-medium text-gray-700">Tire Type</label>
+                                        <label class="block text-sm font-medium text-gray-700">{{ __('admin/tire-storage/show.storage_details.tire_type_label') }}</label>
                                         <div class="mt-1 p-3 bg-gray-50 rounded-lg">
                                             <span class="text-sm font-medium text-gray-900">{{ $tireStorage->tire_type }}</span>
                                         </div>
@@ -152,10 +152,10 @@
                         </div>
 
                         <div class="space-y-4">
-                            <h4 class="font-medium text-gray-900 border-b pb-2">Storage Information</h4>
+                            <h4 class="font-medium text-gray-900 border-b pb-2">{{ __('admin/tire-storage/show.storage_details.storage_info_title') }}</h4>
                             <div class="space-y-3">
                                 <div>
-                                    <label class="block text-sm font-medium text-gray-700">Start Date</label>
+                                    <label class="block text-sm font-medium text-gray-700">{{ __('admin/tire-storage/show.storage_details.start_date_label') }}</label>
                                     <div class="mt-1 p-3 bg-gray-50 rounded-lg">
                                         <span class="text-sm font-medium text-gray-900">
                                             {{ $tireStorage->storage_start_date->format('d F Y') }}
@@ -163,7 +163,7 @@
                                     </div>
                                 </div>
                                 <div>
-                                    <label class="block text-sm font-medium text-gray-700">Planned End Date</label>
+                                    <label class="block text-sm font-medium text-gray-700">{{ __('admin/tire-storage/show.storage_details.planned_end_date_label') }}</label>
                                     <div class="mt-1 p-3 bg-gray-50 rounded-lg">
                                         <span class="text-sm font-medium text-gray-900">
                                             {{ $tireStorage->planned_end_date->format('d F Y') }}
@@ -171,7 +171,7 @@
                                     </div>
                                 </div>
                                 <div>
-                                    <label class="block text-sm font-medium text-gray-700">Storage Fee</label>
+                                    <label class="block text-sm font-medium text-gray-700">{{ __('admin/tire-storage/show.storage_details.storage_fee_label') }}</label>
                                     <div class="mt-1 p-3 bg-purple-50 rounded-lg">
                                         <span class="text-lg font-bold text-purple-600">
                                             Rp {{ number_format($tireStorage->storage_fee, 0, ',', '.') }}
@@ -184,7 +184,7 @@
 
                     @if($tireStorage->description)
                         <div class="mt-6 pt-6 border-t">
-                            <h4 class="font-medium text-gray-900 mb-3">Notes</h4>
+                            <h4 class="font-medium text-gray-900 mb-3">{{ __('admin/tire-storage/show.storage_details.notes_title') }}</h4>
                             <div class="p-4 bg-gray-50 rounded-lg">
                                 <p class="text-sm text-gray-700 whitespace-pre-wrap">{{ $tireStorage->description }}</p>
                             </div>
@@ -197,13 +197,13 @@
                                 <div class="text-2xl font-bold text-blue-600">
                                     {{ $tireStorage->storage_start_date->diffInDays($tireStorage->planned_end_date) }}
                                 </div>
-                                <div class="text-sm text-blue-700">Duration (Days)</div>
+                                <div class="text-sm text-blue-700">{{ __('admin/tire-storage/show.storage_details.duration_days') }}</div>
                             </div>
                             <div class="text-center p-4 bg-green-50 rounded-lg">
                                 <div class="text-2xl font-bold text-green-600">
                                     {{ $tireStorage->storage_start_date->diffInDays(now()) }}
                                 </div>
-                                <div class="text-sm text-green-700">Days Passed</div>
+                                <div class="text-sm text-green-700">{{ __('admin/tire-storage/show.storage_details.days_passed') }}</div>
                             </div>
                             <div class="text-center p-4 bg-orange-50 rounded-lg">
                                 <div class="text-2xl font-bold text-orange-600">
@@ -213,7 +213,7 @@
                                         0
                                     @endif
                                 </div>
-                                <div class="text-sm text-orange-700">Days Remaining</div>
+                                <div class="text-sm text-orange-700">{{ __('admin/tire-storage/show.storage_details.days_remaining') }}</div>
                             </div>
                         </div>
                     </div>
@@ -224,7 +224,7 @@
         <div class="bg-white rounded-lg shadow-sm p-6">
             <h3 class="text-lg font-semibold text-gray-900 mb-6 flex items-center gap-2">
                 <i class="fas fa-history text-blue-600"></i>
-                Storage Timeline
+                {{ __('admin/tire-storage/show.timeline.title') }}
             </h3>
             <div class="relative">
                 <div class="absolute left-4 top-0 bottom-0 w-0.5 bg-gray-200"></div>
@@ -233,13 +233,13 @@
                     <div class="absolute left-2 w-4 h-4 bg-blue-600 rounded-full border-2 border-white"></div>
                     <div class="ml-10">
                         <div class="flex items-center gap-2">
-                            <span class="font-medium text-gray-900">Storage Created</span>
+                            <span class="font-medium text-gray-900">{{ __('admin/tire-storage/show.timeline.created_title') }}</span>
                             <span class="text-sm text-gray-500">
                                 {{ $tireStorage->created_at->format('d M Y, H:i') }}
                             </span>
                         </div>
                         <p class="text-sm text-gray-600 mt-1">
-                            Tire storage for {{ $tireStorage->user->full_name }} has been created.
+                            {{ __('admin/tire-storage/show.timeline.created_desc', ['name' => $tireStorage->user->full_name]) }}
                         </p>
                     </div>
                 </div>
@@ -248,13 +248,13 @@
                     <div class="absolute left-2 w-4 h-4 bg-green-600 rounded-full border-2 border-white"></div>
                     <div class="ml-10">
                         <div class="flex items-center gap-2">
-                            <span class="font-medium text-gray-900">Storage Started</span>
+                            <span class="font-medium text-gray-900">{{ __('admin/tire-storage/show.timeline.started_title') }}</span>
                             <span class="text-sm text-gray-500">
                                 {{ $tireStorage->storage_start_date->format('d M Y') }}
                             </span>
                         </div>
                         <p class="text-sm text-gray-600 mt-1">
-                            Storage for tire {{ $tireStorage->tire_brand }} size {{ $tireStorage->tire_size }} has begun.
+                             {{ __('admin/tire-storage/show.timeline.started_desc', ['brand' => $tireStorage->tire_brand, 'size' => $tireStorage->tire_size]) }}
                         </p>
                     </div>
                 </div>
@@ -264,13 +264,13 @@
                         <div class="absolute left-2 w-4 h-4 bg-gray-600 rounded-full border-2 border-white"></div>
                         <div class="ml-10">
                             <div class="flex items-center gap-2">
-                                <span class="font-medium text-gray-900">Storage Ended</span>
+                                <span class="font-medium text-gray-900">{{ __('admin/tire-storage/show.timeline.ended_title') }}</span>
                                 <span class="text-sm text-gray-500">
                                     {{ $tireStorage->planned_end_date->format('d M Y') }}
                                 </span>
                             </div>
                             <p class="text-sm text-gray-600 mt-1">
-                                The tire storage period has ended.
+                                {{ __('admin/tire-storage/show.timeline.ended_desc') }}
                             </p>
                         </div>
                     </div>
@@ -279,13 +279,13 @@
                         <div class="absolute left-2 w-4 h-4 bg-orange-400 rounded-full border-2 border-white"></div>
                         <div class="ml-10">
                             <div class="flex items-center gap-2">
-                                <span class="font-medium text-gray-900">Planned End Date</span>
+                                <span class="font-medium text-gray-900">{{ __('admin/tire-storage/show.timeline.planned_end_title') }}</span>
                                 <span class="text-sm text-gray-500">
                                     {{ $tireStorage->planned_end_date->format('d M Y') }}
                                 </span>
                             </div>
                             <p class="text-sm text-gray-600 mt-1">
-                                The planned end date for the storage period.
+                                {{ __('admin/tire-storage/show.timeline.planned_end_desc') }}
                             </p>
                         </div>
                     </div>
@@ -296,7 +296,7 @@
 
     <script>
         async function endStorage(id) {
-            if (confirm('Are you sure you want to end this tire storage?')) {
+            if (confirm("{{ __('admin/tire-storage/show.modals.end_confirm') }}")) {
                 try {
                     const response = await fetch(`/admin/tire-storage/${id}/end`, {
                         method: 'POST',
@@ -311,17 +311,17 @@
                         alert(result.message);
                         window.location.reload();
                     } else {
-                        alert(result.message || 'An error occurred while ending the storage.');
+                        alert(result.message || "{{ __('admin/tire-storage/show.modals.end_error') }}");
                     }
                 } catch (error) {
                     console.error('Error:', error);
-                    alert('An error occurred while ending the storage.');
+                    alert("{{ __('admin/tire-storage/show.modals.end_error') }}");
                 }
             }
         }
 
         async function deleteStorage(id) {
-            if (confirm('Are you sure you want to delete this tire storage? This action cannot be undone.')) {
+            if (confirm("{{ __('admin/tire-storage/show.modals.delete_confirm') }}")) {
                 try {
                     const response = await fetch(`/admin/tire-storage/bulk-delete`, {
                         method: 'POST',
@@ -337,11 +337,11 @@
                         alert(result.message);
                         window.location.href = '/admin/tire-storage';
                     } else {
-                        alert(result.message || 'An error occurred while deleting the storage.');
+                        alert(result.message || "{{ __('admin/tire-storage/show.modals.delete_error') }}");
                     }
                 } catch (error) {
                     console.error('Error:', error);
-                    alert('An error occurred while deleting the storage.');
+                    alert("{{ __('admin/tire-storage/show.modals.delete_error') }}");
                 }
             }
         }
