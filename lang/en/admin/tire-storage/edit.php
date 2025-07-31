@@ -1,39 +1,48 @@
 <?php
+// lang/en/admin/tire-storage/edit.php
 
 return [
-    // Page Elements
-    'page_title' => 'Edit Blocked Period',
-    'page_description' => 'Update the time period when a menu is unavailable for reservation.',
-    'back_to_list_button' => 'Back to List',
+    'title' => 'Edit Tire Storage',
+    'description' => 'Update the details for this tire storage record.',
+    'back_button' => 'Back',
+    'form_title' => 'Update Tire Storage Form',
 
-    // Form Labels & Placeholders
-    'form' => [
-        'all_menus_label' => 'Block for All Menus?',
-        'specific_menu_label' => 'Select Specific Menu',
-        'select_menu_placeholder' => '-- Select a menu --',
-        'start_time_label' => 'Start Time',
-        'end_time_label' => 'End Time',
-        'reason_label' => 'Reason',
-        'reason_placeholder' => 'Example: Routine maintenance, public holiday, private event, etc.',
+    'customer_section' => [
+        'label' => 'Customer',
+        'select_placeholder' => 'Select Customer',
     ],
 
-    // Conflict Section
-    'conflict' => [
-        'title' => 'Schedule Conflict Detected!',
-        'description' => 'The period you entered overlaps with the following schedule:',
+    'tire_info_section' => [
+        'title' => 'Tire Information',
+        'brand_label' => 'Tire Brand',
+        'brand_placeholder' => 'e.g., Bridgestone, Michelin, Goodyear',
+        'size_label' => 'Tire Size',
+        'size_placeholder' => 'e.g., 225/60R16, 185/65R15',
     ],
 
-    // Button
-    'button' => [
-        'save_text' => 'Save Changes',
-        'checking_text' => 'Checking...',
+    'schedule_section' => [
+        'title' => 'Storage Schedule',
+        'start_date_label' => 'Storage Start Date',
+        'end_date_label' => 'Planned End Date',
     ],
-    
-    // Controller Messages
-    'messages' => [
-        'not_found' => 'Blocked period not found.',
-        'update_success' => 'Blocked period updated successfully.',
-        'conflict' => 'A time conflict occurred with an existing blocked period.',
-        'update_error' => 'An error occurred: ',
+
+    'fee_status_section' => [
+        'title' => 'Fee & Status',
+        'fee_label' => 'Storage Fee (:currency)',
+        'fee_auto_calc_note' => 'Leave blank for auto-calculation (:currency :rate/month)',
+        'calculated_fee_note' => 'Calculated fee: :currency',
+        'status_label' => 'Status',
+        'status_active' => 'Active',
+        'status_ended' => 'Ended',
+    ],
+
+    'notes_section' => [
+        'label' => 'Notes',
+        'placeholder' => 'Additional notes about this tire storage...',
+    ],
+
+    'buttons' => [
+        'cancel' => 'Cancel',
+        'update' => 'Update Storage',
     ],
 ];
