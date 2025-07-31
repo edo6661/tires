@@ -1,75 +1,53 @@
 <?php
 
 return [
-    // Page details
-    'title' => 'Create New Blocked Period',
-    'description' => 'Set a time period during which a specific menu or all menus are unavailable for reservation.',
+    'page_title' => 'Add Tire Storage',
+    'page_subtitle' => 'Create a new tire storage record for a customer',
+    'back_button' => 'Back',
 
-    // Buttons
-    'back_to_list_button' => 'Back to List',
-    'save_button' => 'Save Blocked Period',
-    'saving_button' => 'Saving...',
+    'form_title' => 'New Tire Storage Form',
 
-    // Form fields
     'form' => [
-        'all_menus_label' => 'Block All Menus?',
-        'select_menu_label' => 'Select Specific Menu',
-        'select_menu_placeholder' => '-- Select a menu --',
-        'start_time_label' => 'Start Time',
-        'end_time_label' => 'End Time',
-        'reason_label' => 'Reason',
-        'reason_placeholder' => 'e.g., Regular maintenance, holiday, private event, etc.',
-    ],
-
-    // Conflict alert (Alpine.js)
-    'conflict_alert' => [
-        'title' => 'Schedule Conflict Detected!',
-        'message' => 'The entered period overlaps with the following schedule(s):',
-    ],
-
-    // Flash messages from controller
-    'flash_messages' => [
-        'create_success' => 'Blocked period created successfully.',
-        'create_error' => 'An error occurred: :message',
-        'conflict_error' => 'A time conflict occurred with an existing blocked period.',
-    ],
-
-    // Validation messages from BlockedPeriodRequest
-    'validation' => [
-        'menu_required_if_not_all' => 'The menu field is required when not blocking all menus.',
-        'start_before_end' => 'The start time must be a date before the end time.',
-        'min_duration' => 'The minimum duration is 15 minutes.',
-        'max_duration' => 'The maximum duration is 30 days.',
-        'all_menus_boolean' => 'The all menus field must be true or false.',
-        'conflict_message' => "Time conflict with the following blocked period(s):\n:details",
-
-        'menu_id' => [
-            'exists' => 'The selected menu is invalid.',
+        'customer' => [
+            'label' => 'Customer',
+            'select_placeholder' => 'Select Customer',
         ],
-        'start_datetime' => [
-            'required' => 'The start time is required.',
-            'date' => 'The start time format is invalid.',
-            'after_or_equal' => 'The start time must be a date after or equal to now.',
+        'tire_info' => [
+            'title' => 'Tire Information',
+            'brand_label' => 'Tire Brand',
+            'brand_placeholder' => 'e.g., Bridgestone, Michelin, Goodyear',
+            'size_label' => 'Tire Size',
+            'size_placeholder' => 'e.g., 225/60R16, 185/65R15',
         ],
-        'end_datetime' => [
-            'required' => 'The end time is required.',
-            'date' => 'The end time format is invalid.',
-            'after' => 'The end time must be a date after the start time.',
+        'schedule' => [
+            'title' => 'Storage Schedule',
+            'start_date_label' => 'Storage Start Date',
+            'end_date_label' => 'Planned End Date',
         ],
-        'reason' => [
-            'required' => 'The reason is required.',
-            'string' => 'The reason must be a string.',
-            'max' => 'The reason may not be greater than 500 characters.',
-            'min' => 'The reason must be at least 3 characters.',
+        'fee_status' => [
+            'title' => 'Fee & Status',
+            'fee_label' => 'Storage Fee (IDR)',
+            'fee_placeholder' => '0',
+            'fee_helper' => 'Leave blank for auto-calculation (IDR 50,000/month)',
+            'calculated_fee_text' => 'Calculated fee: IDR',
+            'status_label' => 'Status',
+            'status_active' => 'Active',
+            'status_ended' => 'Ended',
+        ],
+        'notes' => [
+            'label' => 'Notes',
+            'placeholder' => 'Additional notes about this tire storage...',
         ],
     ],
 
-    // Attributes for validation
-    'attributes' => [
-        'menu_id' => 'menu',
-        'start_datetime' => 'start time',
-        'end_datetime' => 'end time',
-        'reason' => 'reason',
-        'all_menus' => 'all menus',
+    'cancel_button' => 'Cancel',
+    'save_button' => 'Save Storage',
+
+    'info_box' => [
+        'title' => 'Important Information',
+        'point1' => 'The planned end date must be after the storage start date.',
+        'point2' => 'The storage fee will be auto-calculated if left blank (IDR 50,000 per month).',
+        'point3' => '"Active" status means the storage is ongoing.',
+        'point4' => '"Ended" status means the storage has concluded.',
     ],
 ];
