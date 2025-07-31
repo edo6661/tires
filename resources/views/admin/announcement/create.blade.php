@@ -2,13 +2,13 @@
     <div class="container space-y-6">
         <div class="flex items-center justify-between">
             <div>
-                <h1 class="text-2xl font-bold text-gray-900">Tambah Pengumuman</h1>
-                <p class="text-gray-600 mt-1">Buat pengumuman baru dengan dukungan multilingual</p>
+                <h1 class="text-2xl font-bold text-gray-900">{{ __('admin/announcement/create.header_title') }}</h1>
+                <p class="text-gray-600 mt-1">{{ __('admin/announcement/create.header_description') }}</p>
             </div>
             <a href="{{ route('admin.announcement.index') }}"
                class="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors duration-200 flex items-center gap-2">
                 <i class="fas fa-arrow-left"></i>
-                Kembali
+                {{ __('admin/announcement/create.back_button') }}
             </a>
         </div>
 
@@ -28,8 +28,8 @@
 
         <div class="bg-white rounded-lg shadow-sm">
             <div class="p-6 border-b border-gray-200">
-                <h3 class="text-lg font-semibold text-gray-900">Informasi Pengumuman</h3>
-                <p class="text-sm text-gray-600 mt-1">Isi form di bawah untuk membuat pengumuman baru dengan dukungan bahasa Inggris dan Jepang</p>
+                <h3 class="text-lg font-semibold text-gray-900">{{ __('admin/announcement/create.form_section_title') }}</h3>
+                <p class="text-sm text-gray-600 mt-1">{{ __('admin/announcement/create.form_section_description') }}</p>
             </div>
 
             <form action="{{ route('admin.announcement.store') }}" method="POST" class="p-6 space-y-6" x-data="announcementForm()">
@@ -38,19 +38,19 @@
                 <!-- Language Tabs -->
                 <div class="border-b border-gray-200">
                     <div class="flex space-x-8">
-                        <button type="button" 
+                        <button type="button"
                                 @click="activeTab = 'en'"
                                 :class="activeTab === 'en' ? 'border-blue-500 text-blue-600' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'"
                                 class="whitespace-nowrap py-2 px-1 border-b-2 font-medium text-sm flex items-center gap-2">
                             <i class="fas fa-globe"></i>
-                            English
+                            {{ __('admin/announcement/create.tab_english') }}
                         </button>
                         <button type="button"
                                 @click="activeTab = 'ja'"
                                 :class="activeTab === 'ja' ? 'border-blue-500 text-blue-600' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'"
                                 class="whitespace-nowrap py-2 px-1 border-b-2 font-medium text-sm flex items-center gap-2">
                             <i class="fas fa-language"></i>
-                            Japanese (日本語)
+                            {{ __('admin/announcement/create.tab_japanese') }}
                         </button>
                     </div>
                 </div>
@@ -60,21 +60,21 @@
                     <div class="bg-blue-50 rounded-lg p-4 mb-4">
                         <div class="flex items-center gap-2">
                             <i class="fas fa-globe text-blue-600"></i>
-                            <h4 class="font-medium text-blue-900">Konten Bahasa Inggris</h4>
+                            <h4 class="font-medium text-blue-900">{{ __('admin/announcement/create.en_section_title') }}</h4>
                         </div>
-                        <p class="text-sm text-blue-700 mt-1">Isi judul dan konten dalam bahasa Inggris</p>
+                        <p class="text-sm text-blue-700 mt-1">{{ __('admin/announcement/create.en_section_description') }}</p>
                     </div>
 
                     <div class="space-y-2">
                         <label for="title_en" class="block text-sm font-medium text-gray-700">
-                            Judul (English) <span class="text-red-500">*</span>
+                            {{ __('admin/announcement/create.en_title_label') }} <span class="text-red-500">{{ __('admin/announcement/create.required_field') }}</span>
                         </label>
                         <input type="text"
                                id="title_en"
                                name="translations[en][title]"
                                value="{{ old('translations.en.title') }}"
                                class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent @error('translations.en.title') border-red-500 @enderror"
-                               placeholder="Enter the announcement title in English..."
+                               placeholder="{{ __('admin/announcement/create.en_title_placeholder') }}"
                                maxlength="255"
                                @input="updatePreview()">
                         @error('translations.en.title')
@@ -83,18 +83,18 @@
                                 {{ $message }}
                             </p>
                         @enderror
-                        <p class="text-sm text-gray-500">Maksimal 255 karakter</p>
+                        <p class="text-sm text-gray-500">{{ __('admin/announcement/create.max_characters') }}</p>
                     </div>
 
                     <div class="space-y-2">
                         <label for="content_en" class="block text-sm font-medium text-gray-700">
-                            Konten (English) <span class="text-red-500">*</span>
+                            {{ __('admin/announcement/create.en_content_label') }} <span class="text-red-500">{{ __('admin/announcement/create.required_field') }}</span>
                         </label>
                         <textarea id="content_en"
                                   name="translations[en][content]"
                                   rows="8"
                                   class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent @error('translations.en.content') border-red-500 @enderror"
-                                  placeholder="Enter the announcement content in English..."
+                                  placeholder="{{ __('admin/announcement/create.en_content_placeholder') }}"
                                   @input="updatePreview()">{{ old('translations.en.content') }}</textarea>
                         @error('translations.en.content')
                             <p class="text-red-500 text-sm flex items-center gap-1">
@@ -102,7 +102,7 @@
                                 {{ $message }}
                             </p>
                         @enderror
-                        <p class="text-sm text-gray-500">Tulis konten pengumuman dalam bahasa Inggris</p>
+                        <p class="text-sm text-gray-500">{{ __('admin/announcement/create.en_content_helper') }}</p>
                     </div>
                 </div>
 
@@ -111,21 +111,21 @@
                     <div class="bg-green-50 rounded-lg p-4 mb-4">
                         <div class="flex items-center gap-2">
                             <i class="fas fa-language text-green-600"></i>
-                            <h4 class="font-medium text-green-900">コンテンツ (Japanese Content)</h4>
+                            <h4 class="font-medium text-green-900">{{ __('admin/announcement/create.ja_section_title') }}</h4>
                         </div>
-                        <p class="text-sm text-green-700 mt-1">Isi judul dan konten dalam bahasa Jepang</p>
+                        <p class="text-sm text-green-700 mt-1">{{ __('admin/announcement/create.ja_section_description') }}</p>
                     </div>
 
                     <div class="space-y-2">
                         <label for="title_ja" class="block text-sm font-medium text-gray-700">
-                            タイトル (Japanese Title) <span class="text-red-500">*</span>
+                            {{ __('admin/announcement/create.ja_title_label') }} <span class="text-red-500">{{ __('admin/announcement/create.required_field') }}</span>
                         </label>
                         <input type="text"
                                id="title_ja"
                                name="translations[ja][title]"
                                value="{{ old('translations.ja.title') }}"
                                class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent @error('translations.ja.title') border-red-500 @enderror"
-                               placeholder="日本語でお知らせのタイトルを入力してください..."
+                               placeholder="{{ __('admin/announcement/create.ja_title_placeholder') }}"
                                maxlength="255"
                                @input="updatePreview()">
                         @error('translations.ja.title')
@@ -134,18 +134,18 @@
                                 {{ $message }}
                             </p>
                         @enderror
-                        <p class="text-sm text-gray-500">最大255文字</p>
+                        <p class="text-sm text-gray-500">{{ __('admin/announcement/create.max_characters_ja') }}</p>
                     </div>
 
                     <div class="space-y-2">
                         <label for="content_ja" class="block text-sm font-medium text-gray-700">
-                            コンテンツ (Japanese Content) <span class="text-red-500">*</span>
+                            {{ __('admin/announcement/create.ja_content_label') }} <span class="text-red-500">{{ __('admin/announcement/create.required_field') }}</span>
                         </label>
                         <textarea id="content_ja"
                                   name="translations[ja][content]"
                                   rows="8"
                                   class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent @error('translations.ja.content') border-red-500 @enderror"
-                                  placeholder="日本語でお知らせの内容を入力してください..."
+                                  placeholder="{{ __('admin/announcement/create.ja_content_placeholder') }}"
                                   @input="updatePreview()">{{ old('translations.ja.content') }}</textarea>
                         @error('translations.ja.content')
                             <p class="text-red-500 text-sm flex items-center gap-1">
@@ -153,18 +153,18 @@
                                 {{ $message }}
                             </p>
                         @enderror
-                        <p class="text-sm text-gray-500">日本語でお知らせの内容を記入してください</p>
+                        <p class="text-sm text-gray-500">{{ __('admin/announcement/create.ja_content_helper') }}</p>
                     </div>
                 </div>
 
                 <!-- Common Fields -->
                 <div class="border-t border-gray-200 pt-6">
-                    <h4 class="text-md font-semibold text-gray-900 mb-4">Pengaturan Umum</h4>
+                    <h4 class="text-md font-semibold text-gray-900 mb-4">{{ __('admin/announcement/create.common_settings_title') }}</h4>
                     
                     <div class="space-y-6">
                         <div class="space-y-2">
                             <label for="published_at" class="block text-sm font-medium text-gray-700">
-                                Tanggal & Waktu Publikasi
+                                {{ __('admin/announcement/create.published_at_label') }}
                             </label>
                             <input type="datetime-local"
                                    id="published_at"
@@ -178,11 +178,11 @@
                                     {{ $message }}
                                 </p>
                             @enderror
-                            <p class="text-sm text-gray-500">Jika kosong, waktu saat ini akan digunakan</p>
+                            <p class="text-sm text-gray-500">{{ __('admin/announcement/create.published_at_helper') }}</p>
                         </div>
 
                         <div class="space-y-2">
-                            <label class="block text-sm font-medium text-gray-700">Status</label>
+                            <label class="block text-sm font-medium text-gray-700">{{ __('admin/announcement/create.status_label') }}</label>
                             <div class="flex items-center gap-4">
                                 <label class="flex items-center gap-2">
                                     <input type="radio"
@@ -191,7 +191,7 @@
                                            {{ old('is_active', '1') == '1' ? 'checked' : '' }}
                                            class="text-blue-600 focus:ring-blue-500"
                                            @change="updatePreview()">
-                                    <span class="text-sm text-gray-700">Aktif</span>
+                                    <span class="text-sm text-gray-700">{{ __('admin/announcement/create.status_active') }}</span>
                                 </label>
                                 <label class="flex items-center gap-2">
                                     <input type="radio"
@@ -200,7 +200,7 @@
                                            {{ old('is_active') == '0' ? 'checked' : '' }}
                                            class="text-blue-600 focus:ring-blue-500"
                                            @change="updatePreview()">
-                                    <span class="text-sm text-gray-700">Tidak Aktif</span>
+                                    <span class="text-sm text-gray-700">{{ __('admin/announcement/create.status_inactive') }}</span>
                                 </label>
                             </div>
                             @error('is_active')
@@ -216,9 +216,9 @@
                 <!-- Preview Section -->
                 <div class="border-t border-gray-200 pt-6">
                     <div class="flex items-center justify-between mb-4">
-                        <h4 class="text-md font-semibold text-gray-900">Preview</h4>
+                        <h4 class="text-md font-semibold text-gray-900">{{ __('admin/announcement/create.preview_title') }}</h4>
                         <button type="button" @click="showPreview = !showPreview" class="text-blue-600 hover:text-blue-800 text-sm">
-                            <span x-text="showPreview ? 'Sembunyikan Preview' : 'Tampilkan Preview'"></span>
+                            <span x-text="showPreview ? '{{ __('admin/announcement/create.preview_hide') }}' : '{{ __('admin/announcement/create.preview_show') }}'"></span>
                         </button>
                     </div>
                     <div x-show="showPreview" x-transition class="bg-gray-50 rounded-lg p-4">
@@ -228,26 +228,26 @@
                                     @click="previewLang = 'en'"
                                     :class="previewLang === 'en' ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-700'"
                                     class="px-3 py-1 rounded text-sm transition-colors">
-                                English
+                                {{ __('admin/announcement/create.tab_english') }}
                             </button>
                             <button type="button"
                                     @click="previewLang = 'ja'"
                                     :class="previewLang === 'ja' ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-700'"
                                     class="px-3 py-1 rounded text-sm transition-colors">
-                                日本語
+                                {{ __('admin/announcement/create.tab_japanese') }}
                             </button>
                         </div>
 
                         <div class="bg-white rounded-lg p-4 shadow-sm">
-                            <h5 class="font-semibold text-gray-900 mb-2" x-text="getPreviewTitle() || 'Judul pengumuman akan muncul di sini'"></h5>
-                            <div class="text-gray-700 text-sm whitespace-pre-wrap" x-text="getPreviewContent() || 'Konten pengumuman akan muncul di sini'"></div>
+                            <h5 class="font-semibold text-gray-900 mb-2" x-text="getPreviewTitle() || '{{ __('admin/announcement/create.preview_title_placeholder') }}'"></h5>
+                            <div class="text-gray-700 text-sm whitespace-pre-wrap" x-text="getPreviewContent() || '{{ __('admin/announcement/create.preview_content_placeholder') }}'"></div>
                             <div class="mt-3 flex items-center gap-2 text-xs text-gray-500">
                                 <i class="fas fa-calendar"></i>
                                 <span x-text="previewDate"></span>
                                 <span class="px-2 py-1 rounded-full text-xs" :class="previewStatus ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'">
-                                    <span x-text="previewStatus ? 'Aktif' : 'Tidak Aktif'"></span>
+                                    <span x-text="previewStatus ? '{{ __('admin/announcement/create.status_active') }}' : '{{ __('admin/announcement/create.status_inactive') }}'"></span>
                                 </span>
-                                <span class="px-2 py-1 bg-blue-100 text-blue-800 rounded-full text-xs" x-text="previewLang === 'en' ? 'English' : '日本語'"></span>
+                                <span class="px-2 py-1 bg-blue-100 text-blue-800 rounded-full text-xs" x-text="previewLang === 'en' ? '{{ __('admin/announcement/create.tab_english') }}' : '{{ __('admin/announcement/create.tab_japanese') }}'"></span>
                             </div>
                         </div>
                     </div>
@@ -256,12 +256,12 @@
                 <div class="flex items-center justify-end gap-3 pt-6 border-t border-gray-200">
                     <a href="{{ route('admin.announcement.index') }}"
                        class="px-6 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors duration-200">
-                        Batal
+                        {{ __('admin/announcement/create.cancel_button') }}
                     </a>
                     <button type="submit"
                             class="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors duration-200 flex items-center gap-2">
                         <i class="fas fa-save"></i>
-                        Simpan Pengumuman
+                        {{ __('admin/announcement/create.save_button') }}
                     </button>
                 </div>
             </form>
@@ -285,15 +285,16 @@
                     const publishedAt = document.getElementById('published_at').value;
                     if (publishedAt) {
                         const date = new Date(publishedAt);
-                        this.previewDate = date.toLocaleDateString('id-ID', { 
-                            day: 'numeric',
-                            month: 'long',
+                        // Using 'en-GB' for a more universal format like DD/MM/YYYY HH:mm
+                        this.previewDate = date.toLocaleString('en-GB', { 
+                            day: '2-digit',
+                            month: '2-digit',
                             year: 'numeric',
                             hour: '2-digit',
                             minute: '2-digit'
                         });
                     } else {
-                        this.previewDate = 'Tanggal tidak dipilih'; 
+                        this.previewDate = '{{ __("admin/announcement/create.preview_date_not_selected") }}'; 
                     }
                     
                     const activeRadio = document.querySelector('input[name="is_active"]:checked');
