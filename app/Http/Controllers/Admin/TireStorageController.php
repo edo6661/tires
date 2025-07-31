@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
@@ -16,8 +17,7 @@ class TireStorageController extends Controller
     public function __construct(
         protected TireStorageServiceInterface $tireStorageService,
         protected UserServiceInterface $userService,
-        )
-    {
+    ) {
     }
 
     public function index(Request $request): View
@@ -29,12 +29,12 @@ class TireStorageController extends Controller
             'customer_name' => $request->input('customer_name'),
         ];
 
-        $filters = array_filter($filters, function($value) {
+        $filters = array_filter($filters, function ($value) {
             return !empty($value);
         });
 
         $tireStorages = $this->tireStorageService->getPaginatedTireStoragesWithFilters(15, $filters);
-        
+
         return view('admin.tire-storages.index', compact('tireStorages'));
     }
 
@@ -48,22 +48,22 @@ class TireStorageController extends Controller
     {
         try {
             $this->tireStorageService->createTireStorage($request->validated());
-            
+
             return redirect()->route('admin.tire-storage.index')
-                ->with('success', 'Penyimpanan ban berhasil dibuat');
+                ->with('success', __('admin/tire-storage/general.notifications.create_success'));
         } catch (\Exception $e) {
             return redirect()->back()
                 ->withInput()
-                ->with('error', 'Gagal membuat penyimpanan ban: ' . $e->getMessage());
+                ->with('error', __('admin/tire-storage/general.notifications.create_error', ['error' => $e->getMessage()]));
         }
     }
 
     public function show($locale, int $id): View
     {
         $tireStorage = $this->tireStorageService->findTireStorage($id);
-        
+
         if (!$tireStorage) {
-            abort(404, 'Penyimpanan ban tidak ditemukan');
+            abort(404, __('admin/tire-storage/general.notifications.not_found'));
         }
 
         return view('admin.tire-storages.show', compact('tireStorage'));
@@ -74,9 +74,9 @@ class TireStorageController extends Controller
         $tireStorage = $this->tireStorageService->findTireStorage($id);
         $users = $this->userService->getCustomers();
 
-        
+
         if (!$tireStorage) {
-            abort(404, 'Penyimpanan ban tidak ditemukan');
+            abort(404, __('admin/tire-storage/general.notifications.not_found'));
         }
 
         return view('admin.tire-storages.edit', compact('tireStorage', 'users'));
@@ -86,18 +86,18 @@ class TireStorageController extends Controller
     {
         try {
             $tireStorage = $this->tireStorageService->updateTireStorage($id, $request->validated());
-            
+
             if (!$tireStorage) {
                 return redirect()->route('admin.tire-storage.index')
-                    ->with('error', 'Penyimpanan ban tidak ditemukan');
+                    ->with('error', __('admin/tire-storage/general.notifications.not_found'));
             }
 
-            return redirect()->route('admin.tire-storage.show', $id)
-                ->with('success', 'Penyimpanan ban berhasil diperbarui');
+            return redirect()->route('admin.tire-storage.show', ['locale' => $locale, 'id' => $id])
+                ->with('success', __('admin/tire-storage/general.notifications.update_success'));
         } catch (\Exception $e) {
             return redirect()->back()
                 ->withInput()
-                ->with('error', 'Gagal memperbarui penyimpanan ban: ' . $e->getMessage());
+                ->with('error', __('admin/tire-storage/general.notifications.update_error', ['error' => $e->getMessage()]));
         }
     }
 
@@ -105,17 +105,17 @@ class TireStorageController extends Controller
     {
         try {
             $success = $this->tireStorageService->deleteTireStorage($id);
-            
+
             if (!$success) {
-                return redirect()->route('admin.tire-storages.index')
-                    ->with('error', 'Penyimpanan ban tidak ditemukan');
+                return redirect()->route('admin.tire-storage.index')
+                    ->with('error', __('admin/tire-storage/general.notifications.not_found'));
             }
 
-            return redirect()->route('admin.tire-storages.index')
-                ->with('success', 'Penyimpanan ban berhasil dihapus');
+            return redirect()->route('admin.tire-storage.index')
+                ->with('success', __('admin/tire-storage/general.notifications.delete_success'));
         } catch (\Exception $e) {
             return redirect()->back()
-                ->with('error', 'Gagal menghapus penyimpanan ban: ' . $e->getMessage());
+                ->with('error', __('admin/tire-storage/general.notifications.delete_error', ['error' => $e->getMessage()]));
         }
     }
 
@@ -123,17 +123,17 @@ class TireStorageController extends Controller
     {
         try {
             $success = $this->tireStorageService->endTireStorage($id);
-            
+
             if (!$success) {
                 return response()->json([
                     'success' => false,
-                    'message' => 'Penyimpanan ban tidak ditemukan'
+                    'message' => __('admin/tire-storage/general.notifications.not_found')
                 ], 404);
             }
 
             return response()->json([
                 'success' => true,
-                'message' => 'Penyimpanan ban berhasil diakhiri'
+                'message' => __('admin/tire-storage/general.notifications.end_success')
             ]);
         } catch (\Exception $e) {
             return response()->json([
@@ -142,22 +142,16 @@ class TireStorageController extends Controller
             ], 400);
         }
     }
-    // public function active(): View
-    // {
-    //     $tireStorages = $this->tireStorageService->getActiveTireStorages();
-    //     $status = 'active';
-        
-    //     return view('admin.tire-storages.by-status', compact('tireStorages', 'status'));
-    // }
+
     public function bulkDelete(Request $request): JsonResponse
     {
         try {
             $ids = $request->input('ids', []);
-            
+
             if (empty($ids)) {
                 return response()->json([
                     'success' => false,
-                    'message' => 'Tidak ada data yang dipilih'
+                    'message' => __('admin/tire-storage/general.notifications.no_data_selected')
                 ], 400);
             }
 
@@ -170,19 +164,22 @@ class TireStorageController extends Controller
                     if ($success) {
                         $deletedCount++;
                     } else {
-                        $errors[] = "Penyimpanan ban ID {$id} tidak ditemukan";
+                        $errors[] = __('admin/tire-storage/general.notifications.id_not_found', ['id' => $id]);
                     }
                 } catch (\Exception $e) {
-                    $errors[] = "Error menghapus ID {$id}: " . $e->getMessage();
+                    $errors[] = __('admin/tire-storage/general.notifications.id_delete_error', ['id' => $id, 'error' => $e->getMessage()]);
                 }
             }
 
             if ($deletedCount > 0) {
-                $message = "{$deletedCount} penyimpanan ban berhasil dihapus";
+                $message = __('admin/tire-storage/general.notifications.bulk_delete_success', ['count' => $deletedCount]);
                 if (!empty($errors)) {
-                    $message .= ". Namun ada beberapa error: " . implode(', ', $errors);
+                    $message = __('admin/tire-storage/general.notifications.bulk_delete_partial', [
+                        'count' => $deletedCount,
+                        'errors' => implode(', ', $errors)
+                    ]);
                 }
-                
+
                 return response()->json([
                     'success' => true,
                     'message' => $message,
@@ -191,29 +188,26 @@ class TireStorageController extends Controller
             } else {
                 return response()->json([
                     'success' => false,
-                    'message' => 'Tidak ada data yang berhasil dihapus. Errors: ' . implode(', ', $errors)
+                    'message' => __('admin/tire-storage/general.notifications.bulk_delete_error', ['errors' => implode(', ', $errors)])
                 ], 400);
             }
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
-                'message' => 'Terjadi kesalahan saat menghapus data: ' . $e->getMessage()
+                'message' => __('admin/tire-storage/general.notifications.bulk_delete_generic_error', ['error' => $e->getMessage()])
             ], 500);
         }
     }
 
-    /**
-     * Handle bulk end operation
-     */
     public function bulkEnd(Request $request): JsonResponse
     {
         try {
             $ids = $request->input('ids', []);
-            
+
             if (empty($ids)) {
                 return response()->json([
                     'success' => false,
-                    'message' => 'Tidak ada data yang dipilih'
+                    'message' => __('admin/tire-storage/general.notifications.no_data_selected')
                 ], 400);
             }
 
@@ -226,19 +220,22 @@ class TireStorageController extends Controller
                     if ($success) {
                         $endedCount++;
                     } else {
-                        $errors[] = "Penyimpanan ban ID {$id} tidak ditemukan";
+                        $errors[] = __('admin/tire-storage/general.notifications.id_not_found', ['id' => $id]);
                     }
                 } catch (\Exception $e) {
-                    $errors[] = "Error mengakhiri ID {$id}: " . $e->getMessage();
+                    $errors[] = __('admin/tire-storage/general.notifications.id_end_error', ['id' => $id, 'error' => $e->getMessage()]);
                 }
             }
 
             if ($endedCount > 0) {
-                $message = "{$endedCount} penyimpanan ban berhasil diakhiri";
+                $message = __('admin/tire-storage/general.notifications.bulk_end_success', ['count' => $endedCount]);
                 if (!empty($errors)) {
-                    $message .= ". Namun ada beberapa error: " . implode(', ', $errors);
+                    $message = __('admin/tire-storage/general.notifications.bulk_end_partial', [
+                        'count' => $endedCount,
+                        'errors' => implode(', ', $errors)
+                    ]);
                 }
-                
+
                 return response()->json([
                     'success' => true,
                     'message' => $message,
@@ -247,13 +244,13 @@ class TireStorageController extends Controller
             } else {
                 return response()->json([
                     'success' => false,
-                    'message' => 'Tidak ada data yang berhasil diakhiri. Errors: ' . implode(', ', $errors)
+                    'message' => __('admin/tire-storage/general.notifications.bulk_end_error', ['errors' => implode(', ', $errors)])
                 ], 400);
             }
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
-                'message' => 'Terjadi kesalahan saat mengakhiri penyimpanan: ' . $e->getMessage()
+                'message' => __('admin/tire-storage/general.notifications.bulk_end_generic_error', ['error' => $e->getMessage()])
             ], 500);
         }
     }

@@ -1,30 +1,26 @@
 <?php
 
 return [
-    'title' => 'Blocked Periods',
-    'all_menus' => 'All Menus',
-
-    'flash_messages' => [
-        'create_success'      => 'Blocked period has been created successfully.',
-        'create_error'        => 'An error occurred while creating the blocked period: :message',
-        'update_success'      => 'Blocked period has been updated successfully.',
-        'update_error'        => 'An error occurred while updating the blocked period: :message',
-        'delete_success'      => 'Blocked period has been deleted successfully.',
-        'delete_error'        => 'An error occurred while deleting the blocked period: :message',
-        'not_found'           => 'Blocked period not found.',
-        'conflict'            => 'The selected schedule conflicts with an existing blocked period.',
-        'bulk_delete_success' => 'Successfully deleted :count blocked period(s).',
-        'bulk_delete_error'   => 'An error occurred during bulk deletion: :message',
-    ],
-
-    'calendar' => [
-        'all_menus_label' => 'All Menus',
-    ],
-
-    'confirmation' => [
-        'delete_title'   => 'Delete Blocked Period',
-        'delete_message' => 'Are you sure you want to delete this blocked period?',
-        'bulk_delete_title' => 'Delete Selected Periods',
-        'bulk_delete_message' => 'Are you sure you want to delete the selected blocked periods?',
+    'notifications' => [
+        'create_success' => 'タイヤ保管が正常に作成されました。',
+        'create_error' => 'タイヤ保管の作成に失敗しました: :error',
+        'not_found' => 'タイヤ保管が見つかりません。',
+        'update_success' => 'タイヤ保管が正常に更新されました。',
+        'update_error' => 'タイヤ保管の更新に失敗しました: :error',
+        'delete_success' => 'タイヤ保管が正常に削除されました。',
+        'delete_error' => 'タイヤ保管の削除に失敗しました: :error',
+        'end_success' => 'タイヤ保管が正常に終了しました。',
+        'no_data_selected' => 'データが選択されていません。',
+        'bulk_delete_success' => ':count 件のタイヤ保管が正常に削除されました。',
+        'bulk_delete_partial' => ':count 件のタイヤ保管が正常に削除されました。ただし、いくつかのエラーが発生しました: :errors',
+        'bulk_delete_error' => 'データは正常に削除されませんでした。エラー: :errors',
+        'bulk_delete_generic_error' => 'データの削除中にエラーが発生しました: :error',
+        'bulk_end_success' => ':count 件のタイヤ保管が正常に終了しました。',
+        'bulk_end_partial' => ':count 件のタイヤ保管が正常に終了しました。ただし、いくつかのエラーが発生しました: :errors',
+        'bulk_end_error' => 'データは正常に終了されませんでした。エラー: :errors',
+        'bulk_end_generic_error' => '保管の終了中にエラーが発生しました: :error',
+        'id_not_found' => 'タイヤ保管ID :id が見つかりません。',
+        'id_delete_error' => 'ID :id の削除中にエラーが発生しました: :error',
+        'id_end_error' => 'ID :id の終了中にエラーが発生しました: :error',
     ],
 ];
