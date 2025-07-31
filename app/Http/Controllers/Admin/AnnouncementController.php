@@ -1,66 +1,57 @@
 <?php
-
 namespace App\Http\Controllers\Admin;
-
 use App\Http\Controllers\Controller;
 use App\Services\AnnouncementServiceInterface;
 use App\Http\Requests\AnnouncementRequest;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Log;
-
 class AnnouncementController extends Controller
 {
     public function __construct(protected AnnouncementServiceInterface $announcementService)
     {
     }
-
     public function index()
     {
         $announcements = $this->announcementService->getPaginatedAnnouncements(15);
         return view('admin.announcement.index', compact('announcements'));
     }
-
     public function create()
     {
         return view('admin.announcement.create');
     }
-
     public function store(AnnouncementRequest $request)
     {
         try {
             $data = $request->validated();
             $this->announcementService->createAnnouncement($data);
             return redirect()->route('admin.announcement.index')
-                ->with('success', 'Pengumuman berhasil dibuat dengan dukungan English dan Japanese.');
+                ->with('success', __('admin/announcement/general.notifications.created'));
         } catch (\Exception $e) {
             return redirect()->back()
-                ->with('error', 'Terjadi kesalahan: ' . $e->getMessage())
+                ->with('error', __('admin/announcement/general.notifications.error', ['message' => $e->getMessage()]))
                 ->withInput();
         }
     }
-
     public function show(string $locale, int $id)
     {
         $announcement = $this->announcementService->findAnnouncement($id);
         if (!$announcement) {
             return redirect()->route('admin.announcement.index')
-                ->with('error', 'Pengumuman tidak ditemukan.');
+                ->with('error', __('admin/announcement/general.notifications.not_found'));
         }
         return view('admin.announcement.show', compact('announcement'));
     }
-
     public function edit(string $locale, int $id)
     {
         $announcement = $this->announcementService->findAnnouncement($id);
         if (!$announcement) {
             return redirect()->route('admin.announcement.index')
-                ->with('error', 'Pengumuman tidak ditemukan.');
+                ->with('error', __('admin/announcement/general.notifications.not_found'));
         }
         $announcement->load('translations');
         return view('admin.announcement.edit', compact('announcement'));
     }
-
     public function update(AnnouncementRequest $request, string $locale, int $id)
     {
         try {
@@ -68,17 +59,16 @@ class AnnouncementController extends Controller
             $announcement = $this->announcementService->updateAnnouncement($id, $data);
             if (!$announcement) {
                 return redirect()->route('admin.announcement.index')
-                    ->with('error', 'Pengumuman tidak ditemukan.');
+                    ->with('error', __('admin/announcement/general.notifications.not_found'));
             }
             return redirect()->route('admin.announcement.index')
-                ->with('success', 'Pengumuman berhasil diperbarui dengan dukungan multilingual.');
+                ->with('success', __('admin/announcement/general.notifications.updated'));
         } catch (\Exception $e) {
             return redirect()->back()
-                ->with('error', 'Terjadi kesalahan: ' . $e->getMessage())
+                ->with('error', __('admin/announcement/general.notifications.error', ['message' => $e->getMessage()]))
                 ->withInput();
         }
     }
-
     public function destroy(string $locale, int $id): JsonResponse
     {
         try {
@@ -86,45 +76,41 @@ class AnnouncementController extends Controller
             if (!$deleted) {
                 return response()->json([
                     'success' => false,
-                    'message' => 'Pengumuman tidak ditemukan.'
+                    'message' => __('admin/announcement/general.notifications.not_found')
                 ], 404);
             }
             return response()->json([
                 'success' => true,
-                'message' => 'Pengumuman berhasil dihapus.'
+                'message' => __('admin/announcement/general.notifications.deleted')
             ]);
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
-                'message' => 'Terjadi kesalahan: ' . $e->getMessage()
+                'message' => __('admin/announcement/general.notifications.error', ['message' => $e->getMessage()])
             ], 500);
         }
     }
-
     public function toggleStatus(string $locale, int $id)
     {
         try {
             $toggled = $this->announcementService->toggleAnnouncementStatus($id);
             if (!$toggled) {
-                return response()->json(['error' => 'Pengumuman tidak ditemukan.'], 404);
+                return response()->json(['error' => __('admin/announcement/general.notifications.not_found')], 404);
             }
-            return response()->json(['success' => 'Status pengumuman berhasil diubah.']);
+            return response()->json(['success' => __('admin/announcement/general.notifications.status_changed')]);
         } catch (\Exception $e) {
-            return response()->json(['error' => 'Terjadi kesalahan: ' . $e->getMessage()], 500);
+            return response()->json(['error' => __('admin/announcement/general.notifications.error', ['message' => $e->getMessage()])], 500);
         }
     }
-
     public function bulkToggleStatus(Request $request)
     {
-        $idsInput = $request->input('ids'); 
+        $idsInput = $request->input('ids');
         $statusInput = $request->input('status');
-
-        $ids = json_decode($idsInput, true); 
-        $status = $statusInput === 'true'; 
+        $ids = json_decode($idsInput, true);
+        $status = $statusInput === 'true';
         if (!$ids || !is_array($ids)) {
-            return response()->json(['success' => false, 'message' => 'Data tidak valid'], 400);
+            return response()->json(['success' => false, 'message' => __('admin/announcement/general.notifications.invalid_data')], 400);
         }
-
         try {
             foreach ($ids as $id) {
                 $announcement = $this->announcementService->findAnnouncement($id);
@@ -133,13 +119,11 @@ class AnnouncementController extends Controller
                     $announcement->save();
                 }
             }
-            
-            return response()->json(['success' => true]);
+            return response()->json(['success' => true, 'message' => __('admin/announcement/general.notifications.bulk_status_changed')]);
         } catch (\Exception $e) {
             return response()->json(['success' => false, 'message' => $e->getMessage()], 500);
         }
     }
-
     public function bulkDelete(Request $request): JsonResponse
     {
         Log::info("Bulk delete request received with IDs: " . json_encode($request->ids));
@@ -148,23 +132,21 @@ class AnnouncementController extends Controller
                 'ids' => 'required|array',
                 'ids.*' => 'integer|exists:announcements,id',
             ]);
-
             $success = $this->announcementService->bulkDeleteAnnouncements($request->ids);
             if (!$success) {
                 return response()->json([
                     'success' => false,
-                    'message' => 'Tidak ada pengumuman yang berhasil dihapus.'
+                    'message' => __('admin/announcement/general.notifications.none_deleted')
                 ], 400);
             }
-
             return response()->json([
                 'success' => true,
-                'message' => 'Pengumuman berhasil dihapus secara bulk.'
+                'message' => __('admin/announcement/general.notifications.bulk_deleted')
             ]);
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
-                'message' => 'Terjadi kesalahan: ' . $e->getMessage()
+                'message' => __('admin/announcement/general.notifications.error', ['message' => $e->getMessage()])
             ], 500);
         }
     }
