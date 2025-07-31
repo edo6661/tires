@@ -1,22 +1,26 @@
 <x-layouts.app>
     <div class="container px-4 sm:px-6 lg:px-8 py-8"
          x-data="blockedPeriodForm({
-            menus: {{ Js::from($menus) }},
-            blockedPeriod: {{ Js::from($blockedPeriod) }},
-            old_input: {{ Js::from(session()->getOldInput()) }},
-            check_conflict_url: '{{ route('admin.blocked-period.check-conflict') }}',
-            csrf_token: '{{ csrf_token() }}'
+             menus: {{ Js::from($menus) }},
+             blockedPeriod: {{ Js::from($blockedPeriod) }},
+             old_input: {{ Js::from(session()->getOldInput()) }},
+             check_conflict_url: '{{ route('admin.blocked-period.check-conflict') }}',
+             csrf_token: '{{ csrf_token() }}',
+             text: {
+                checking: '{{ __('admin/blocked-period/edit.button.checking_text') }}',
+                save: '{{ __('admin/blocked-period/edit.button.save_text') }}'
+             }
          })">
 
         <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
             <div class="transform transition-all duration-500 hover:translate-x-2">
-                <h1 class="text-title-lg font-bold text-main-text">Edit Periode Blokir</h1>
-                <p class="mt-1 text-body-md text-main-text/80">Perbarui periode waktu di mana menu tidak tersedia untuk reservasi.</p>
+                <h1 class="text-title-lg font-bold text-main-text">{{ __('admin/blocked-period/edit.page_title') }}</h1>
+                <p class="mt-1 text-body-md text-main-text/80">{{ __('admin/blocked-period/edit.page_description') }}</p>
             </div>
             <a href="{{ route('admin.blocked-period.index') }}"
                class="inline-flex items-center px-4 py-2 bg-white border border-disabled rounded-lg shadow-sm text-button-md font-medium text-main-text hover:bg-sub hover:text-brand hover:border-brand hover:shadow-md hover:-translate-y-1 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-brand transition-all duration-300 transform group">
                 <i class="fas fa-arrow-left mr-2 transition-transform duration-300 group-hover:-translate-x-1"></i>
-                Kembali ke Daftar
+                {{ __('admin/blocked-period/edit.back_to_list_button') }}
             </a>
         </div>
 
@@ -44,20 +48,20 @@
                     <input id="all_menus" name="all_menus" type="checkbox" value="1" x-model="all_menus"
                            class="h-4 w-4 rounded border-disabled text-brand focus:ring-brand transition-all duration-300 ">
                     <label for="all_menus" class="ml-3 block text-body-md font-medium text-main-text group-hover:text-brand transition-colors duration-300 cursor-pointer">
-                        Blokir untuk Semua Menu?
+                        {{ __('admin/blocked-period/edit.form.all_menus_label') }}
                     </label>
                 </div>
-                <div class="md:col-span-2" x-cloak x-show="!all_menus" 
+                <div class="md:col-span-2" x-cloak x-show="!all_menus"
                      x-transition:enter="transition ease-out duration-300"
                      x-transition:enter-start="opacity-0 transform -translate-y-4"
                      x-transition:enter-end="opacity-100 transform translate-y-0"
                      x-transition:leave="transition ease-in duration-200"
                      x-transition:leave-start="opacity-100 transform translate-y-0"
                      x-transition:leave-end="opacity-0 transform -translate-y-4">
-                    <label for="menu_id" class="block text-body-md font-medium text-main-text mb-1">Pilih Menu Spesifik</label>
+                    <label for="menu_id" class="block text-body-md font-medium text-main-text mb-1">{{ __('admin/blocked-period/edit.form.specific_menu_label') }}</label>
                     <select id="menu_id" name="menu_id" x-model="menu_id" :disabled="all_menus" @change="checkConflict"
                             class="block w-full rounded-md border-disabled shadow-sm focus:border-brand focus:ring-brand text-body-md disabled:bg-disabled disabled:cursor-not-allowed transition-all duration-300 hover:border-brand/50 hover:shadow-md">
-                        <option value="">-- Pilih satu menu --</option>
+                        <option value="">{{ __('admin/blocked-period/edit.form.select_menu_placeholder') }}</option>
                         @foreach($menus as $menu)
                             <option value="{{ $menu->id }}">
                                 {{ $menu->name }}
@@ -73,7 +77,7 @@
 
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div class="transform transition-all duration-300  hover:shadow-md rounded-lg p-2 -m-2">
-                    <label for="start_datetime" class="block text-body-md font-medium text-main-text mb-1">Waktu Mulai</label>
+                    <label for="start_datetime" class="block text-body-md font-medium text-main-text mb-1">{{ __('admin/blocked-period/edit.form.start_time_label') }}</label>
                     <input type="datetime-local" id="start_datetime" name="start_datetime" x-model="start_datetime" @input.debounce.750ms="checkConflict"
                            class="block w-full rounded-md border-disabled shadow-sm focus:border-brand focus:ring-brand text-body-md transition-all duration-300 hover:border-brand/50 hover:shadow-md">
                     @error('start_datetime')
@@ -81,7 +85,7 @@
                     @enderror
                 </div>
                 <div class="transform transition-all duration-300  hover:shadow-md rounded-lg p-2 -m-2">
-                    <label for="end_datetime" class="block text-body-md font-medium text-main-text mb-1">Waktu Selesai</label>
+                    <label for="end_datetime" class="block text-body-md font-medium text-main-text mb-1">{{ __('admin/blocked-period/edit.form.end_time_label') }}</label>
                     <input type="datetime-local" id="end_datetime" name="end_datetime" x-model="end_datetime" @input.debounce.750ms="checkConflict"
                            class="block w-full rounded-md border-disabled shadow-sm focus:border-brand focus:ring-brand text-body-md transition-all duration-300 hover:border-brand/50 hover:shadow-md">
                     @error('end_datetime')
@@ -90,7 +94,7 @@
                 </div>
             </div>
 
-            <div x-cloak x-show="conflict.has_conflict" 
+            <div x-cloak x-show="conflict.has_conflict"
                  x-transition:enter="transition ease-out duration-300"
                  x-transition:enter-start="opacity-0 transform scale-95"
                  x-transition:enter-end="opacity-100 transform scale-100"
@@ -103,8 +107,8 @@
                         <i class="fas fa-exclamation-triangle text-red-400 mt-0.5 animate-bounce"></i>
                     </div>
                     <div class="ml-3">
-                        <p class="text-body-md text-red-800 font-semibold">Terdeteksi Konflik Jadwal!</p>
-                        <p class="text-body-md text-red-700 mt-1">Periode yang Anda masukkan tumpang tindih dengan jadwal berikut:</p>
+                        <p class="text-body-md text-red-800 font-semibold">{{ __('admin/blocked-period/edit.conflict.title') }}</p>
+                        <p class="text-body-md text-red-700 mt-1">{{ __('admin/blocked-period/edit.conflict.description') }}</p>
                         <ul class="mt-2 list-disc list-inside text-body-md text-red-700 space-y-1">
                             <template x-for="detail in conflict.details" :key="detail.id">
                                 <li class="transform transition-all duration-300 hover:translate-x-2">
@@ -120,10 +124,10 @@
             <hr class="border-disabled/50">
 
             <div class="transform transition-all duration-300  hover:shadow-md rounded-lg p-2 -m-2">
-                <label for="reason" class="block text-body-md font-medium text-main-text mb-1">Alasan</label>
+                <label for="reason" class="block text-body-md font-medium text-main-text mb-1">{{ __('admin/blocked-period/edit.form.reason_label') }}</label>
                 <textarea id="reason" name="reason" rows="4" x-model="reason"
                           class="block w-full rounded-md border-disabled shadow-sm focus:border-brand focus:ring-brand text-body-md transition-all duration-300 hover:border-brand/50 hover:shadow-md resize-none"
-                          placeholder="Contoh: Perawatan rutin, hari libur, acara pribadi, dll."></textarea>
+                          placeholder="{{ __('admin/blocked-period/edit.form.reason_placeholder') }}"></textarea>
                 @error('reason')
                     <p class="mt-2 text-body-md text-red-600 animate-pulse">{{ $message }}</p>
                 @enderror
@@ -134,8 +138,8 @@
                         :disabled="isLoading || conflict.has_conflict"
                         class="inline-flex items-center justify-center px-6 py-2 border border-transparent text-button-md font-medium rounded-lg shadow-sm text-white bg-brand hover:bg-link-hover focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-brand disabled:bg-disabled disabled:cursor-not-allowed transition-all duration-300 transform  hover:shadow-lg hover:-translate-y-1"
                         :class="{ 'animate-pulse': isLoading }">
-                <i class="fas fa-spinner fa-spin mr-2 transition-all duration-300" x-show="isLoading" x-cloak></i>
-                    <span x-text="isLoading ? 'Memeriksa...' : 'Simpan Perubahan'" class="transition-all duration-300"></span>
+                    <i class="fas fa-spinner fa-spin mr-2 transition-all duration-300" x-show="isLoading" x-cloak></i>
+                    <span x-text="isLoading ? text.checking : text.save" class="transition-all duration-300"></span>
                 </button>
             </div>
         </form>
@@ -155,6 +159,7 @@
             };
 
             return {
+                // Config
                 all_menus: config.old_input.hasOwnProperty('all_menus')
                     ? (config.old_input.all_menus === '1' || config.old_input.all_menus === true)
                     : config.blockedPeriod.all_menus,
@@ -163,7 +168,9 @@
                 end_datetime: config.old_input.end_datetime || formatDateTimeLocal(config.blockedPeriod.end_datetime),
                 reason: config.old_input.reason !== undefined ? config.old_input.reason : (config.blockedPeriod.reason || ''),
                 excludeId: config.blockedPeriod.id,
+                text: config.text, // localized texts
 
+                // State
                 isLoading: false,
                 conflict: {
                     has_conflict: false,

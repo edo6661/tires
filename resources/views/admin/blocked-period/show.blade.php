@@ -1,18 +1,18 @@
 <x-layouts.app>
     <div class="container py-8 px-4 sm:px-6 lg:px-8" x-data="{ loaded: false }" x-init="setTimeout(() => loaded = true, 100)">
-        <div class="flex justify-between items-center mb-6" 
+        <div class="flex justify-between items-center mb-6"
              x-show="loaded"
              x-transition:enter="transition-all ease-out duration-500"
              x-transition:enter-start="opacity-0 -translate-y-4"
              x-transition:enter-end="opacity-100 translate-y-0">
             <div>
-                <h1 class="text-title-lg font-bold text-main-text">Blocked Period Details</h1>
-                <p class="text-body-md text-main-text/70 mt-1">Displaying the details of the selected blocked period.</p>
+                <h1 class="text-title-lg font-bold text-main-text">{{ __('admin/blocked-period/show.title') }}</h1>
+                <p class="text-body-md text-main-text/70 mt-1">{{ __('admin/blocked-period/show.subtitle') }}</p>
             </div>
-            <a href="{{ route('admin.blocked-period.index') }}" 
+            <a href="{{ route('admin.blocked-period.index') }}"
                class="inline-flex items-center px-4 py-2 bg-secondary-button border border-transparent rounded-md font-semibold text-button-md text-main-text uppercase tracking-widest hover:bg-secondary-button/80 hover:shadow-md focus:outline-none focus:ring-2 focus:ring-brand transition-all duration-300 transform ">
                 <i class="fas fa-arrow-left mr-2"></i>
-                Back
+                {{ __('admin/blocked-period/show.back_button') }}
             </a>
         </div>
 
@@ -26,25 +26,25 @@
                     <div class="md:col-span-2 transform transition-all duration-300 hover:scale-[1.01]">
                         <dt class="text-body-md font-medium text-main-text/70 flex items-center">
                             <i class="fas fa-utensils text-brand mr-2"></i>
-                            Blocked Menu
+                            {{ __('admin/blocked-period/show.details.blocked_menu') }}
                         </dt>
                         <dd class="mt-1 text-heading-lg text-main-text font-semibold flex items-center">
                             @if($blockedPeriod->all_menus)
                                 <span class="px-3 py-1 text-body-md font-bold text-white bg-red-600 rounded-full flex items-center shadow-sm hover:shadow-md transition-shadow duration-300">
-                                    <i class="fas fa-globe-asia mr-2"></i> All Menus
+                                    <i class="fas fa-globe-asia mr-2"></i> {{ __('admin/blocked-period/show.details.all_menus') }}
                                 </span>
                             @elseif($blockedPeriod->menu)
                                 <span class="w-4 h-4 rounded-full mr-3 shadow-sm" style="background-color: {{ $blockedPeriod->menu->color ?? '#6B7280' }};"></span>
                                 {{ $blockedPeriod->menu->name }}
                             @else
-                                <span class="text-main-text/50 italic">Menu not available</span>
+                                <span class="text-main-text/50 italic">{{ __('admin/blocked-period/show.details.menu_not_available') }}</span>
                             @endif
                         </dd>
                     </div>
 
                     <div class="transform transition-all duration-300 hover:scale-[1.02] hover:bg-sub/30 rounded-lg p-3 -m-3">
                         <dt class="text-body-md font-medium text-main-text/70 flex items-center">
-                            <i class="far fa-clock text-brand mr-2"></i> Start Time
+                            <i class="far fa-clock text-brand mr-2"></i> {{ __('admin/blocked-period/show.details.start_time') }}
                         </dt>
                         <dd class="mt-1 text-body-lg text-main-text font-medium">
                             {{ $blockedPeriod->start_datetime->format('F d, Y, H:i') }}
@@ -53,7 +53,7 @@
 
                     <div class="transform transition-all duration-300 hover:scale-[1.02] hover:bg-sub/30 rounded-lg p-3 -m-3">
                         <dt class="text-body-md font-medium text-main-text/70 flex items-center">
-                            <i class="far fa-check-circle text-brand mr-2"></i> End Time
+                            <i class="far fa-check-circle text-brand mr-2"></i> {{ __('admin/blocked-period/show.details.end_time') }}
                         </dt>
                         <dd class="mt-1 text-body-lg text-main-text font-medium">
                             {{ $blockedPeriod->end_datetime->format('F d, Y, H:i') }}
@@ -62,7 +62,7 @@
 
                     <div class="transform transition-all duration-300 hover:scale-[1.02] hover:bg-sub/30 rounded-lg p-3 -m-3">
                         <dt class="text-body-md font-medium text-main-text/70 flex items-center">
-                            <i class="fas fa-hourglass-half text-brand mr-2"></i> Duration
+                            <i class="fas fa-hourglass-half text-brand mr-2"></i> {{ __('admin/blocked-period/show.details.duration') }}
                         </dt>
                         <dd class="mt-1 text-body-lg text-main-text font-medium">
                             {{ $blockedPeriod->getDurationText() }}
@@ -71,22 +71,21 @@
 
                     <div class="transform transition-all duration-300 hover:scale-[1.02] hover:bg-sub/30 rounded-lg p-3 -m-3">
                         <dt class="text-body-md font-medium text-main-text/70 flex items-center">
-                            <i class="fas fa-circle-info text-brand mr-2"></i> Status
+                            <i class="fas fa-circle-info text-brand mr-2"></i> {{ __('admin/blocked-period/show.details.status') }}
                         </dt>
                         <dd class="mt-1">
                             @php
-                                $now = now();
                                 if ($blockedPeriod->isActive()) {
                                     $statusClass = 'bg-green-100 text-green-800';
-                                    $statusText = 'Active';
+                                    $statusText = __('admin/blocked-period/show.status.active');
                                     $statusIcon = 'fas fa-circle text-green-500';
                                 } elseif ($blockedPeriod->start_datetime->isFuture()) {
                                     $statusClass = 'bg-yellow-100 text-yellow-800';
-                                    $statusText = 'Upcoming';
+                                    $statusText = __('admin/blocked-period/show.status.upcoming');
                                     $statusIcon = 'fas fa-clock text-yellow-500';
                                 } else {
                                     $statusClass = 'bg-disabled/30 text-main-text/70';
-                                    $statusText = 'Completed';
+                                    $statusText = __('admin/blocked-period/show.status.completed');
                                     $statusIcon = 'fas fa-history text-main-text/50';
                                 }
                             @endphp
@@ -99,7 +98,7 @@
 
                     <div class="md:col-span-2 transform transition-all duration-300 hover:scale-[1.01]">
                         <dt class="text-body-md font-medium text-main-text/70 flex items-center">
-                            <i class="fas fa-comment-alt text-brand mr-2"></i> Reason
+                            <i class="fas fa-comment-alt text-brand mr-2"></i> {{ __('admin/blocked-period/show.details.reason') }}
                         </dt>
                         <dd class="mt-1 text-body-lg text-main-text prose max-w-none bg-sub/20 rounded-lg p-4 hover:bg-sub/30 transition-colors duration-300">
                             {!! nl2br(e($blockedPeriod->reason)) !!}
@@ -112,37 +111,37 @@
                 <div class="text-body-md text-main-text/70">
                     <span class="flex items-center gap-1">
                         <i class="fas fa-plus-circle text-brand text-xs"></i>
-                        Created: {{ $blockedPeriod->created_at->diffForHumans() }}
+                        {{ __('admin/blocked-period/show.details.created_at') }}: {{ $blockedPeriod->created_at->diffForHumans() }}
                     </span>
                     <span class="flex items-center gap-1 mt-1">
                         <i class="fas fa-edit text-brand text-xs"></i>
-                        Updated: {{ $blockedPeriod->updated_at->diffForHumans() }}
+                        {{ __('admin/blocked-period/show.details.updated_at') }}: {{ $blockedPeriod->updated_at->diffForHumans() }}
                     </span>
                 </div>
-                
+
                 <div class="flex items-center space-x-3" x-data="{ showConfirm: false }">
-                    <a href="{{ route('admin.blocked-period.edit', $blockedPeriod->id) }}" 
+                    <a href="{{ route('admin.blocked-period.edit', $blockedPeriod->id) }}"
                        class="inline-flex items-center px-4 py-2 bg-yellow-500 border border-transparent rounded-md font-semibold text-button-md text-white uppercase tracking-widest hover:bg-yellow-600 hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-yellow-300 transition-all duration-300 transform ">
                         <i class="fas fa-edit mr-2"></i>
-                        Edit
+                        {{ __('admin/blocked-period/show.actions.edit') }}
                     </a>
                     
-                    <button @click="showConfirm = true" 
+                    <button @click="showConfirm = true"
                             class="inline-flex items-center px-4 py-2 bg-red-600 border border-transparent rounded-md font-semibold text-button-md text-white uppercase tracking-widest hover:bg-red-700 hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-red-300 transition-all duration-300 transform ">
                         <i class="fas fa-trash-alt mr-2"></i>
-                        Delete
+                        {{ __('admin/blocked-period/show.actions.delete') }}
                     </button>
 
-                    <div x-show="showConfirm" 
+                    <div x-show="showConfirm"
                          x-transition:enter="transition ease-out duration-300"
                          x-transition:enter-start="opacity-0"
                          x-transition:enter-end="opacity-100"
                          x-transition:leave="transition ease-in duration-200"
                          x-transition:leave-start="opacity-100"
                          x-transition:leave-end="opacity-0"
-                         class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50" 
+                         class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50"
                          style="display: none;">
-                        <div class="bg-white rounded-lg shadow-xl p-6 w-full max-w-md border border-disabled/20" 
+                        <div class="bg-white rounded-lg shadow-xl p-6 w-full max-w-md border border-disabled/20"
                              @click.away="showConfirm = false"
                              x-transition:enter="transition ease-out duration-300 transform"
                              x-transition:enter-start="opacity-0 scale-95"
@@ -153,19 +152,19 @@
                             <div class="flex items-center justify-center w-12 h-12 mx-auto bg-red-100 rounded-full mb-4">
                                 <i class="fas fa-exclamation-triangle text-red-600 text-xl"></i>
                             </div>
-                            <h3 class="text-heading-lg font-bold text-main-text text-center">Confirm Deletion</h3>
-                            <p class="mt-2 text-body-md text-main-text/70 text-center">Are you sure you want to delete this blocked period? This action cannot be undone.</p>
+                            <h3 class="text-heading-lg font-bold text-main-text text-center">{{ __('admin/blocked-period/show.delete_modal.title') }}</h3>
+                            <p class="mt-2 text-body-md text-main-text/70 text-center">{{ __('admin/blocked-period/show.delete_modal.text') }}</p>
                             <div class="mt-6 flex justify-center space-x-3">
-                                <button @click="showConfirm = false" 
+                                <button @click="showConfirm = false"
                                         class="px-4 py-2 bg-secondary-button text-main-text text-button-md font-medium rounded-md hover:bg-secondary-button/80 transition-all duration-200 transform ">
-                                    Cancel
+                                    {{ __('admin/blocked-period/show.delete_modal.cancel_button') }}
                                 </button>
                                 <form action="{{ route('admin.blocked-period.destroy', $blockedPeriod->id) }}" method="POST" class="inline">
                                     @csrf
                                     @method('DELETE')
-                                    <button type="submit" 
+                                    <button type="submit"
                                             class="px-4 py-2 bg-red-600 text-white text-button-md font-medium rounded-md hover:bg-red-700 hover:shadow-lg transition-all duration-200 transform ">
-                                        Yes, Delete
+                                        {{ __('admin/blocked-period/show.delete_modal.confirm_button') }}
                                     </button>
                                 </form>
                             </div>
