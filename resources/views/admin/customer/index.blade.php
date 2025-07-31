@@ -2,8 +2,8 @@
     <div class="container space-y-6" x-data="customerIndex()">
         <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
             <div>
-                <h1 class="text-2xl font-bold text-gray-900">Customer Management</h1>
-                <p class="text-gray-600 mt-1">Manage customer data and their reservation history.</p>
+                <h1 class="text-2xl font-bold text-gray-900">{{ __('admin/customer/index.title') }}</h1>
+                <p class="text-gray-600 mt-1">{{ __('admin/customer/index.description') }}</p>
             </div>
         </div>
         <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -13,7 +13,7 @@
                         <i class="fas fa-user-plus text-blue-600"></i>
                     </div>
                     <div class="ml-4">
-                        <p class="text-sm font-medium text-gray-600">First Time</p>
+                        <p class="text-sm font-medium text-gray-600">{{ __('admin/customer/index.stats.first_time') }}</p>
                         <p class="text-2xl font-bold text-gray-900">{{ $customerTypeCounts['first_time'] }}</p>
                     </div>
                 </div>
@@ -24,7 +24,7 @@
                         <i class="fas fa-sync-alt text-green-600"></i>
                     </div>
                     <div class="ml-4">
-                        <p class="text-sm font-medium text-gray-600">Repeat</p>
+                        <p class="text-sm font-medium text-gray-600">{{ __('admin/customer/index.stats.repeat') }}</p>
                         <p class="text-2xl font-bold text-gray-900">{{ $customerTypeCounts['repeat'] }}</p>
                     </div>
                 </div>
@@ -35,7 +35,7 @@
                         <i class="fas fa-clock text-yellow-600"></i>
                     </div>
                     <div class="ml-4">
-                        <p class="text-sm font-medium text-gray-600">Dormant</p>
+                        <p class="text-sm font-medium text-gray-600">{{ __('admin/customer/index.stats.dormant') }}</p>
                         <p class="text-2xl font-bold text-gray-900">{{ $customerTypeCounts['dormant'] }}</p>
                     </div>
                 </div>
@@ -52,22 +52,22 @@
                                x-model="searchQuery"
                                @input.debounce.500ms="applyFilters()"
                                class="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                               placeholder="Search by name, email, or phone number...">
+                               :placeholder="__('admin/customer/index.filters.search_placeholder')">
                     </div>
                 </div>
                 <div class="lg:w-64">
                     <select x-model="customerType"
                             @change="applyFilters()"
                             class="block w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
-                        <option value="">All Customer Types</option>
-                        <option value="first_time">First Time</option>
-                        <option value="repeat">Repeat Customer</option>
-                        <option value="dormant">Dormant</option>
+                        <option value="">{{ __('admin/customer/index.filters.all_types') }}</option>
+                        <option value="first_time">{{ __('admin/customer/index.filters.first_time') }}</option>
+                        <option value="repeat">{{ __('admin/customer/index.filters.repeat') }}</option>
+                        <option value="dormant">{{ __('admin/customer/index.filters.dormant') }}</option>
                     </select>
                 </div>
                 <button @click="resetFilters()"
                         class="px-4 py-2 text-gray-600 hover:text-gray-800 transition-colors">
-                    <i class="fas fa-times mr-2"></i>Reset
+                    <i class="fas fa-times mr-2"></i>{{ __('admin/customer/index.filters.reset') }}
                 </button>
             </div>
         </div>
@@ -77,25 +77,25 @@
                     <thead class="bg-gray-50">
                         <tr>
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                Customer
+                                {{ __('admin/customer/index.table.header.customer') }}
                             </th>
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                Contact Info
+                                {{ __('admin/customer/index.table.header.contact_info') }}
                             </th>
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                Status
+                                {{ __('admin/customer/index.table.header.status') }}
                             </th>
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                Reservations
+                                {{ __('admin/customer/index.table.header.reservations') }}
                             </th>
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                Total Amount
+                                {{ __('admin/customer/index.table.header.total_amount') }}
                             </th>
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                Last Reservation
+                                {{ __('admin/customer/index.table.header.last_reservation') }}
                             </th>
                             <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                Actions
+                                {{ __('admin/customer/index.table.header.actions') }}
                             </th>
                         </tr>
                     </thead>
@@ -132,31 +132,31 @@
                                         @if($customer->is_registered)
                                             <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
                                                 <i class="fas fa-user-check mr-1"></i>
-                                                Registered
+                                                {{ __('admin/customer/index.table.status_badge.registered') }}
                                             </span>
                                         @else
                                             <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
                                                 <i class="fas fa-user mr-1"></i>
-                                                Guest
+                                                {{ __('admin/customer/index.table.status_badge.guest') }}
                                             </span>
                                         @endif
                                         @php
-                                            $customerTypeLabel = '';
+                                            $customerTypeKey = '';
                                             $customerTypeBadge = '';
                                             if($customer->reservation_count == 1) {
-                                                $customerTypeLabel = 'First Time';
+                                                $customerTypeKey = 'admin/customer/index.table.type_badge.first_time';
                                                 $customerTypeBadge = 'bg-blue-100 text-blue-800';
                                             } elseif($customer->reservation_count >= 3) {
-                                                $customerTypeLabel = 'Repeat';
+                                                $customerTypeKey = 'admin/customer/index.table.type_badge.repeat';
                                                 $customerTypeBadge = 'bg-green-100 text-green-800';
                                             } elseif(\Carbon\Carbon::parse($customer->latest_reservation)->diffInMonths(now()) >= 3) {
-                                                $customerTypeLabel = 'Dormant';
+                                                $customerTypeKey = 'admin/customer/index.table.type_badge.dormant';
                                                 $customerTypeBadge = 'bg-yellow-100 text-yellow-800';
                                             }
                                         @endphp
-                                        @if($customerTypeLabel)
+                                        @if($customerTypeKey)
                                             <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium {{ $customerTypeBadge }}">
-                                                {{ $customerTypeLabel }}
+                                                {{ __($customerTypeKey) }}
                                             </span>
                                         @endif
                                     </div>
@@ -164,7 +164,7 @@
                                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                                     <div class="flex items-center">
                                         <i class="fas fa-calendar-check text-gray-400 mr-2"></i>
-                                        {{ $customer->reservation_count }} times
+                                        {{ __('admin/customer/index.table.reservations_count', ['count' => $customer->reservation_count]) }}
                                     </div>
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
@@ -183,13 +183,13 @@
                                     <div class="flex items-center justify-end gap-2">
                                         @if($customer->is_registered)
                                             <a href="{{ route('admin.customer.show', $customer->user_id ?? $customer->customer_id) }}"
-                                            class="text-blue-600 hover:text-blue-900 transition-colors"
-                                            title="View Details">
+                                               class="text-blue-600 hover:text-blue-900 transition-colors"
+                                               :title="__('admin/customer/index.table.actions_tooltip.view_details')">
                                                 <i class="fas fa-eye"></i>
                                             </a>
                                             <button @click="sendMessage('{{ $customer->customer_id }}')"
                                                     class="text-green-600 hover:text-green-900 transition-colors"
-                                                    title="Send Message">
+                                                    :title="__('admin/customer/index.table.actions_tooltip.send_message')">
                                                 <i class="fas fa-envelope"></i>
                                             </button>
                                         @endif
@@ -201,8 +201,8 @@
                                 <td colspan="7" class="px-6 py-12 text-center">
                                     <div class="flex flex-col items-center justify-center">
                                         <i class="fas fa-users text-gray-300 text-4xl mb-4"></i>
-                                        <h3 class="text-lg font-medium text-gray-900 mb-2">No customers found</h3>
-                                        <p class="text-gray-500">There are no customers registered or matching the selected filters.</p>
+                                        <h3 class="text-lg font-medium text-gray-900 mb-2">{{ __('admin/customer/index.table.empty.title') }}</h3>
+                                        <p class="text-gray-500">{{ __('admin/customer/index.table.empty.description') }}</p>
                                     </div>
                                 </td>
                             </tr>
@@ -217,13 +217,13 @@
                             @if($customers->previousPageUrl())
                                 <a href="{{ $customers->previousPageUrl() }}"
                                    class="relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50">
-                                    Previous
+                                    {{ __('admin/customer/index.pagination.previous') }}
                                 </a>
                             @endif
                             @if($customers->nextPageUrl())
                                 <a href="{{ $customers->nextPageUrl() }}"
                                    class="ml-3 relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50">
-                                    Next
+                                    {{ __('admin/customer/index.pagination.next') }}
                                 </a>
                             @endif
                         </div>
@@ -245,31 +245,31 @@
              class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
             <div class="relative top-20 mx-auto p-5 border max-w-md shadow-lg rounded-md bg-white">
                 <div class="mt-3">
-                    <h3 class="text-lg font-medium text-gray-900 mb-4">Send Message</h3>
+                    <h3 class="text-lg font-medium text-gray-900 mb-4">{{ __('admin/customer/index.modal.title') }}</h3>
                     <div class="space-y-4">
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">Subject</label>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">{{ __('admin/customer/index.modal.subject') }}</label>
                             <input type="text"
                                    x-model="messageSubject"
                                    class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                   placeholder="Enter subject">
+                                   :placeholder="__('admin/customer/index.modal.subject_placeholder')">
                         </div>
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">Message</label>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">{{ __('admin/customer/index.modal.message') }}</label>
                             <textarea x-model="messageContent"
                                       rows="4"
                                       class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                      placeholder="Enter your message"></textarea>
+                                      :placeholder="__('admin/customer/index.modal.message_placeholder')"></textarea>
                         </div>
                     </div>
                     <div class="mt-6 flex gap-2 justify-end">
                         <button @click="showMessageModal = false"
                                 class="px-4 py-2 bg-gray-200 text-gray-800 text-base font-medium rounded-md shadow-sm hover:bg-gray-300">
-                            Cancel
+                            {{ __('admin/customer/index.modal.cancel') }}
                         </button>
                         <button @click="sendMessageConfirm()"
                                 class="px-4 py-2 bg-blue-600 text-white text-base font-medium rounded-md shadow-sm hover:bg-blue-700">
-                            Send Message
+                            {{ __('admin/customer/index.modal.send') }}
                         </button>
                     </div>
                 </div>
@@ -285,6 +285,11 @@
                 selectedCustomerId: null,
                 messageSubject: '',
                 messageContent: '',
+                translations: {
+                    validation_error: "{{ __('admin/customer/index.alerts.validation_error') }}",
+                    send_success: "{{ __('admin/customer/index.alerts.send_success') }}",
+                    send_error: "{{ __('admin/customer/index.alerts.send_error') }}"
+                },
                 applyFilters() {
                     const params = new URLSearchParams();
                     if (this.searchQuery.trim()) {
@@ -311,7 +316,7 @@
                 },
                 async sendMessageConfirm() {
                     if (!this.messageSubject.trim() || !this.messageContent.trim()) {
-                        alert('Please fill in both subject and message');
+                        alert(this.translations.validation_error);
                         return;
                     }
                     try {
@@ -324,12 +329,11 @@
                         //         subject: this.messageSubject,
                         //         content: this.messageContent
                         //     })
-                        // });
-                        alert('Message sent successfully!');
+                        // });                        alert(this.translations.send_success);
                         this.showMessageModal = false;
                     } catch (error) {
                         console.error('Error:', error);
-                        alert('Failed to send message');
+                        alert(this.translations.send_error);
                     }
                 }
             }
