@@ -289,7 +289,7 @@
                 showFilters: false,
                 showDeleteModal: false,
                 selectedItems: [],
-                allItemIds: [], 
+                allItemIds: [],
                 deleteTarget: null,
                 deleteMessage: '',
                 init() {
@@ -314,7 +314,7 @@
                     if (this.selectedItems.length === 0) return;
                     if (confirm('{{ __('admin/tire-storage/index.modals.end_storage.multiple_message', ['count' => '']) }}'.replace(':count', this.selectedItems.length))) {
                         try {
-                            const response = await fetch('/admin/tire-storage/bulk-end', {
+                            const response = await fetch('{{ route("admin.tire-storage.bulk-end") }}', {
                                 method: 'POST',
                                 headers: {
                                     'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
@@ -337,8 +337,7 @@
                 async confirmDelete() {
                     try {
                         let response;
-                        if (this.deleteTarget.length > 1) { 
-                            response = await fetch('/admin/tire-storage/bulk-delete', {
+                            response = await fetch('{{ route("admin.tire-storage.bulk-delete") }}', {
                                 method: 'POST',
                                 headers: {
                                     'Content-Type': 'application/json',
@@ -346,16 +345,6 @@
                                 },
                                 body: JSON.stringify({ ids: this.deleteTarget })
                             });
-                        } else if (this.deleteTarget.length === 1) { 
-                            response = await fetch(`/admin/tire-storage/${this.deleteTarget[0]}`, {
-                                method: 'DELETE',
-                                headers: {
-                                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
-                                }
-                            });
-                        } else {
-                            return; 
-                        }
                         if (response.ok) {
                             window.location.reload();
                         } else {
@@ -374,7 +363,8 @@
         async function endStorage(id) {
             if (confirm('{{ __('admin/tire-storage/index.modals.end_storage.single_message') }}')) {
                 try {
-                    const response = await fetch(`/admin/tire-storage/${id}/end`, {
+                    const url = '{{ route("admin.tire-storage.end", ["id" => "__ID__"]) }}'.replace('__ID__', id);
+                    const response = await fetch(url, {
                         method: 'POST',
                         headers: {
                             'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
