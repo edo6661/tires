@@ -35,6 +35,14 @@
             <x-layouts.footer.customer-footer />
         </div>
     </div>
+    
+    {{-- Tambahkan script ini untuk meneruskan terjemahan ke JS --}}
+    <script>
+        window.translations = {
+            sidebar: @json(__('admin/sidebar'))
+        };
+    </script>
+    
     <script>
         function dropdown(type = 'reservation') {
             return {
@@ -51,25 +59,27 @@
                 },
                 setItems(type) {
                     const currentRoute = window.location.pathname;
+                    const trans = window.translations.sidebar;
+
                     const dropdownItems = {
                         reservation: [
                             { 
                                 id: 1, 
-                                name: 'Calendar', 
+                                name: trans.reservation.items.calendar, 
                                 icon: 'fas fa-calendar-alt', 
                                 url: '{{ route('admin.reservation.calendar') }}',
                                 isActive: currentRoute.includes('admin/reservation/calendar')
                             },
                             { 
                                 id: 3, 
-                                name: 'Blocked', 
+                                name: trans.reservation.items.blocked, 
                                 icon: 'fas fa-ban', 
                                 url: '{{ route('admin.blocked-period.index') }}',
                                 isActive: currentRoute.includes('admin/blocked-period')
                             },
                             { 
                                 id: 4, 
-                                name: 'Availability', 
+                                name: trans.reservation.items.availability, 
                                 icon: 'fas fa-check-circle', 
                                 url: '{{ route('admin.reservation.viewAvailability') }}',
                                 isActive: currentRoute.includes('admin/reservation/availability')
@@ -78,14 +88,14 @@
                         customer: [
                             { 
                                 id: 1, 
-                                name: 'Contact', 
+                                name: trans.customer_support.items.contact, 
                                 icon: 'fa-solid fa-address-book', 
                                 url: '{{ route('admin.contact.index') }}',
                                 isActive: currentRoute.includes('admin/contact')
                             },
                             { 
                                 id: 2, 
-                                name: 'Announcement', 
+                                name: trans.customer_support.items.announcement, 
                                 icon: 'fas fa-bullhorn', 
                                 url: '{{ route('admin.announcement.index') }}',
                                 isActive: currentRoute.includes('admin/announcement')
@@ -94,14 +104,14 @@
                         settings: [
                             { 
                                 id: 1, 
-                                name: 'Business Information', 
+                                name: trans.settings.items.business_information, 
                                 icon: 'fa-solid fa-store', 
                                 url: '{{ route('admin.business-setting.index') }}',
                                 isActive: currentRoute.includes('admin/business-setting')
                             },
                             { 
                                 id: 2, 
-                                name: 'Menu', 
+                                name: trans.settings.items.menu, 
                                 icon: 'fa-solid fa-book-open', 
                                 url: '{{ route('admin.menu.index') }}',
                                 isActive: currentRoute.includes('admin/menu')
