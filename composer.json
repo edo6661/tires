@@ -13,7 +13,8 @@
         "aws/aws-sdk-php": "^3.351",
         "laravel/framework": "^12.0",
         "laravel/tinker": "^2.10.1",
-        "league/flysystem-aws-s3-v3": "^3.29"
+        "league/flysystem-aws-s3-v3": "^3.29",
+        "spatie/icalendar-generator": "^3.0"
     },
     "require-dev": {
         "fakerphp/faker": "^1.23",

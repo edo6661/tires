@@ -1,5 +1,7 @@
 <?php
 namespace App\Http\Controllers\Admin;
+
+use App\Events\BookingCompleted;
 use Carbon\Carbon;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\ReservationRequest;
@@ -524,7 +526,9 @@ class ReservationController extends Controller
     public function store(ReservationRequest $request): RedirectResponse
     {
         try {
-            $this->reservationService->createReservation($request->validated());
+            $reservation = $this->reservationService->createReservation($request->validated());
+            
+            BookingCompleted::dispatch($reservation);
             return redirect()->route('admin.reservation.calendar')
                 ->with('success', __('admin/reservation/create.notifications.creation_success'));
         } catch (\Exception $e) {

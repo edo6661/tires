@@ -83,7 +83,7 @@
                     </div>
                 </div>
 
-                <div x-show="!loading && !bookingSuccess" class="space-y-6" x-transition>
+                {{-- <div x-show="!loading && !bookingSuccess" class="space-y-6" x-transition>
                      <div class="bg-red-50 border border-red-200 rounded-lg p-4">
                          <div class="flex items-center justify-center text-red-700">
                              <i class="fas fa-exclamation-triangle mr-2"></i>
@@ -103,7 +103,7 @@
                             {{ __('final-step.failure_go_back') }}
                         </a>
                     </div>
-                </div>
+                </div> --}}
             </div>
         </div>
     </div>
@@ -142,6 +142,7 @@
                             amount: 0, 
                             status: 'pending',
                             notes: 'Booking via website',
+
                             @guest
                             full_name: this.finalBookingData.guestInfo?.full_name || '',
                             full_name_kana: this.finalBookingData.guestInfo?.full_name_kana || '',
@@ -150,6 +151,7 @@
                             customer_type: 'guest',
                             @else
                             user_id: {{ auth()->id() ?? 'null' }},
+                            customer_type: 'existing',
                             @endguest
                         };
 

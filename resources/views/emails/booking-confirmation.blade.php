@@ -84,6 +84,12 @@
             
             <p>Best regards,<br>The {{ config('app.name') }} Team</p>
         </div>
+        <p>
+            <strong>🗓️ Add to Calendar:</strong> We've attached a calendar invite (.ics file) to this email for your convenience. Simply click on it to add this booking to your personal calendar.
+        </p>
+
+        <p><strong>Important Notes:</strong></p>
+
         
         <div class="footer">
             &copy; {{ date('Y') }} {{ config('app.name') }}. All rights reserved.
