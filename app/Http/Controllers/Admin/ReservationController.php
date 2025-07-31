@@ -76,7 +76,6 @@ class ReservationController extends Controller
                             ->orderBy('reservation_datetime', 'desc')
                             ->paginate(15);
         $menus = Menu::where('is_active', true)
-                                ->orderBy('name')
                                 ->get();
         $statuses = [
             'pending' => 'Pending',
