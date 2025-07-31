@@ -92,14 +92,14 @@
     </div>
     
     <!-- Menu Price Info -->
-    @if($menu->price)
+    {{-- @if($menu->price)
         <div class="bg-gray-50 rounded-lg p-3">
             <div class="flex items-center justify-between">
                 <div class="text-gray-600 text-xs">Menu Price:</div>
                 <div class="font-medium text-gray-900">$ {{ number_format($menu->price, 0, ',', '.') }}</div>
             </div>
         </div>
-    @endif
+    @endif --}}
     
     <!-- Notes -->
     @if($reservation->notes)

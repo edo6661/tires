@@ -9,11 +9,11 @@
             <div class="flex items-center justify-between mb-4">
                 <h3 class="text-lg font-semibold text-gray-900 flex items-center">
                     <i class="fas fa-filter text-blue-600 mr-2"></i>
-                    Filter Reservations
+                    {{ __('admin/reservation/calendar.filter.title') }}
                 </h3>
                 <div class="flex items-center space-x-2">
                     <span class="text-sm text-gray-600">
-                        {{ $reservations->total() }} total reservations
+                        {{ $reservations->total() }} {{ __('admin/reservation/calendar.filter.total_reservations') }}
                     </span>
                 </div>
             </div>
@@ -23,22 +23,22 @@
                     <div class="md:col-span-2">
                         <label for="search" class="block text-sm font-medium text-gray-700 mb-1">
                             <i class="fas fa-search text-gray-400 mr-1"></i>
-                            Quick Search
+                            {{ __('admin/reservation/calendar.filter.quick_search') }}
                         </label>
                         <input type="text" 
                                 name="search" 
                                 id="search" 
-                                placeholder="Customer name, phone, email..."
+                                placeholder="{{ __('admin/reservation/calendar.filter.search_placeholder') }}"
                                 value="{{ request('search') }}"
                                 class="w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 transition-all py-2 pl-2">
                     </div>
                     <div>
                         <label for="menu_id" class="block text-sm font-medium text-gray-700 mb-1">
                             <i class="fas fa-utensils text-gray-400 mr-1"></i>
-                            Menu
+                            {{ __('admin/reservation/calendar.filter.menu') }}
                         </label>
                         <select name="menu_id" id="menu_id" class="w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 transition-all py-2 pl-2">
-                            <option value="">All Menus</option>
+                            <option value="">{{ __('admin/reservation/calendar.filter.all_menus') }}</option>
                             @foreach($menus as $menu)
                                 <option value="{{ $menu->id }}" 
                                         {{ request('menu_id') == $menu->id ? 'selected' : '' }}>
@@ -50,10 +50,10 @@
                     <div>
                         <label for="status" class="block text-sm font-medium text-gray-700 mb-1">
                             <i class="fas fa-flag text-gray-400 mr-1"></i>
-                            Status
+                            {{ __('admin/reservation/calendar.filter.status') }}
                         </label>
                         <select name="status" id="status" class="w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 transition-all py-2 pl-2">
-                            <option value="">All Statuses</option>
+                            <option value="">{{ __('admin/reservation/calendar.filter.all_statuses') }}</option>
                             @foreach($statuses as $value => $label)
                                 <option value="{{ $value }}" 
                                         {{ request('status') == $value ? 'selected' : '' }}>
@@ -65,13 +65,13 @@
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-1">
                             <i class="fas fa-calendar-alt text-gray-400 mr-1"></i>
-                            Date Range
+                            {{ __('admin/reservation/calendar.filter.date_range') }}
                         </label>
                         <button type="button" 
                                 onclick="toggleDateRange()" 
                                 class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm text-gray-700 hover:bg-gray-50 focus:ring-2 focus:ring-blue-500 transition-all">
                             <i class="fas fa-calendar-week mr-1"></i>
-                            Select Range
+                            {{ __('admin/reservation/calendar.filter.select_range') }}
                         </button>
                     </div>
                 </div>
@@ -80,7 +80,7 @@
                         <div>
                             <label for="start_date" class="block text-sm font-medium text-gray-700 mb-1">
                                 <i class="fas fa-calendar-plus text-blue-600 mr-1"></i>
-                                Start Date
+                                {{ __('admin/reservation/calendar.filter.start_date') }}
                             </label>
                             <input type="date" 
                                     name="start_date" 
@@ -91,7 +91,7 @@
                         <div>
                             <label for="end_date" class="block text-sm font-medium text-gray-700 mb-1">
                                 <i class="fas fa-calendar-minus text-blue-600 mr-1"></i>
-                                End Date
+                                {{ __('admin/reservation/calendar.filter.end_date') }}
                             </label>
                             <input type="date" 
                                     name="end_date" 
@@ -106,25 +106,25 @@
                         <button type="submit" 
                                 class="inline-flex items-center px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all">
                             <i class="fas fa-filter mr-2"></i>
-                            Apply Filters
+                            {{ __('admin/reservation/calendar.filter.apply_filters') }}
                         </button>
                         <a href="{{ route('admin.reservation.calendar', ['tab' => 'list']) }}" 
                             class="inline-flex items-center px-4 py-2 bg-gray-200 text-gray-700 text-sm font-medium rounded-lg hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-gray-500 transition-all">
                             <i class="fas fa-times mr-2"></i>
-                            Clear All
+                            {{ __('admin/reservation/calendar.filter.clear_all') }}
                         </a>
                     </div>
                     <div class="flex items-center space-x-4">
                         <div class="text-sm text-gray-600">
-                            Showing {{ $reservations->firstItem() ?? 0 }} - {{ $reservations->lastItem() ?? 0 }} 
-                            of {{ $reservations->total() }} results
+                            {{ __('admin/reservation/calendar.filter.showing') }} {{ $reservations->firstItem() ?? 0 }} - {{ $reservations->lastItem() ?? 0 }} 
+                            {{ __('admin/reservation/calendar.filter.of') }} {{ $reservations->total() }} {{ __('admin/reservation/calendar.filter.results') }}
                         </div>
                         <div class="flex items-center space-x-2">
-                            <button onclick="exportReservations()" 
+                            {{-- <button onclick="exportReservations()" 
                                     class="text-sm text-blue-600 hover:text-blue-700 font-medium">
                                 <i class="fas fa-download mr-1"></i>
-                                Export
-                            </button>
+                                {{ __('admin/reservation/calendar.filter.export') }}
+                            </button> --}}
                         </div>
                     </div>
                 </div>
@@ -138,37 +138,37 @@
                     <th class="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                         <div class="flex items-center space-x-1">
                             <i class="fas fa-user text-gray-400"></i>
-                            <span>Customer</span>
+                            <span>{{ __('admin/reservation/calendar.table.customer') }}</span>
                         </div>
                     </th>
                     <th class="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                         <div class="flex items-center space-x-1">
                             <i class="fas fa-clock text-gray-400"></i>
-                            <span>Date & Time</span>
+                            <span>{{ __('admin/reservation/calendar.table.date_time') }}</span>
                         </div>
                     </th>
                     <th class="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                         <div class="flex items-center space-x-1">
                             <i class="fas fa-utensils text-gray-400"></i>
-                            <span>Menu</span>
+                            <span>{{ __('admin/reservation/calendar.table.menu') }}</span>
                         </div>
                     </th>
                     <th class="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                         <div class="flex items-center space-x-1">
                             <i class="fas fa-users text-gray-400"></i>
-                            <span>People</span>
+                            <span>{{ __('admin/reservation/calendar.table.people') }}</span>
                         </div>
                     </th>
                     <th class="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                         <div class="flex items-center space-x-1">
                             <i class="fas fa-flag text-gray-400"></i>
-                            <span>Status</span>
+                            <span>{{ __('admin/reservation/calendar.table.status') }}</span>
                         </div>
                     </th>
                     <th class="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                         <div class="flex items-center space-x-1">
                             <i class="fas fa-cog text-gray-400"></i>
-                            <span>Actions</span>
+                            <span>{{ __('admin/reservation/calendar.table.actions') }}</span>
                         </div>
                     </th>
                 </tr>
@@ -209,7 +209,7 @@
                             </div>
                             <div class="text-sm text-gray-500">
                                 <i class="fas fa-stopwatch text-gray-400 mr-1"></i>
-                                {{ $reservation->menu->required_time }} minutes
+                                {{ $reservation->menu->required_time }} {{ __('admin/reservation/calendar.table.minutes') }}
                             </div>
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap">
@@ -227,52 +227,52 @@
                                 {{ $reservation->status->value === 'completed' ? 'bg-green-100 text-green-800' : '' }}
                                 {{ $reservation->status->value === 'cancelled' ? 'bg-red-100 text-red-800' : '' }}">
                                 <i class="fas fa-circle text-xs mr-1"></i>
-                                {{ $reservation->status->label() }}
+                                {{ __('admin/reservation/calendar.status_labels.' . $reservation->status->value) }}
                             </span>
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
                             <div class="flex items-center space-x-2">
                                 <a href="{{ route('admin.reservation.show', $reservation->id) }}" 
                                     class="text-blue-600 hover:text-blue-900 transition-colors"
-                                    title="View Details">
+                                    title="{{ __('admin/reservation/calendar.actions.view_details') }}">
                                     <i class="fas fa-eye"></i>
                                 </a>
                                 <a href="{{ route('admin.reservation.edit', $reservation->id) }}" 
                                     class="text-indigo-600 hover:text-indigo-900 transition-colors"
-                                    title="Edit">
+                                    title="{{ __('admin/reservation/calendar.actions.edit') }}">
                                     <i class="fas fa-edit"></i>
                                 </a>
                                 @if($reservation->status->value === 'pending')
                                     <button onclick="updateStatus('{{ route('admin.reservation.confirm', $reservation->id) }}')"
                                             class="text-green-600 hover:text-green-900 transition-colors"
-                                            title="Confirm">
+                                            title="{{ __('admin/reservation/calendar.actions.confirm') }}">
                                         <i class="fas fa-check"></i>
                                     </button>
                                 @endif
                                 @if(in_array($reservation->status->value, ['pending', 'confirmed']))
                                     <button onclick="updateStatus('{{ route('admin.reservation.cancel', $reservation->id) }}')"
                                             class="text-red-600 hover:text-red-900 transition-colors"
-                                            title="Cancel">
+                                            title="{{ __('admin/reservation/calendar.actions.cancel') }}">
                                         <i class="fas fa-times"></i>
                                     </button>
                                 @endif
                                 <div class="relative" x-data="{ open: false }">
-                                    <button @click="open = !open" 
+                                    {{-- <button @click="open = !open" 
                                             class="text-gray-600 hover:text-gray-900 transition-colors"
-                                            title="More Actions">
+                                            title="{{ __('admin/reservation/calendar.actions.more_actions') }}">
                                         <i class="fas fa-ellipsis-v"></i>
-                                    </button>
+                                    </button> --}}
                                     <div x-show="open" 
                                          @click.away="open = false"
                                          class="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg border border-gray-200 z-10">
                                         <div class="py-1">
                                             <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
                                                 <i class="fas fa-print mr-2"></i>
-                                                Print Details
+                                                {{ __('admin/reservation/calendar.actions.print_details') }}
                                             </a>
                                             <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
                                                 <i class="fas fa-envelope mr-2"></i>
-                                                Send Email
+                                                {{ __('admin/reservation/calendar.actions.send_email') }}
                                             </a>
                                         </div>
                                     </div>
@@ -285,8 +285,8 @@
                         <td colspan="6" class="px-6 py-12 text-center">
                             <div class="flex flex-col items-center">
                                 <i class="fas fa-calendar-times text-gray-400 text-4xl mb-4"></i>
-                                <h3 class="text-lg font-medium text-gray-900 mb-2">No reservations found</h3>
-                                <p class="text-gray-500">Try adjusting your filters or search criteria</p>
+                                <h3 class="text-lg font-medium text-gray-900 mb-2">{{ __('admin/reservation/calendar.empty_state.no_reservations') }}</h3>
+                                <p class="text-gray-500">{{ __('admin/reservation/calendar.empty_state.adjust_filters') }}</p>
                             </div>
                         </td>
                     </tr>
@@ -298,9 +298,9 @@
         <div class="bg-gray-50 px-6 py-4 border-t border-gray-200">
             <div class="flex items-center justify-between">
                 <div class="flex items-center space-x-2 text-sm text-gray-600">
-                    <span>Show</span>
+                    <span>{{ __('admin/reservation/calendar.pagination.show') }}</span>
                     <span class="font-medium">{{ $reservations->count() }}</span>
-                    <span>entries per page</span>
+                    <span>{{ __('admin/reservation/calendar.pagination.entries_per_page') }}</span>
                 </div>
                 <div class="flex items-center space-x-2">
                     {{ $reservations->appends(request()->query())->links() }}
@@ -346,7 +346,7 @@
     function exportReservations() {
     }
     function updateStatus(url) { 
-        if (!confirm('Are you sure you want to change the status of this reservation?')) {
+        if (!confirm('{{ __('admin/reservation/calendar.confirmation.change_status') }}')) {
             return;
         }
         fetch(url, {
@@ -362,12 +362,12 @@
                 alert(data.message);
                 window.location.reload();
             } else {
-                alert('Error: ' + data.message);
+                alert('{{ __('admin/reservation/calendar.alerts.error') }}' + data.message);
             }
         })
         .catch(error => {
             console.error('Error:', error);
-            alert('An error occurred while updating the status');
+            alert('{{ __('admin/reservation/calendar.alerts.update_error') }}');
         });
     }
 </script>

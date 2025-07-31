@@ -1,6 +1,6 @@
 <x-layouts.app>
     {{-- Teruskan terjemahan JavaScript ke Alpine.js menggunakan @json --}}
-    <div class="container space-y-6" x-data="dashboardData(@json(__('admin/dashboard.javascript')))">
+    <div class="container space-y-6" x-data='dashboardData(@json(__('admin/dashboard.javascript')))'>
         <div class="bg-white rounded-lg shadow-sm p-6 border border-disabled/20 transform transition-all duration-500 ">
             <div class="space-y-3">
                 @foreach ($announcements as $announcement)
@@ -27,7 +27,6 @@
                 @endforeach
             </div>
         </div>
-
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
             <div class="space-y-6">
                 <div class="bg-white rounded-lg shadow-sm p-6 border border-disabled/20 transform transition-all duration-500 ">
@@ -49,7 +48,6 @@
                         </div>
                     </div>
                 </div>
-
                 <div class="bg-white rounded-lg shadow-sm p-6 border border-disabled/20 transform transition-all duration-500 ">
                     <div class="flex items-center justify-between mb-4 border-b border-sub pb-2">
                         <h2 class="text-heading-lg font-semibold text-brand">{{ __('admin/dashboard.contact.title') }}</h2>
@@ -86,7 +84,6 @@
                     </div>
                 </div>
             </div>
-
             <div class="space-y-6">
                 <div class="bg-white rounded-lg shadow-sm p-6 border border-disabled/20 transform transition-all duration-500 ">
                     <div class="flex items-center justify-between mb-4 border-b border-sub pb-2">
@@ -122,7 +119,6 @@
                         </table>
                     </div>
                 </div>
-
                 <div class="bg-white rounded-lg shadow-sm p-6 border border-disabled/20 transform transition-all duration-500 ">
                     <div class="flex items-center justify-between mb-4 border-b border-sub pb-2">
                         <h2 class="text-heading-lg font-semibold text-brand">
@@ -140,7 +136,6 @@
                                 <div class="text-body-md text-main-text/70">{{ __('admin/dashboard.status.cases_unit') }}</div>
                             </div>
                         </div>
-                        
                         <div class="flex items-center justify-between p-4 bg-sub/30 rounded-lg border border-sub/50 hover:bg-sub/50 hover:border-brand/30 transition-all duration-300 hover:scale-[1.02] transform group">
                             <div class="flex items-center gap-2">
                                 <span class="text-body-md font-medium text-main-text group-hover:text-brand transition-colors duration-300">{{ __('admin/dashboard.status.new_customers') }}</span>
@@ -150,19 +145,16 @@
                                 <div class="text-body-md text-main-text/70">{{ __('admin/dashboard.status.cases_unit') }}</div>
                             </div>
                         </div>
-                        
                     </div>
                 </div>
             </div>
         </div>
     </div>
     <script>
-        // Menerima objek terjemahan dari Blade
         function dashboardData(translations) {
             return {
-                translations: translations, // Simpan terjemahan untuk digunakan di dalam fungsi
+                translations: translations, 
                 async deactivateAnnouncement(announcementId) {
-                    // Gunakan terjemahan dari objek
                     if (!confirm(this.translations.confirm_close_announcement)) {
                         return;
                     }
@@ -170,7 +162,7 @@
                         const formData = new FormData();
                         formData.append('ids', JSON.stringify([announcementId]));
                         formData.append('status', false); 
-                        const response = await fetch('/admin/announcement/bulk-toggle-status', {
+                        const response = await fetch('{{ route('admin.announcement.bulkToggleStatus') }}', {
                             method: 'POST',
                             headers: {
                                 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
@@ -181,12 +173,10 @@
                         if (result.success) {
                             window.location.reload();
                         } else {
-                            // Gunakan terjemahan dari objek
                             alert(result.message || this.translations.deactivation_error);
                         }
                     } catch (error) {
                         console.error('Error:', error);
-                        // Gunakan terjemahan dari objek
                         alert(this.translations.deactivation_error);
                     }
                 }

@@ -3,7 +3,19 @@
         <div class="bg-gray-50 rounded-lg p-4 min-h-[300px] min-w-[174px]">
             <div class="flex items-center justify-between mb-3">
                 <div class="text-center">
-                    <div class="text-xs text-gray-600 uppercase">{{ $day['date']->format('D') }}</div>
+                    @php
+                        $dayName = strtolower($day['date']->format('l'));
+                        $dayKey = match($dayName) {
+                            'monday' => 'mon',
+                            'tuesday' => 'tue', 
+                            'wednesday' => 'wed',
+                            'thursday' => 'thu',
+                            'friday' => 'fri',
+                            'saturday' => 'sat',
+                            'sunday' => 'sun'
+                        };
+                    @endphp
+                    <div class="text-xs text-gray-600 uppercase">{{ __('admin/reservation/calendar.calendar.days_short.' . $dayKey) }}</div>
                     <div class="text-lg font-semibold text-gray-900 {{ $day['isToday'] ? 'text-blue-600' : '' }}">
                         {{ $day['date']->format('j') }}
                     </div>

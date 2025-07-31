@@ -1,11 +1,9 @@
 @props(['reservation', 'menu'])
-
 @php
     $backgroundColor = $menu->getColorWithOpacity(10); 
     $borderColor = $menu->color;
     $textColor = $menu->getTextColor();
 @endphp
-
 <div 
     x-data="reservationTooltip()"
     @mouseenter="showTooltip = true; checkTooltipPosition($event)"
@@ -17,7 +15,7 @@
     <div class="flex items-start flex-col gap-2">
         <div class="flex-1">
             <div class="font-medium">
-                {{$reservation->getFullName() }}
+                {{ $reservation->getFullName() }}
             </div>
         </div>
         <div class="flex items-start flex-col">
@@ -26,9 +24,7 @@
             </div>
         </div>
     </div>
-    
-    <!-- Enhanced Tooltip -->
-    <div 
+    <a 
         x-show="showTooltip"
         x-transition:enter="transition ease-out duration-200"
         x-transition:enter-start="opacity-0 transform scale-95"
@@ -44,8 +40,8 @@
         }"
         class="absolute z-50 w-80 bg-white rounded-lg shadow-xl border border-gray-200 overflow-hidden"
         style="display: none;"
+        href="{{ route('admin.reservation.show', $reservation->id) }}"
     >
-        <!-- Tooltip Arrow -->
         <div 
             x-show="tooltipPosition === 'bottom' && tooltipHorizontal === 'left'"
             class="absolute -top-2 left-4 w-0 h-0 border-l-8 border-r-8 border-b-8 border-transparent border-b-white"
@@ -62,8 +58,6 @@
             x-show="tooltipPosition === 'top' && tooltipHorizontal === 'right'"
             class="absolute -bottom-2 right-4 w-0 h-0 border-l-8 border-r-8 border-t-8 border-transparent border-t-white"
         ></div>
-
-        <!-- Tooltip Header -->
         <div class="px-4 py-3 border-b border-gray-200"
             style="background-color: {{ $backgroundColor }}; border-top: 3px solid {{ $borderColor }};">
             <div class="flex justify-between items-center gap-2">
@@ -78,28 +72,22 @@
                         {{ $reservation->status->value === 'completed' ? 'bg-blue-100 text-blue-800' : '' }}
                         {{ $reservation->status->value === 'cancelled' ? 'bg-red-100 text-red-800' : '' }}
                     ">
-                        {{ $reservation->status->label() }}
+                        {{ __('admin/reservation/calendar.status_labels.' . $reservation->status->value) }}
                     </span>
                 </div>
             </div>
         </div>
-        
-        <!-- Tooltip Content -->
         <div class="px-4 py-3 space-y-3 text-sm">
-            <!-- Customer Info -->
             <div class="flex items-center space-x-3">
                 <div class="w-8 h-8 rounded-full flex items-center justify-center"
                     style="background-color: {{ $backgroundColor }};">
                     <i class="fas fa-user text-gray-600 text-xs"></i>
                 </div>
                 <div>
-                    <div class="font-medium text-gray-900">                                        {{$reservation->getFullName() }}
-</div>
+                    <div class="font-medium text-gray-900">{{ $reservation->getFullName() }}</div>
                     <div class="text-gray-600 text-xs">{{ $reservation->getEmail() }}</div>
                 </div>
             </div>
-            
-            <!-- Menu Info -->
             <div class="flex items-center space-x-3">
                 <div class="w-8 h-8 rounded-full flex items-center justify-center"
                     style="background-color: {{ $borderColor }};">
@@ -109,8 +97,6 @@
                     <div class="font-medium text-gray-900">{{ $menu->name }}</div>
                 </div>
             </div>
-            
-            <!-- Reservation Details -->
             <div class="grid grid-cols-2 gap-3">
                 <div class="flex items-center space-x-2">
                     <i class="fas fa-clock text-gray-400 text-xs"></i>
@@ -118,54 +104,47 @@
                 </div>
                 <div class="flex items-center space-x-2">
                     <i class="fas fa-hourglass-half text-gray-400 text-xs"></i>
-                    <span class="text-gray-600">{{ $menu->required_time }} minute</span>
+                    <span class="text-gray-600">{{ $menu->required_time }} {{ __('admin/reservation/calendar.reservation_tooltip.minute') }}</span>
                 </div>
                 <div class="flex items-center space-x-2">
                     <i class="fas fa-users text-gray-400 text-xs"></i>
-                    <span class="text-gray-600">{{ $reservation->number_of_people }} people</span>
+                    <span class="text-gray-600">{{ $reservation->number_of_people }} {{ __('admin/reservation/calendar.reservation_tooltip.people') }}</span>
                 </div>
                 <div class="flex items-center space-x-2">
                     <i class="fas fa-money-bill-wave text-gray-400 text-xs"></i>
                     <span class="font-semibold text-gray-900">$ {{ number_format($reservation->amount, 0, ',', '.') }}</span>
                 </div>
             </div>
-            
-            <!-- Menu Price Info -->
-            @if($menu->price)
+            {{-- @if($menu->price)
                 <div class="bg-gray-50 rounded-lg p-3">
                     <div class="flex items-center justify-between">
-                        <div class="text-gray-600 text-xs">Menu Price:</div>
+                        <div class="text-gray-600 text-xs">{{ __('admin/reservation/calendar.reservation_tooltip.menu_price') }}</div>
                         <div class="font-medium text-gray-900">$ {{ number_format($menu->price, 0, ',', '.') }}</div>
                     </div>
                 </div>
-            @endif
-            
-            <!-- Notes -->
+            @endif --}}
             @if($reservation->notes)
                 <div class="bg-gray-50 rounded-lg p-3">
                     <div class="flex items-start space-x-2">
                         <i class="fas fa-sticky-note text-gray-400 text-xs mt-1"></i>
                         <div>
-                            <div class="text-gray-600 text-xs mb-1">Notes:</div>
+                            <div class="text-gray-600 text-xs mb-1">{{ __('admin/reservation/calendar.reservation_tooltip.notes') }}</div>
                             <div class="text-gray-900 text-xs">{{ $reservation->notes }}</div>
                         </div>
                     </div>
                 </div>
             @endif
         </div>
-        
-        <!-- Tooltip Footer -->
         <div class="px-4 py-2 bg-gray-50 border-t border-gray-200 text-xs text-gray-500">
             <div class="flex items-center justify-between">
-                <span>Click to view full details</span>
+                <span>{{ __('admin/reservation/calendar.reservation_tooltip.click_to_view') }}</span>
                 <div class="flex items-center space-x-1">
                     <div class="w-2 h-2 rounded-full" style="background-color: {{ $borderColor }};"></div>
                 </div>
             </div>
         </div>
-    </div>
+    </a>
 </div>
-
 <script>
     document.addEventListener('alpine:init', () => {
         Alpine.data('reservationTooltip', () => ({
@@ -180,13 +159,11 @@
                 const windowWidth = window.innerWidth;
                 const tooltipHeight = 300;
                 const tooltipWidth = 320;
-                
                 if (rect.bottom + tooltipHeight > windowHeight) {
                     this.tooltipPosition = 'top';
                 } else {
                     this.tooltipPosition = 'bottom';
                 }
-                
                 if (rect.left + tooltipWidth > windowWidth) {
                     this.tooltipHorizontal = 'right';
                 } else {

@@ -52,7 +52,7 @@
             <div class="bg-white rounded-lg p-6 shadow-xl">
                 <div class="flex items-center space-x-3">
                     <div class="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600"></div>
-                    <span class="text-gray-700">Loading data...</span>
+                    <span class="text-gray-700">{{ __('admin/reservation/calendar.loading.data') }}</span>
                 </div>
             </div>
         </div>
@@ -112,7 +112,7 @@
             printWindow.document.write(`
                 <html>
                     <head>
-                        <title>Reservation Calendar</title>
+                        <title>{{ __('admin/reservation/calendar.print.calendar_title') }}</title>
                         <style>
                             body { font-family: Arial, sans-serif; margin: 20px; }
                             .no-print { display: none !important; }
@@ -123,7 +123,7 @@
                         </style>
                     </head>
                     <body>
-                        <h1>Reservation Calendar</h1>
+                        <h1>{{ __('admin/reservation/calendar.print.calendar_title') }}</h1>
                         ${calendarContent}
                     </body>
                 </html>

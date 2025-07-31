@@ -403,7 +403,6 @@ class ReservationController extends Controller
             return response()->json(['error' => 'Format tanggal tidak valid'], 400);
         }
     }
-    
     public function availability(Request $request): JsonResponse
     {
         try {
@@ -517,7 +516,6 @@ class ReservationController extends Controller
         $menus = $this->menuService->getActiveMenus();
         return view('admin.reservation.availability', compact('menus'));
     }
-
     public function create(): View
     {
         $menus = $this->menuService->getActiveMenus();
@@ -529,61 +527,60 @@ class ReservationController extends Controller
         try {
             $this->reservationService->createReservation($request->validated());
             return redirect()->route('admin.reservation.calendar')
-                ->with('success', 'Reservasi berhasil dibuat');
+                ->with('success', __('admin/reservation/create.notifications.creation_success'));
         } catch (\Exception $e) {
             return redirect()->back()
                 ->withInput()
-                ->with('error', 'Gagal membuat reservasi: ' . $e->getMessage());
+                ->with('error', __('admin/reservation/create.notifications.creation_failed', ['error' => $e->getMessage()]));
         }
     }
-    public function show(int $id): View
+     public function show($locale, int $id): View
     {
         $reservation = $this->reservationService->findReservation($id);
         if (!$reservation) {
-            abort(404, 'Reservasi tidak ditemukan');
+            abort(404, __('admin/reservation/general.notifications.reservation_not_found'));
         }
         return view('admin.reservation.show', compact('reservation'));
     }
-    public function edit(int $id): View
+    public function edit($locale, int $id): View
     {
         $reservation = $this->reservationService->findReservation($id);
         $menus = $this->menuService->getActiveMenus();
         $users = $this->userService->getCustomers();
-
         if (!$reservation) {
-            abort(404, 'Reservasi tidak ditemukan');
+            abort(404, __('admin/reservation/general.notifications.reservation_not_found'));
         }
         return view('admin.reservation.edit', compact('reservation', 'menus', 'users'));
     }
-    public function update(ReservationRequest $request, int $id): RedirectResponse
+    public function update(ReservationRequest $request, $locale, int $id): RedirectResponse
     {
         try {
             $reservation = $this->reservationService->updateReservation($id, $request->validated());
             if (!$reservation) {
                 return redirect()->route('admin.reservation.calendar')
-                    ->with('error', 'Reservasi tidak ditemukan');
+                    ->with('error', __('admin/reservation/general.notifications.reservation_not_found'));
             }
-            return redirect()->route('admin.reservation.show', $id)
-                ->with('success', 'Reservasi berhasil diperbarui');
+            return redirect()->route('admin.reservation.show', ['locale' => $locale, 'id' => $id])
+                ->with('success', __('admin/reservation/general.notifications.update_success'));
         } catch (\Exception $e) {
             return redirect()->back()
                 ->withInput()
-                ->with('error', 'Gagal memperbarui reservasi: ' . $e->getMessage());
+                ->with('error', __('admin/reservation/general.notifications.update_failed', ['error' => $e->getMessage()]));
         }
     }
-    public function destroy(int $id): RedirectResponse
+    public function destroy($locale, int $id): RedirectResponse
     {
         try {
             $success = $this->reservationService->deleteReservation($id);
             if (!$success) {
                 return redirect()->route('admin.reservation.calendar')
-                    ->with('error', 'Reservasi tidak ditemukan');
+                    ->with('error', __('admin/reservation/general.notifications.reservation_not_found'));
             }
             return redirect()->route('admin.reservation.calendar')
-                ->with('success', 'Reservasi berhasil dihapus');
+                ->with('success', __('admin/reservation/general.notifications.delete_success'));
         } catch (\Exception $e) {
             return redirect()->back()
-                ->with('error', 'Gagal menghapus reservasi: ' . $e->getMessage());
+                ->with('error', __('admin/reservation/general.notifications.delete_failed', ['error' => $e->getMessage()]));
         }
     }
     public function checkAvailability(Request $request): JsonResponse
@@ -601,29 +598,29 @@ class ReservationController extends Controller
             );
             return response()->json([
                 'available' => $available,
-                'message' => $available ? 'Waktu tersedia' : 'Waktu tidak tersedia'
+                'message' => $available ? __('admin/reservation/general.availability.available') : __('admin/reservation/general.availability.unavailable')
             ]);
         } catch (\Exception $e) {
             Log::error('Error checking availability: ' . $e->getMessage());
             return response()->json([
-                'error' => 'Terjadi kesalahan saat mengecek ketersediaan',
+                'error' => __('admin/reservation/general.notifications.availability_check_error'),
                 'message' => $e->getMessage()
             ], 500);
         }
     }
-    public function confirm(int $id): JsonResponse
+    public function confirm($locale, int $id): JsonResponse
     {
         try {
             $success = $this->reservationService->confirmReservation($id);
             if (!$success) {
                 return response()->json([
                     'success' => false,
-                    'message' => 'Reservasi tidak ditemukan'
+                    'message' => __('admin/reservation/general.notifications.reservation_not_found')
                 ], 404);
             }
             return response()->json([
                 'success' => true,
-                'message' => 'Reservasi berhasil dikonfirmasi'
+                'message' => __('admin/reservation/general.notifications.confirm_success')
             ]);
         } catch (\Exception $e) {
             return response()->json([
@@ -632,19 +629,19 @@ class ReservationController extends Controller
             ], 400);
         }
     }
-    public function cancel(int $id): JsonResponse
+    public function cancel($locale, int $id): JsonResponse
     {
         try {
             $success = $this->reservationService->cancelReservation($id);
             if (!$success) {
                 return response()->json([
                     'success' => false,
-                    'message' => 'Reservasi tidak ditemukan'
+                    'message' => __('admin/reservation/general.notifications.reservation_not_found')
                 ], 404);
             }
             return response()->json([
                 'success' => true,
-                'message' => 'Reservasi berhasil dibatalkan'
+                'message' => __('admin/reservation/general.notifications.cancel_success')
             ]);
         } catch (\Exception $e) {
             return response()->json([
@@ -653,19 +650,19 @@ class ReservationController extends Controller
             ], 400);
         }
     }
-    public function complete(int $id): JsonResponse
+    public function complete($locale, int $id): JsonResponse
     {
         try {
             $success = $this->reservationService->completeReservation($id);
             if (!$success) {
                 return response()->json([
                     'success' => false,
-                    'message' => 'Reservasi tidak ditemukan'
+                    'message' => __('admin/reservation/general.notifications.reservation_not_found')
                 ], 404);
             }
             return response()->json([
                 'success' => true,
-                'message' => 'Reservasi berhasil diselesaikan'
+                'message' => __('admin/reservation/general.notifications.complete_success')
             ]);
         } catch (\Exception $e) {
             return response()->json([
@@ -689,12 +686,12 @@ class ReservationController extends Controller
             if (!$success) {
                 return response()->json([
                     'success' => false,
-                    'message' => 'Gagal memperbarui status reservasi'
+                    'message' => __('admin/reservation/general.notifications.bulk_update_failed')
                 ], 400);
             }
             return response()->json([
                 'success' => true,
-                'message' => 'Status reservasi berhasil diperbarui'
+                'message' => __('admin/reservation/general.notifications.bulk_update_success')
             ]);
         } catch (\Exception $e) {
             return response()->json([

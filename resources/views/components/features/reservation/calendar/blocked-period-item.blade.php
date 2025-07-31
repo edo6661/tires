@@ -4,11 +4,11 @@
     x-data="blockedPeriodTooltip()"
     @mouseenter="showTooltip = true; checkTooltipPosition($event)"
     @mouseleave="showTooltip = false"
-    class="relative mb-2 sm:p-2 bg-red-100 border border-red-300 rounded-lg cursor-pointer transition-all duration-200"
+    class="relative mb-2 sm:p-2 bg-red-100 border border-red-300 rounded-lg transition-all duration-200"
 >
     <div class="flex flex-col gap-0.5">
         <div class="flex items-center space-x-2">
-            <span class="text-xs font-medium text-red-800">Blocked Period</span>
+            <span class="text-xs font-medium text-red-800">{{ __('admin/reservation/calendar.blocked_period.title') }}</span>
         </div>
         <span class="text-xs text-red-600">
             {{ $blockedPeriod->start_datetime->format('H:i') }} - 
@@ -16,7 +16,6 @@
         </span>
     </div>
     
-    <!-- Blocked Period Tooltip -->
     <div 
         x-show="showTooltip"
         x-transition:enter="transition ease-out duration-200"
@@ -34,7 +33,6 @@
         class="absolute z-50 w-72 bg-white rounded-lg shadow-xl border border-red-200 overflow-hidden"
         style="display: none;"
     >
-        <!-- Tooltip Arrow -->
         <div 
             x-show="tooltipPosition === 'bottom' && tooltipHorizontal === 'left'"
             class="absolute -top-2 left-4 w-0 h-0 border-l-8 border-r-8 border-b-8 border-transparent border-b-white"
@@ -52,17 +50,14 @@
             class="absolute -bottom-2 right-4 w-0 h-0 border-l-8 border-r-8 border-t-8 border-transparent border-t-white"
         ></div>
 
-        <!-- Tooltip Header -->
         <div class="px-4 py-3 bg-red-50 border-b border-red-200">
             <div class="flex items-center space-x-2">
                 <i class="fas fa-ban text-red-600"></i>
-                <span class="font-semibold text-red-800 text-sm">Blocked Period</span>
+                <span class="font-semibold text-red-800 text-sm">{{ __('admin/reservation/calendar.blocked_period.title') }}</span>
             </div>
         </div>
         
-        <!-- Tooltip Content -->
         <div class="px-4 py-3 space-y-3 text-sm">
-            <!-- Time Range -->
             <div class="flex items-center space-x-2">
                 <i class="fas fa-clock text-gray-400 text-xs"></i>
                 <span class="text-gray-700">
@@ -71,28 +66,26 @@
                 </span>
             </div>
             
-            <!-- Reason -->
             <div class="flex items-start space-x-2">
                 <i class="fas fa-info-circle text-gray-400 text-xs mt-1"></i>
                 <div>
-                    <div class="text-gray-600 text-xs mb-1">Reason:</div>
+                    <div class="text-gray-600 text-xs mb-1">{{ __('admin/reservation/calendar.blocked_period.reason') }}</div>
                     <div class="text-gray-900 text-xs" x-text="blockedInfo.reason"></div>
                 </div>
             </div>
             
-            <!-- Menu Status -->
             <div class="flex items-start space-x-2">
                 <i class="fas fa-utensils text-gray-400 text-xs mt-1"></i>
                 <div>
-                    <div class="text-gray-600 text-xs mb-1">Affected Menu:</div>
+                    <div class="text-gray-600 text-xs mb-1">{{ __('admin/reservation/calendar.blocked_period.affected_menu') }}</div>
                     <div class="text-gray-900 text-xs">
                         @if($blockedPeriod->all_menus)
                             <span class="px-2 py-1 bg-red-100 text-red-800 rounded-full text-xs font-medium">
-                                All Menus Blocked
+                                {{ __('admin/reservation/calendar.blocked_period.all_menus_blocked') }}
                             </span>
                         @else
                             <span class="px-2 py-1 bg-orange-100 text-orange-800 rounded-full text-xs font-medium">
-                                {{ $blockedPeriod->menu ? $blockedPeriod->menu->name : 'Specific Menu' }}
+                                {{ $blockedPeriod->menu ? $blockedPeriod->menu->name : __('admin/reservation/calendar.blocked_period.specific_menu') }}
                             </span>
                         @endif
                     </div>
