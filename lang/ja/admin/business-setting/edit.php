@@ -1,49 +1,67 @@
 <?php
 
 return [
-    'header' => [
-        'back_to_list' => 'Back to List',
-        'title' => 'Announcement Detail',
+    // Page-specific texts
+    'page' => [
+        'title' => '事業者設定の編集',
+        'subtitle' => '事業者情報と営業時間を更新します',
+        'back_to_settings' => '設定に戻る',
     ],
-    'status_card' => [
-        'title' => 'Announcement Status',
-        'description_prefix' => 'This announcement is currently',
-        'active' => 'Active',
-        'inactive' => 'Inactive',
-        'created_at' => 'Created at',
-        'updated_at_prefix' => 'Updated:',
+
+    // Section headers
+    'section_headers' => [
+        'basic_info' => '基本情報',
+        'business_hours' => '営業時間',
+        'site_settings' => 'サイト設定',
+        'desc_image' => '説明と画像',
+        'policies_terms' => '規約とポリシー',
     ],
-    'main_card' => [
-        'publish_date_label' => 'Publish Date:',
-        'not_published_yet' => 'Not published yet',
-        'content_title' => 'Announcement Content',
-        'additional_info_title' => 'Additional Information',
+
+    // Form labels
+    'labels' => [
+        'shop_name' => '店舗名',
+        'phone_number' => '電話番号',
+        'address' => '住所',
+        'website_url' => 'ウェブサイトURL',
+        'closed' => '定休日',
+        'open_time' => '開店時間',
+        'close_time' => '閉店時間',
+        'site_name' => 'サイト名',
+        'make_site_public' => 'サイトを公開する',
+        'reply_email' => '返信先メールアドレス',
+        'google_analytics_id' => 'GoogleアナリティクスID',
+        'shop_description' => '店舗の説明',
+        'access_information' => 'アクセス情報',
+        'top_image' => 'トップ画像',
+        'image_preview' => '画像プレビュー',
+        'terms_of_use' => '利用規約',
+        'privacy_policy' => 'プライバシーポリシー',
     ],
-    'additional_info' => [
-        'id' => 'ID:',
-        'status' => 'Status:',
-        'published' => 'Published:',
-        'created' => 'Created:',
-        'updated' => 'Updated:',
-        'characters_label' => 'Characters:',
-        'characters_unit' => 'characters',
+
+    // Input placeholders
+    'placeholders' => [
+        'website_url' => 'https://example.com',
+        'google_analytics_id' => 'GA-XXXXXXXXX-X',
+        'shop_description' => 'お店の説明を入力してください...',
+        'access_information' => 'お店へのアクセス方法...',
+        'terms_of_use' => '利用規約を入力してください...',
+        'privacy_policy' => 'プライバシーポリシーを入力してください...',
     ],
-    'actions' => [
-        'title' => 'Quick Actions',
-        'description' => 'Manage this announcement easily',
-        'edit' => 'Edit Announcement',
-        'deactivate' => 'Deactivate',
-        'activate' => 'Activate',
+
+    // Days of the week
+    'days' => [
+        'monday' => '月曜日',
+        'tuesday' => '火曜日',
+        'wednesday' => '水曜日',
+        'thursday' => '木曜日',
+        'friday' => '金曜日',
+        'saturday' => '土曜日',
+        'sunday' => '日曜日',
     ],
-    'delete_modal' => [
-        'title' => 'Confirm Deletion',
-        'text_line_1' => 'Are you sure you want to delete this announcement?',
-        'text_line_2' => 'This action cannot be undone.',
-        'cancel_button' => 'Cancel',
-        'delete_button' => 'Delete',
-    ],
-    'alerts' => [
-        'toggle_status_error' => 'An error occurred while changing the status',
-        'delete_error' => 'An error occurred while deleting the announcement',
+
+    // Buttons
+    'buttons' => [
+        'cancel' => 'キャンセル',
+        'save_changes' => '変更を保存',
     ],
 ];

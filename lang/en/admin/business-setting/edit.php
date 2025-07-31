@@ -1,49 +1,67 @@
 <?php
 
 return [
-    'header' => [
-        'back_to_list' => 'Back to List',
-        'title' => 'Announcement Detail',
+    // Page-specific texts
+    'page' => [
+        'title' => 'Edit Business Settings',
+        'subtitle' => 'Update your business information and operating hours',
+        'back_to_settings' => 'Back to Settings',
     ],
-    'status_card' => [
-        'title' => 'Announcement Status',
-        'description_prefix' => 'This announcement is currently',
-        'active' => 'Active',
-        'inactive' => 'Inactive',
-        'created_at' => 'Created at',
-        'updated_at_prefix' => 'Updated:',
+
+    // Section headers
+    'section_headers' => [
+        'basic_info' => 'Basic Information',
+        'business_hours' => 'Business Hours',
+        'site_settings' => 'Site Settings',
+        'desc_image' => 'Description & Image',
+        'policies_terms' => 'Policies & Terms',
     ],
-    'main_card' => [
-        'publish_date_label' => 'Publish Date:',
-        'not_published_yet' => 'Not published yet',
-        'content_title' => 'Announcement Content',
-        'additional_info_title' => 'Additional Information',
+
+    // Form labels
+    'labels' => [
+        'shop_name' => 'Shop Name',
+        'phone_number' => 'Phone Number',
+        'address' => 'Address',
+        'website_url' => 'Website URL',
+        'closed' => 'Closed',
+        'open_time' => 'Open Time',
+        'close_time' => 'Close Time',
+        'site_name' => 'Site Name',
+        'make_site_public' => 'Make site public',
+        'reply_email' => 'Reply Email',
+        'google_analytics_id' => 'Google Analytics ID',
+        'shop_description' => 'Shop Description',
+        'access_information' => 'Access Information',
+        'top_image' => 'Top Image',
+        'image_preview' => 'Image Preview',
+        'terms_of_use' => 'Terms of Use',
+        'privacy_policy' => 'Privacy Policy',
     ],
-    'additional_info' => [
-        'id' => 'ID:',
-        'status' => 'Status:',
-        'published' => 'Published:',
-        'created' => 'Created:',
-        'updated' => 'Updated:',
-        'characters_label' => 'Characters:',
-        'characters_unit' => 'characters',
+
+    // Input placeholders
+    'placeholders' => [
+        'website_url' => 'https://example.com',
+        'google_analytics_id' => 'GA-XXXXXXXXX-X',
+        'shop_description' => 'Describe your business...',
+        'access_information' => 'How to get to your business...',
+        'terms_of_use' => 'Enter your terms of use...',
+        'privacy_policy' => 'Enter your privacy policy...',
     ],
-    'actions' => [
-        'title' => 'Quick Actions',
-        'description' => 'Manage this announcement easily',
-        'edit' => 'Edit Announcement',
-        'deactivate' => 'Deactivate',
-        'activate' => 'Activate',
+
+    // Days of the week
+    'days' => [
+        'monday' => 'Monday',
+        'tuesday' => 'Tuesday',
+        'wednesday' => 'Wednesday',
+        'thursday' => 'Thursday',
+        'friday' => 'Friday',
+        'saturday' => 'Saturday',
+        'sunday' => 'Sunday',
     ],
-    'delete_modal' => [
-        'title' => 'Confirm Deletion',
-        'text_line_1' => 'Are you sure you want to delete this announcement?',
-        'text_line_2' => 'This action cannot be undone.',
-        'cancel_button' => 'Cancel',
-        'delete_button' => 'Delete',
-    ],
-    'alerts' => [
-        'toggle_status_error' => 'An error occurred while changing the status',
-        'delete_error' => 'An error occurred while deleting the announcement',
+
+    // Buttons
+    'buttons' => [
+        'cancel' => 'Cancel',
+        'save_changes' => 'Save Changes',
     ],
 ];
