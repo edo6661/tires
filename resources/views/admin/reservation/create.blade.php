@@ -571,6 +571,11 @@
                 async loadBlockedDates() {
                     if (!this.selectedMenu) return;
                     try {
+                        // Hitung end_date yang benar berdasarkan jumlah hari di bulan tersebut
+                        const lastDayOfMonth = new Date(this.currentYear, this.currentMonth + 1, 0).getDate();
+                        const startDate = `${this.currentYear}-${String(this.currentMonth + 1).padStart(2, '0')}-01`;
+                        const endDate = `${this.currentYear}-${String(this.currentMonth + 1).padStart(2, '0')}-${String(lastDayOfMonth).padStart(2, '0')}`;
+                        
                         const response = await fetch('{{ route('admin.reservation.availability') }}', {
                             method: 'POST',
                             headers: {
@@ -579,10 +584,11 @@
                             },
                             body: JSON.stringify({
                                 menu_id: this.selectedMenu,
-                                start_date: `${this.currentYear}-${String(this.currentMonth + 1).padStart(2, '0')}-01`,
-                                end_date: `${this.currentYear}-${String(this.currentMonth + 1).padStart(2, '0')}-31`
+                                start_date: startDate,
+                                end_date: endDate
                             })
                         });
+                        
                         const data = await response.json();
                         this.availabilityData = data.success && data.data ? data.data : [];
                         this.generateCalendar();

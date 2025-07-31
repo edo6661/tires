@@ -17,6 +17,7 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\View\View;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Validator;
 class ReservationController extends Controller
 {
     public function __construct(
@@ -407,14 +408,31 @@ class ReservationController extends Controller
     public function availability(Request $request): JsonResponse
     {
         try {
-            $request->validate([
+            $validator = Validator::make($request->all(), [
                 'menu_id' => 'nullable|integer|exists:menus,id',
-                'start_date' => 'required|date',
-                'end_date' => 'required|date|after_or_equal:start_date'
+                'start_date' => 'required|date_format:Y-m-d',
+                'end_date' => 'required|date_format:Y-m-d|after_or_equal:start_date'
             ]);
+
+            if ($validator->fails()) {
+                Log::error('Validation failed for availability request', [
+                    'errors' => $validator->errors(),
+                    'request_data' => $request->all()
+                ]);
+                
+                return response()->json([
+                    'success' => false,
+                    'error' => 'Validation failed',
+                    'errors' => $validator->errors(),
+                    'data' => []
+                ], 422);
+            }
+
             $menuId = $request->menu_id;
             $startDate = $request->start_date;
             $endDate = $request->end_date;
+
+                
             $availabilityData = [];
             $start = Carbon::parse($startDate);
             $end = Carbon::parse($endDate);
