@@ -19,7 +19,7 @@ return [
         'phone' => '電話番号:',
         'status' => 'ステータス:',
     ],
-    'booking_status_confirmed' => '確定済み',
+    'booking_status_pending' => '保留中',
     'duration_unit' => '分',
 
     // Next Steps & Help

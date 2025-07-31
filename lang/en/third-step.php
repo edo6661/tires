@@ -73,6 +73,7 @@ return [
             'email_required' => 'Email is required',
             'email_invalid' => 'Please enter a valid email address',
             'phone_required' => 'Phone number is required',
+            'phone_invalid' => 'Phone number is invalid',
             'terms_required' => 'You must agree to the terms and conditions',
         ],
     ],

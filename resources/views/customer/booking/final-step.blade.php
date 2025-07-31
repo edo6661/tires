@@ -46,7 +46,7 @@
                                     <div class="flex justify-between p-1"><span class="text-main-text/70">{{ __('final-step.labels.name') }}</span><span class="font-medium text-main-text text-right" x-text="getCustomerName()"></span></div>
                                     <div class="flex justify-between p-1"><span class="text-main-text/70">{{ __('final-step.labels.email') }}</span><span class="font-medium text-main-text text-right" x-text="getCustomerEmail()"></span></div>
                                     <div class="flex justify-between p-1"><span class="text-main-text/70">{{ __('final-step.labels.phone') }}</span><span class="font-medium text-main-text" x-text="getCustomerPhone()"></span></div>
-                                    <div class="flex justify-between p-1"><span class="text-main-text/70">{{ __('final-step.labels.status') }}</span><span class="px-2 py-1 bg-brand/10 text-brand text-body-md rounded-full">{{ __('final-step.booking_status_confirmed') }}</span></div>
+                                    <div class="flex justify-between p-1"><span class="text-main-text/70">{{ __('final-step.labels.status') }}</span><span class="px-2 py-1 bg-brand/10 text-brand text-body-md rounded-full">{{ __('final-step.booking_status_pending') }}</span></div>
                                 </div>
                             </div>
                         </div>
@@ -140,13 +140,14 @@
                             reservation_datetime: this.finalBookingData.datetime,
                             number_of_people: 1, 
                             amount: 0, 
-                            status: 'confirmed',
+                            status: 'pending',
                             notes: 'Booking via website',
                             @guest
                             full_name: this.finalBookingData.guestInfo?.full_name || '',
                             full_name_kana: this.finalBookingData.guestInfo?.full_name_kana || '',
                             email: this.finalBookingData.guestInfo?.email || '',
                             phone_number: this.finalBookingData.guestInfo?.phone_number || '',
+                            customer_type: 'guest',
                             @else
                             user_id: {{ auth()->id() ?? 'null' }},
                             @endguest

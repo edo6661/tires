@@ -24,7 +24,7 @@
                             <i class="fas fa-address-card text-brand mr-2 transform transition-all duration-300 "></i>
                             {{ __('third-step.form_title') }}
                         </h2>
-                        <form @submit.prevent="validateAndProceed()" class="space-y-4">
+                        <form @submit.prevent="validateAndProceed()" class="space-y-4" novalidate>
                             <div class="grid md:grid-cols-2 gap-4">
                                 <div>
                                     <label for="full_name" class="block text-body-md font-medium text-main-text mb-2">{{ __('third-step.labels.full_name') }} <span class="text-red-500">*</span></label>
@@ -150,100 +150,123 @@
             </div>
         </div>
     </div>
-    <script>
-        function thirdStepHandler() {
-            return {
-                @guest
-                showConfirmation: false,
-                guestInfo: { full_name: '', full_name_kana: '', email: '', phone_number: '' },
-                @else
-                showConfirmation: true,
-                @endguest
-                bookingData: {}, 
-                agreedToTerms: false,
-                errors: {},
-                loading: false,
-                translations: @json(__('third-step.js')),
-                backButtonText: '{{ Auth::guest() ? __("third-step.form_button_back") : __("third-step.form_button_back") }}',
-                init() {
-                    const storedBookingData = sessionStorage.getItem('bookingData');
-                    if (!storedBookingData) {
-                        alert(this.translations.booking_info_not_found);
-                        window.location.href = '{{ route("home") }}';
-                        return;
-                    }
-                    this.bookingData = JSON.parse(storedBookingData);
-                    this.bookingData.serviceName = this.translations.loading || '...';
-                    this.bookingData.duration = '...';
-                    this.loadMenuInfo();
+        <script>
+            function thirdStepHandler() {
+                return {
                     @guest
-                    this.$watch('showConfirmation', (value) => {
-                        this.backButtonText = value ? '{{ __("third-step.action_back_guest_edit") }}' : '{{ __("third-step.form_button_back") }}';
-                    });
-                    @endguest
-                },
-                async loadMenuInfo() {
-                    if (!this.bookingData.menuId) {
-                        console.error('Menu ID not found in session.');
-                        this.bookingData.serviceName = this.translations.error_service_not_found;
-                        this.bookingData.duration = this.translations.not_applicable;
-                        return;
-                    }
-                    try {
-                        const url = `{{ route('booking.menu-details', ['menuId' => '__MENU_ID__']) }}`.replace('__MENU_ID__', this.bookingData.menuId);
-                        const response = await fetch(url);
-                        if (!response.ok) throw new Error('Failed to fetch menu details');
-                        const data = await response.json();
-                        if (data.success) {
-                            this.bookingData.serviceName = data.menu.name;
-                            this.bookingData.duration = data.menu.required_time;
-                        } else {
-                            throw new Error(data.message);
-                        }
-                    } catch (error) {
-                        console.error('Error fetching menu info:', error);
-                        this.bookingData.serviceName = this.translations.error_loading_service;
-                        this.bookingData.duration = this.translations.not_applicable;
-                    }
-                },
-                @guest
-                validateAndProceed() {
-                    this.errors = {};
-                    let isValid = true;
-                    if (!this.guestInfo.full_name.trim()) { this.errors.full_name = this.translations.validation.full_name_required; isValid = false; }
-                    if (!this.guestInfo.full_name_kana.trim()) { this.errors.full_name_kana = this.translations.validation.full_name_kana_required; isValid = false; }
-                    if (!this.guestInfo.email.trim()) { this.errors.email = this.translations.validation.email_required; isValid = false; }
-                    else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(this.guestInfo.email)) { this.errors.email = this.translations.validation.email_invalid; isValid = false; }
-                    if (!this.guestInfo.phone_number.trim()) { this.errors.phone_number = this.translations.validation.phone_required; isValid = false; }
-                    if (isValid) {
-                        sessionStorage.setItem('guestInfo', JSON.stringify(this.guestInfo));
-                        this.showConfirmation = true;
-                    }
-                },
-                @endguest
-                formatBookingDate() {
-                    if (!this.bookingData.date) return '';
-                    const date = new Date(this.bookingData.date + 'T00:00:00');
-                    return date.toLocaleDateString(this.translations.date_locale, { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
-                },
-                goBack() {
-                    @guest
-                    if (this.showConfirmation) {
-                        this.showConfirmation = false;
-                    } else {
-                        this.goBackToSecondStep();
-                    }
+                    showConfirmation: false,
+                    guestInfo: { full_name: '', full_name_kana: '', email: '', phone_number: '' },
                     @else
-                    this.goBackToSecondStep();
+                    showConfirmation: true,
                     @endguest
-                },
-                goBackToSecondStep() {
-                    window.location.href = '{{ route("booking.second-step") }}';
-                },
-                completeBooking() {
-                    this.errors = {};
+                    bookingData: {},
+                    agreedToTerms: false,
+                    errors: {},
+                    loading: false,
+                    translations: @json(__('third-step.js')),
+                    backButtonText: '{{ Auth::guest() ? __("third-step.form_button_back") : __("third-step.form_button_back") }}',
+                    init() {
+                        const storedBookingData = sessionStorage.getItem('bookingData');
+                        if (!storedBookingData) {
+                            alert(this.translations.booking_info_not_found);
+                            window.location.href = '{{ route("home") }}';
+                            return;
+                        }
+                        this.bookingData = JSON.parse(storedBookingData);
+                        this.bookingData.serviceName = this.translations.loading || '...';
+                        this.bookingData.duration = '...';
+                        this.loadMenuInfo();
+                        @guest
+                        const storedGuestInfo = sessionStorage.getItem('guestInfo');
+                        if (storedGuestInfo) {
+                            this.guestInfo = JSON.parse(storedGuestInfo);
+                        }
+                        this.$watch('showConfirmation', (value) => {
+                            this.backButtonText = value ? (this.translations.action_back_guest_edit || 'Edit Info') : '{{ __("third-step.form_button_back") }}';
+                        });
+                        @endguest
+                    },
+                    async loadMenuInfo() {
+                        if (!this.bookingData.menuId) {
+                            console.error('Menu ID not found in session.');
+                            this.bookingData.serviceName = this.translations.error_service_not_found;
+                            this.bookingData.duration = this.translations.not_applicable;
+                            return;
+                        }
+                        try {
+                            const url = `{{ route('booking.menu-details', ['menuId' => '__MENU_ID__']) }}`.replace('__MENU_ID__', this.bookingData.menuId);
+                            const response = await fetch(url);
+                            if (!response.ok) throw new Error('Failed to fetch menu details');
+                            const data = await response.json();
+                            if (data.success) {
+                                this.bookingData.serviceName = data.menu.name;
+                                this.bookingData.duration = data.menu.required_time;
+                            } else {
+                                throw new Error(data.message);
+                            }
+                        } catch (error) {
+                            console.error('Error fetching menu info:', error);
+                            this.bookingData.serviceName = this.translations.error_loading_service;
+                            this.bookingData.duration = this.translations.not_applicable;
+                        }
+                    },
+                    @guest
+                    validateAndProceed() {
+                        this.errors = {}; 
+                        let isValid = true;
+                        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+                        const phoneRegex = /^(\+)?([0-9\s-]{10,15})$/; 
+                        if (!this.guestInfo.full_name.trim()) {
+                            this.errors.full_name = this.translations.validation.full_name_required;
+                            isValid = false;
+                        }
+                        if (!this.guestInfo.full_name_kana.trim()) {
+                            this.errors.full_name_kana = this.translations.validation.full_name_kana_required;
+                            isValid = false;
+                        } 
+                        if (!this.guestInfo.email.trim()) {
+                            this.errors.email = this.translations.validation.email_required;
+                            isValid = false;
+                        } else if (!emailRegex.test(this.guestInfo.email)) {
+                            this.errors.email = this.translations.validation.email_invalid;
+                            isValid = false;
+                        }
+                        if (!this.guestInfo.phone_number.trim()) {
+                            this.errors.phone_number = this.translations.validation.phone_required;
+                            isValid = false;
+                        } else if (!phoneRegex.test(this.guestInfo.phone_number)) {
+                            this.errors.phone_number = this.translations.validation.phone_invalid || 'Format nomor telepon tidak valid.';
+                            isValid = false;
+                        }
+                        if (isValid) {
+                            sessionStorage.setItem('guestInfo', JSON.stringify(this.guestInfo));
+                            this.showConfirmation = true;
+                        }
+                    },
+                    @endguest
+                    formatBookingDate() {
+                        if (!this.bookingData.date) return '';
+                        const date = new Date(this.bookingData.date + 'T00:00:00');
+                        return date.toLocaleDateString(this.translations.date_locale, { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+                    },
+                    goBack() {
+                        @guest
+                        if (this.showConfirmation) {
+                            this.showConfirmation = false;
+                        } else {
+                            this.goBackToSecondStep();
+                        }
+                        @else
+                        this.goBackToSecondStep();
+                        @endguest
+                    },
+                    goBackToSecondStep() {
+                        window.location.href = '{{ route("booking.second-step") }}';
+                    },
+                    completeBooking() {
+                        this.errors = {};
                         if (!this.agreedToTerms) {
-                            this.errors.terms = 'You must agree to the terms and conditions';
+                            this.errors.terms = this.translations.validation.terms_required || 'Anda harus menyetujui syarat dan ketentuan.';
                             return;
                         }
                         if (this.loading) return;
@@ -257,8 +280,8 @@
                         };
                         sessionStorage.setItem('finalBookingData', JSON.stringify(finalBookingData));
                         window.location.href = '{{ route("booking.final-step") }}';
+                    }
                 }
             }
-        }
-    </script>
+        </script>
 </x-layouts.app>

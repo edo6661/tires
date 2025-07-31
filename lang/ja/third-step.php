@@ -73,6 +73,7 @@ return [
             'email_required' => 'メールアドレスは必須です',
             'email_invalid' => '有効なメールアドレスを入力してください',
             'phone_required' => '電話番号は必須です',
+            'phone_invalid' => '電話番号が無効です',
             'terms_required' => '利用規約とプライバシーポリシーに同意する必要があります',
         ],
     ],

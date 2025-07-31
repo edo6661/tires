@@ -19,7 +19,7 @@ return [
         'phone' => 'Phone:',
         'status' => 'Status:',
     ],
-    'booking_status_confirmed' => 'Confirmed',
+    'booking_status_pending' => 'Pending',
     'duration_unit' => 'minutes',
 
     // Next Steps & Help
