@@ -42,7 +42,7 @@
                     href="{{ route('admin.customer.index') }}"
                     :is-active="request()->routeIs('admin.customer.*')"
                 />
-                <x-layouts.header.admin-dropdown-menu-item
+                {{-- <x-layouts.header.admin-dropdown-menu-item
                     icon="fas fa-tree"
                     title="{{ __('admin/sidebar.tire_management') }}"
                     href="{{ route('admin.tire-storage.index') }}"
@@ -52,8 +52,8 @@
                     icon="fas fa-chart-bar"
                     title="{{ __('admin/sidebar.aggregation_analysis') }}"
                     href="#"
-                    {{-- :is-active="request()->routeIs('admin.analytics')" --}}
-                />
+                    :is-active="request()->routeIs('admin.analytics')"
+                /> --}}
             </div>
         </nav>
     </div>
