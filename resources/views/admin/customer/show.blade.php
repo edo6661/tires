@@ -13,10 +13,10 @@
             </div>
             <div class="flex gap-2">
                 @if($customerDetail['customer']['is_registered'])
-                    <button @click="sendMessage()"
+                    {{-- <button @click="sendMessage()"
                             class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
                         <i class="fas fa-envelope mr-2"></i>{{ __('admin/customer/show.header.send_message_button') }}
-                    </button>
+                    </button> --}}
                 @endif
                 <button @click="exportData()"
                         class="px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors">

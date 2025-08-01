@@ -187,11 +187,11 @@
                                                title="{{ __('admin/customer/index.table.actions_tooltip.view_details') }}">
                                                 <i class="fas fa-eye"></i>
                                             </a>
-                                            <button @click="sendMessage('{{ $customer->customer_id }}')"
+                                            {{-- <button @click="sendMessage('{{ $customer->customer_id }}')"
                                                     class="text-green-600 hover:text-green-900 transition-colors"
                                                     title="{{ __('admin/customer/index.table.actions_tooltip.send_message') }}">
                                                 <i class="fas fa-envelope"></i>
-                                            </button>
+                                            </button> --}}
                                         @endif
                                     </div>
                                 </td>
