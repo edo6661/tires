@@ -2,7 +2,7 @@
 @php
     $backgroundColor = $menu->getColorWithOpacity(10); 
     $borderColor = $menu->color;
-    $textColor = $menu->getTextColor();
+    $textColor = $menu->getDarkenedTextColor();
 @endphp
 <div 
     x-data="reservationTooltip()"

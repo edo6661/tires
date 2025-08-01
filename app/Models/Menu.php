@@ -63,6 +63,19 @@ class Menu extends Model
         $luminance = (0.299 * $r + 0.587 * $g + 0.114 * $b) / 255;
         return $luminance > 0.5 ? '#000000' : '#ffffff';
     }
+    public function getDarkenedTextColor(): string
+    {
+        $hex = str_replace('#', '', $this->color);
+        $r = hexdec(substr($hex, 0, 2));
+        $g = hexdec(substr($hex, 2, 2));
+        $b = hexdec(substr($hex, 4, 2));
+
+        $r = floor($r * 0.5);
+        $g = floor($g * 0.5);
+        $b = floor($b * 0.5);
+
+        return sprintf("#%02x%02x%02x", $r, $g, $b);
+    }
     public function reservations()
     {
         return $this->hasMany(Reservation::class);
