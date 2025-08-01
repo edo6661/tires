@@ -37,7 +37,7 @@
                     </div>
                 </div>
             </div>
-            <div class="bg-white rounded-lg border border-gray-200 p-6">
+            {{-- <div class="bg-white rounded-lg border border-gray-200 p-6">
                 <div class="flex items-center">
                     <div class="p-2 bg-green-100 rounded-lg">
                         <i class="fas fa-yen-sign text-green-600"></i>
@@ -47,7 +47,7 @@
                         <p class="text-2xl font-bold text-gray-900">¥{{ number_format($customerDetail['stats']['total_amount'], 0) }}</p>
                     </div>
                 </div>
-            </div>
+            </div> --}}
             <div class="bg-white rounded-lg border border-gray-200 p-6">
                 <div class="flex items-center">
                     <div class="p-2 bg-purple-100 rounded-lg">
@@ -494,7 +494,7 @@
                 
                 exportData() {
                     // Placeholder for export functionality
-                    alert("{{ __('admin/customer/show.js_alerts.export_placeholder') }}");
+                    // alert("{{ __('admin/customer/show.js_alerts.export_placeholder') }}");
                 }
             }
         }

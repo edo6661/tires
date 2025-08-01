@@ -52,7 +52,7 @@
                                x-model="searchQuery"
                                @input.debounce.500ms="applyFilters()"
                                class="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                               :placeholder="__('admin/customer/index.filters.search_placeholder')">
+                               placeholder="{{ __('admin/customer/index.filters.search_placeholder') }}">
                     </div>
                 </div>
                 <div class="lg:w-64">
@@ -88,9 +88,9 @@
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                 {{ __('admin/customer/index.table.header.reservations') }}
                             </th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            {{-- <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                 {{ __('admin/customer/index.table.header.total_amount') }}
-                            </th>
+                            </th> --}}
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                 {{ __('admin/customer/index.table.header.last_reservation') }}
                             </th>
@@ -167,12 +167,12 @@
                                         {{ __('admin/customer/index.table.reservations_count', ['count' => $customer->reservation_count]) }}
                                     </div>
                                 </td>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                {{-- <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                                     <div class="flex items-center">
                                         <i class="fas fa-yen-sign text-gray-400 mr-2"></i>
                                         ¥{{ number_format($customer->total_amount, 0) }}
                                     </div>
-                                </td>
+                                </td> --}}
                                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                                     {{ \Carbon\Carbon::parse($customer->latest_reservation)->format('d M Y') }}
                                     <div class="text-xs text-gray-400">
@@ -184,12 +184,12 @@
                                         @if($customer->is_registered)
                                             <a href="{{ route('admin.customer.show', $customer->user_id ?? $customer->customer_id) }}"
                                                class="text-blue-600 hover:text-blue-900 transition-colors"
-                                               :title="__('admin/customer/index.table.actions_tooltip.view_details')">
+                                               title="{{ __('admin/customer/index.table.actions_tooltip.view_details') }}">
                                                 <i class="fas fa-eye"></i>
                                             </a>
                                             <button @click="sendMessage('{{ $customer->customer_id }}')"
                                                     class="text-green-600 hover:text-green-900 transition-colors"
-                                                    :title="__('admin/customer/index.table.actions_tooltip.send_message')">
+                                                    title="{{ __('admin/customer/index.table.actions_tooltip.send_message') }}">
                                                 <i class="fas fa-envelope"></i>
                                             </button>
                                         @endif
@@ -234,6 +234,7 @@
                 </div>
             @endif
         </div>
+        <!-- Modal -->
         <div x-show="showMessageModal"
              x-transition:enter="transition ease-out duration-300"
              x-transition:enter-start="opacity-0"
@@ -245,31 +246,31 @@
              class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
             <div class="relative top-20 mx-auto p-5 border max-w-md shadow-lg rounded-md bg-white">
                 <div class="mt-3">
-                    <h3 class="text-lg font-medium text-gray-900 mb-4">{{ __('admin/customer/index.modal.title') }}</h3>
+                    <h3 class="text-lg font-medium text-gray-900 mb-4" x-text="translations.modal_title"></h3>
                     <div class="space-y-4">
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">{{ __('admin/customer/index.modal.subject') }}</label>
+                            <label class="block text-sm font-medium text-gray-700 mb-2" x-text="translations.modal_subject"></label>
                             <input type="text"
                                    x-model="messageSubject"
                                    class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                   :placeholder="__('admin/customer/index.modal.subject_placeholder')">
+                                   :placeholder="translations.modal_subject_placeholder">
                         </div>
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">{{ __('admin/customer/index.modal.message') }}</label>
+                            <label class="block text-sm font-medium text-gray-700 mb-2" x-text="translations.modal_message"></label>
                             <textarea x-model="messageContent"
                                       rows="4"
                                       class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                      :placeholder="__('admin/customer/index.modal.message_placeholder')"></textarea>
+                                      :placeholder="translations.modal_message_placeholder"></textarea>
                         </div>
                     </div>
                     <div class="mt-6 flex gap-2 justify-end">
                         <button @click="showMessageModal = false"
-                                class="px-4 py-2 bg-gray-200 text-gray-800 text-base font-medium rounded-md shadow-sm hover:bg-gray-300">
-                            {{ __('admin/customer/index.modal.cancel') }}
+                                class="px-4 py-2 bg-gray-200 text-gray-800 text-base font-medium rounded-md shadow-sm hover:bg-gray-300"
+                                x-text="translations.modal_cancel">
                         </button>
                         <button @click="sendMessageConfirm()"
-                                class="px-4 py-2 bg-blue-600 text-white text-base font-medium rounded-md shadow-sm hover:bg-blue-700">
-                            {{ __('admin/customer/index.modal.send') }}
+                                class="px-4 py-2 bg-blue-600 text-white text-base font-medium rounded-md shadow-sm hover:bg-blue-700"
+                                x-text="translations.modal_send">
                         </button>
                     </div>
                 </div>
@@ -288,7 +289,14 @@
                 translations: {
                     validation_error: "{{ __('admin/customer/index.alerts.validation_error') }}",
                     send_success: "{{ __('admin/customer/index.alerts.send_success') }}",
-                    send_error: "{{ __('admin/customer/index.alerts.send_error') }}"
+                    send_error: "{{ __('admin/customer/index.alerts.send_error') }}",
+                    modal_title: "{{ __('admin/customer/index.modal.title') }}",
+                    modal_subject: "{{ __('admin/customer/index.modal.subject') }}",
+                    modal_subject_placeholder: "{{ __('admin/customer/index.modal.subject_placeholder') }}",
+                    modal_message: "{{ __('admin/customer/index.modal.message') }}",
+                    modal_message_placeholder: "{{ __('admin/customer/index.modal.message_placeholder') }}",
+                    modal_cancel: "{{ __('admin/customer/index.modal.cancel') }}",
+                    modal_send: "{{ __('admin/customer/index.modal.send') }}"
                 },
                 applyFilters() {
                     const params = new URLSearchParams();
@@ -329,7 +337,9 @@
                         //         subject: this.messageSubject,
                         //         content: this.messageContent
                         //     })
-                        // });                        alert(this.translations.send_success);
+                        // });
+                        
+                        alert(this.translations.send_success);
                         this.showMessageModal = false;
                     } catch (error) {
                         console.error('Error:', error);
