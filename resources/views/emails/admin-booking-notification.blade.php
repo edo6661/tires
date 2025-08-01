@@ -198,18 +198,6 @@
                     This reservation is pending confirmation. Please login to the admin panel to approve or reject this reservation.
                 </p>
             </div>
-
-            <div class="action-section">
-                <h4 style="margin-top: 0; color: #4a5568;">Admin Actions:</h4>
-                <p style="margin-bottom: 15px; font-size: 14px;">Click one of the buttons below to manage this reservation:</p>
-
-                <a href="{{ route('admin.reservation.show', $reservation->id) }}" class="action-button">
-                    📝 View Details
-                </a>
-                <a href="{{ route('admin.reservation.index') }}" class="action-button" style="background: #38a169;">
-                    📋 All Reservations
-                </a>
-            </div>
             
             <p><strong>Important Notes:</strong></p>
             <ul style="padding-left: 20px; margin-bottom: 20px; font-size: 14px;">
