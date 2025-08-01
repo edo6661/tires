@@ -6,6 +6,8 @@ use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Facades\DB;
+
 class BlockedPeriodRepository implements BlockedPeriodRepositoryInterface
 {
     protected $model;
@@ -228,7 +230,7 @@ class BlockedPeriodRepository implements BlockedPeriodRepositoryInterface
         return $conflicts->map(function ($period) {
             return [
                 'id' => $period->id,
-                'menu_name' => $period->all_menus ? 'Semua Menu' : ($period->menu ? $period->menu->name : 'Menu tidak ditemukan'),
+                'menu_name' => $period->all_menus ? 'All Menu' : ($period->menu ? $period->menu->name : 'Menu not found'),
                 'start_datetime' => $period->start_datetime->format('d/m/Y H:i'),
                 'end_datetime' => $period->end_datetime->format('d/m/Y H:i'),
                 'reason' => $period->reason,
@@ -331,7 +333,7 @@ class BlockedPeriodRepository implements BlockedPeriodRepositoryInterface
     public function getMostBlockedMenus(int $limit = 10): array
     {
         return $this->model->with('menu')
-            ->select('menu_id', \DB::raw('COUNT(*) as block_count'))
+            ->select('menu_id', DB::raw('COUNT(*) as block_count'))
             ->whereNotNull('menu_id')
             ->groupBy('menu_id')
             ->orderBy('block_count', 'desc')
@@ -350,16 +352,16 @@ class BlockedPeriodRepository implements BlockedPeriodRepositoryInterface
     {
         return $this->model->with('menu')
             ->whereExists(function ($query) {
-                $query->select(\DB::raw(1))
+                $query->select(DB::raw(1))
                     ->from('blocked_periods as bp2')
                     ->whereRaw('bp2.id != blocked_periods.id')
                     ->where(function ($q) {
                         $q->where(function ($timeQuery) {
-                            $timeQuery->whereBetween('bp2.start_datetime', [\DB::raw('blocked_periods.start_datetime'), \DB::raw('blocked_periods.end_datetime')])
-                                ->orWhereBetween('bp2.end_datetime', [\DB::raw('blocked_periods.start_datetime'), \DB::raw('blocked_periods.end_datetime')])
+                            $timeQuery->whereBetween('bp2.start_datetime', [DB::raw('blocked_periods.start_datetime'), DB::raw('blocked_periods.end_datetime')])
+                                ->orWhereBetween('bp2.end_datetime', [DB::raw('blocked_periods.start_datetime'), DB::raw('blocked_periods.end_datetime')])
                                 ->orWhere(function ($subQuery) {
-                                    $subQuery->where('bp2.start_datetime', '<=', \DB::raw('blocked_periods.start_datetime'))
-                                            ->where('bp2.end_datetime', '>=', \DB::raw('blocked_periods.end_datetime'));
+                                    $subQuery->where('bp2.start_datetime', '<=', DB::raw('blocked_periods.start_datetime'))
+                                            ->where('bp2.end_datetime', '>=', DB::raw('blocked_periods.end_datetime'));
                                 });
                         });
                     });

@@ -285,11 +285,11 @@
                     <i class="fas fa-inbox text-disabled text-6xl mb-4"></i>
                     <h3 class="text-heading-lg font-medium text-main-text mb-2">{{ __('admin/contact/index.empty.title') }}</h3>
                     <p class="text-main-text/70 mb-4 text-body-md">{{ __('admin/contact/index.empty.message') }}</p>
-                    <a href="{{ route('admin.contact.create') }}"
+                    {{-- <a href="{{ route('admin.contact.create') }}"
                        class="inline-flex items-center gap-2 px-4 py-2 bg-brand text-white rounded-lg hover:bg-brand/90 transition-all duration-300 transform hover:scale-105 hover:shadow-lg text-button-md font-semibold">
                         <i class="fas fa-plus"></i>
                         {{ __('admin/contact/index.add_button') }}
-                    </a>
+                    </a> --}}
                 </div>
             @endif
         </div>

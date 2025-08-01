@@ -64,7 +64,6 @@
                                     <i class="fas fa-times-circle text-red-400"></i>
                                 </div>
                                 <div class="ml-3">
-                                    <h3 class="text-sm font-medium text-red-800">Terdapat beberapa kesalahan pada input Anda:</h3>
                                     <div class="mt-2 text-sm text-red-700">
                                         <ul role="list" class="list-disc pl-5 space-y-1">
                                             @foreach ($errors->all() as $error)
