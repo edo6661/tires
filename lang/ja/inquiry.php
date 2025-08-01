@@ -16,13 +16,13 @@ return [
 
     // Days of the week (used in opening hours)
     'days' => [
-        'monday'    => '月曜日',
-        'tuesday'   => '火曜日',
-        'wednesday' => '水曜日',
-        'thursday'  => '木曜日',
-        'friday'    => '金曜日',
-        'saturday'  => '土曜日',
-        'sunday'    => '日曜日',
+        'monday'    => '月曜',
+        'tuesday'   => '火曜',
+        'wednesday' => '水曜',
+        'thursday'  => '木曜',
+        'friday'    => '金曜',
+        'saturday'  => '土曜',
+        'sunday'    => '日曜',
     ],
 
     // Main Content - Form
