@@ -11,7 +11,7 @@ return [
     'location' => '所在地',
     'opening_hours' => '営業時間',
     'closed' => '休業日',
-    'about_us' => '当店について',
+    'about_us' => '会社概要',
     'terms_of_use' => '利用規約',
 
     // Days of the week (used in opening hours)
@@ -26,13 +26,13 @@ return [
     ],
 
     // Main Content - Form
-    'title' => 'お問い合わせ',
+    'title' => 'お名前（必須）',
     'name' => 'お名前 *',
-    'email' => 'メールアドレス *',
+    'email' => 'メールアドレス（必須）',
     'phone' => '電話番号',
-    'subject' => '件名 *',
-    'inquiry_content' => 'お問い合わせ内容 *',
-    'submit_button' => '送信する',
+    'subject' => '件名（必須）',
+    'inquiry_content' => 'お問い合わせ内容（必須）',
+    'submit_button' => 'お問い合わせを送信する',
 
     // Placeholders for form inputs
     'placeholders' => [

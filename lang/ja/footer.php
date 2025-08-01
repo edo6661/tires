@@ -7,7 +7,7 @@ return [
     |--------------------------------------------------------------------------
     */
 
-    'terms_of_service' => 'RESERVATION 利用規約',
-    'privacy_policy'   => 'RESERVATION プライバシーポリシー',
+    'terms_of_service' => '予約システム利用規約',
+    'privacy_policy'   => '予約システム個人情報保護方針',
     'system_name'      => '無料予約システム',
 ];

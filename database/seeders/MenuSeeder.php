@@ -24,8 +24,8 @@ class MenuSeeder extends Seeder
                             'description' => 'Professional installation of tires purchased at our store',
                         ],
                         'ja' => [
-                            'name' => '当店でご購入いただいたタイヤの取り付け',
-                            'description' => '当店でご購入いただいたタイヤの専門的な取り付けサービス',
+                            'name' => '当店でご購入されたタイヤの取付',
+                            'description' => '当店で購入されたタイヤのプロによる取付作業',
                         ],
                     ],
                 ],
@@ -37,12 +37,12 @@ class MenuSeeder extends Seeder
                     'color' => '#10B981',
                     'translations' => [
                         'en' => [
-                            'name' => 'Replacement and installation of tires brought in',
+                            'name' => 'Replacement and installation of tires brought in (tires shipped directly to our store)',
                             'description' => 'Installation of tires shipped directly to our store',
                         ],
                         'ja' => [
-                            'name' => '持ち込みタイヤの交換・取り付け',
-                            'description' => '当店に直送されたタイヤの取り付けサービス',
+                            'name' => '持ち込みタイヤ（直送含む）の交換および取付',
+                            'description' => '当店へ直送されたタイヤの取付',
                         ],
                     ],
                 ],
@@ -59,7 +59,7 @@ class MenuSeeder extends Seeder
                         ],
                         'ja' => [
                             'name' => 'オイル交換',
-                            'description' => '完全なオイル交換サービス',
+                            'description' => 'オイルの完全交換サービス',
                         ],
                     ],
                 ],
@@ -71,12 +71,12 @@ class MenuSeeder extends Seeder
                     'color' => '#EF4444',
                     'translations' => [
                         'en' => [
-                            'name' => 'Tire storage and tire replacement',
+                            'name' => 'Tire storage and tire replacement at our store',
                             'description' => 'Tire storage service and replacement',
                         ],
                         'ja' => [
-                            'name' => 'タイヤ保管・タイヤ交換',
-                            'description' => 'タイヤ保管サービスと交換',
+                            'name' => 'タイヤ保管および当店での交換サービス',
+                            'description' => 'タイヤ保管と交換のセットサービス',
                         ],
                     ],
                 ],
@@ -88,12 +88,12 @@ class MenuSeeder extends Seeder
                     'color' => '#8B5CF6',
                     'translations' => [
                         'en' => [
-                            'name' => 'Change tires by bringing your own',
+                            'name' => 'Change tires by bringing your own (removal and removal of season tires, etc.)',
                             'description' => 'Tire changing service for customer-provided tires',
                         ],
                         'ja' => [
-                            'name' => '持ち込みタイヤ交換',
-                            'description' => 'お客様ご提供のタイヤ交換サービス',
+                            'name' => '持ち込みタイヤの交換（季節タイヤの取り外し・取付など）',
+                            'description' => 'お客様ご持参のタイヤの交換サービス',
                         ],
                     ],
                 ],

@@ -2,8 +2,8 @@
 
 return [
     // Page Header
-    'page_title' => '私の予約',
-    'subtitle' => 'すべての予約を1か所で管理・表示します。',
+    'page_title' => 'マイ予約',
+    'subtitle' => 'すべての予約をこのページで管理・確認できます',
 
     // Stats
     'total_reservations' => '予約総数',
@@ -21,9 +21,9 @@ return [
     'cancel_button' => 'キャンセル',
 
     // Empty State
-    'no_reservations_title' => 'まだ予約がありません',
-    'no_reservations_body' => 'まだ予約がありません。最初の予約を作成して、当社のサービスをお楽しみください。',
-    'create_first_reservation' => '最初の予約を作成',
+    'no_reservations_title' => '現在、予約はありません',
+    'no_reservations_body' => 'まだ予約がありません。まずは初めての予約を作成して、当店のサービスをご利用ください。',
+    'create_first_reservation' => '最初の予約を作成する',
 
     // Cancel Modal
     'modal_cancel_title' => '予約をキャンセル',
