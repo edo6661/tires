@@ -6,6 +6,7 @@ use App\Repositories\ReservationRepositoryInterface;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Log;
 class ReservationRepository implements ReservationRepositoryInterface
 {
     protected $model;
@@ -82,7 +83,7 @@ class ReservationRepository implements ReservationRepositoryInterface
             ->orderBy('reservation_datetime')
             ->get();
     }
-    public function getByDateRangeAndMenu(string $startDate, string $endDate, int $menuId): Collection
+    public function getByDateRangeAndMenu(string $startDate, string $endDate, int $menuId, ?int $excludeReservationId = null): Collection
     {
         return $this->model->with(['user', 'menu'])
             ->where('menu_id', $menuId)
@@ -91,6 +92,9 @@ class ReservationRepository implements ReservationRepositoryInterface
                 Carbon::parse($endDate)->endOfDay()
             ])
             ->whereIn('status', ['pending', 'confirmed'])
+            ->when($excludeReservationId, function ($query) use ($excludeReservationId) {
+                return $query->where('id', '!=', $excludeReservationId);
+            })
             ->orderBy('reservation_datetime')
             ->get();
     }
@@ -121,29 +125,36 @@ class ReservationRepository implements ReservationRepositoryInterface
     {
         $menu = Menu::find($menuId);
         if (!$menu) {
+            Log::error('Menu not found for availability check', ['menu_id' => $menuId]);
             return false;
         }
         $reservationTime = Carbon::parse($datetime);
         $endTime = $reservationTime->copy()->addMinutes($menu->required_time);
-        $existingReservations = $this->model
+        $conflictingReservations = $this->model
             ->where('menu_id', $menuId)
             ->whereIn('status', ['pending', 'confirmed'])
             ->when($excludeReservationId, function ($query) use ($excludeReservationId) {
                 return $query->where('id', '!=', $excludeReservationId);
             })
             ->get();
-        foreach ($existingReservations as $reservation) {
+        foreach ($conflictingReservations as $reservation) {
             $existingStart = Carbon::parse($reservation->reservation_datetime);
             $existingEnd = $existingStart->copy()->addMinutes($menu->required_time);
             if ($reservationTime->lt($existingEnd) && $endTime->gt($existingStart)) {
+               
                 return false;
             }
         }
-        return !$this->blockedPeriodRepo->checkConflict(
+        $hasBlockedConflict = $this->blockedPeriodRepo->checkConflict(
             $menuId,
             $reservationTime->format('Y-m-d H:i:s'),
             $endTime->format('Y-m-d H:i:s')
         );
+        if ($hasBlockedConflict) {
+            
+            return false;
+        }
+        return true;
     }
     public function bulkUpdateStatus(array $ids, string $status): bool
     {

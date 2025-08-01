@@ -111,5 +111,6 @@ return [
         'phone_number_required' => 'ゲスト顧客の場合、電話番号は必須です。',
         'phone_number_string' => '電話番号は文字列である必要があります。',
         'phone_number_max' => '電話番号は20文字以内で入力してください。',
+        'reservation_datetime_unavailable' => '選択された予約日時は利用できません。他の時間を選択してください。',
     ],
 ];

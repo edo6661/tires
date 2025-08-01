@@ -178,8 +178,8 @@ class ReservationService implements ReservationServiceInterface
         
         return $prefix . $date . $random;
     }
-    public function getReservationsByDateRangeAndMenu(string $startDate, string $endDate, int $menuId): Collection
+    public function getReservationsByDateRangeAndMenu(string $startDate, string $endDate, int $menuId, ?int $excludeReservationId = null): Collection
     {
-        return $this->reservationRepository->getByDateRangeAndMenu($startDate, $endDate, $menuId);
+        return $this->reservationRepository->getByDateRangeAndMenu($startDate, $endDate, $menuId, $excludeReservationId);
     }
 }

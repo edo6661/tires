@@ -111,5 +111,6 @@ return [
         'phone_number_required' => 'The phone number field is required for a guest customer.',
         'phone_number_string' => 'The phone number must be a string.',
         'phone_number_max' => 'The phone number may not be greater than 20 characters.',
+        'reservation_datetime_unavailable' => 'The selected reservation datetime is unavailable. Please choose another time.',
     ],
 ];

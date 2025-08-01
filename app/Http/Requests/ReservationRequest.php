@@ -1,30 +1,44 @@
 <?php
-
 namespace App\Http\Requests;
-
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
-
 class ReservationRequest extends FormRequest
 {
     public function authorize(): bool
     {
         return true;
     }
-
     public function rules(): array
     {
+        $reservationId = $this->route('reservation');
         return [
-            'reservation_number' => 'nullable|string|max:255|unique:reservations,reservation_number,' . $this->route('reservation'),
+            'reservation_number' => 'nullable|string|max:255|unique:reservations,reservation_number,' . $reservationId,
             'user_id' => 'nullable|exists:users,id',
             'menu_id' => 'required|exists:menus,id',
-            'reservation_datetime' => 'required|date|after:now',
+            'reservation_datetime' => [
+                'required',
+                'date',
+                $reservationId ? 'date' : 'after:now',
+                function ($attribute, $value, $fail) use ($reservationId) {
+                    if (!$this->input('menu_id') || !$value) {
+                        return;
+                    }
+                    $reservationService = app(\App\Services\ReservationService::class);
+                    $isAvailable = $reservationService->checkAvailability(
+                        $this->input('menu_id'),
+                        $value,
+                        $reservationId 
+                    );
+                    if (!$isAvailable) {
+                        $fail(__('admin/reservation/create.validation.reservation_datetime_unavailable'));
+                    }
+                }
+            ],
             'number_of_people' => 'required|integer|min:1',
             'amount' => 'required|numeric|min:0',
             'status' => 'in:pending,confirmed,completed,cancelled',
             'notes' => 'nullable|string',
             'customer_type' => 'required|in:existing,guest', 
-            
             'full_name' => [
                 Rule::requiredIf(fn () => $this->input('customer_type') === 'guest'),
                 'nullable',
@@ -51,7 +65,6 @@ class ReservationRequest extends FormRequest
             ],
         ];
     }
-
     public function messages(): array
     {
         $prefix = 'admin/reservation/create.validation.';
@@ -63,6 +76,9 @@ class ReservationRequest extends FormRequest
             'reservation_datetime.required' => __($prefix . 'reservation_datetime_required'),
             'reservation_datetime.date' => __($prefix . 'reservation_datetime_date'),
             'reservation_datetime.after' => __($prefix . 'reservation_datetime_after'),
+            'reservation_datetime_unavailable' => __($prefix . 'reservation_datetime_unavailable', [
+                'datetime' => $this->input('reservation_datetime')
+            ]),
             'number_of_people.required' => __($prefix . 'number_of_people_required'),
             'number_of_people.integer' => __($prefix . 'number_of_people_integer'),
             'number_of_people.min' => __($prefix . 'number_of_people_min'),
@@ -84,5 +100,12 @@ class ReservationRequest extends FormRequest
             'phone_number.string' => __($prefix . 'phone_number_string'),
             'phone_number.max' => __($prefix . 'phone_number_max'),
         ];
+    }
+    /**
+     * Prepare the data for validation.
+     */
+    protected function prepareForValidation()
+    {
+        
     }
 }

@@ -32,4 +32,5 @@ return [
         'notes_label' => '備考',
     ],
     'back_button' => 'カレンダーに戻る',
+    'edit_button' => '予約を編集',
 ];

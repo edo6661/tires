@@ -176,7 +176,6 @@
                             {{ __('admin/reservation/edit.update_reservation_button') }}
                         </button>
                     </div>
-
                     <div x-show="showCalendarModal"
                          x-transition:enter="transition ease-out duration-300"
                          x-transition:enter-start="opacity-0"
@@ -355,15 +354,12 @@
                 blockedTimes: {},
                 availabilityData: [],
                 isSelectedDateFullyBlocked: false,
-                
                 init() {
                     this.updateAmount();
                     this.validateForm();
-                    
                     this.$watch('customerType', () => { this.validateForm(); });
                     this.$watch('selectedMenu', () => { this.updateAmount(); this.validateForm(); });
                     this.$watch('reservationDateTime', () => { this.validateForm(); });
-                    
                     setTimeout(() => {
                         const guestFields = ['full_name', 'full_name_kana', 'email', 'phone_number'];
                         guestFields.forEach(fieldId => {
@@ -378,7 +374,6 @@
                         }
                     }, 100);
                 },
-                
                 updateAmount() {
                     if (this.selectedMenu) {
                         const menuSelect = document.getElementById('menu_id');
@@ -388,12 +383,10 @@
                         }
                     }
                 },
-                
                 validateForm() {
                     const menuSelected = this.selectedMenu && this.selectedMenu !== '';
                     const dateTimeSelected = this.reservationDateTime && this.reservationDateTime !== '';
                     let customerInfoValid = false;
-                    
                     if (this.customerType === 'existing') {
                         const userSelect = document.getElementById('user_id');
                         customerInfoValid = userSelect && userSelect.value !== '';
@@ -407,17 +400,16 @@
                                           email && email.value.trim() !== '' &&
                                           phoneNumber && phoneNumber.value.trim() !== '';
                     }
-                    
                     this.isFormValid = menuSelected && dateTimeSelected && customerInfoValid;
                 },
-                
                 async checkAvailability() {
                     if (!this.selectedMenu || !this.reservationDateTime) {
                         this.availabilityMessage = '{{ __('admin/reservation/edit.js_select_menu_datetime_first') }}';
                         this.availabilityStatus = 'error';
                         return;
                     }
-                    
+                    this.availabilityMessage = 'Memeriksa ketersediaan...';
+                    this.availabilityStatus = 'checking';
                     try {
                         const response = await fetch('{{ route('admin.reservation.check-availability') }}', {
                             method: 'POST',
@@ -428,20 +420,21 @@
                             body: JSON.stringify({
                                 menu_id: this.selectedMenu,
                                 reservation_datetime: this.reservationDateTime,
-                                exclude_reservation_id: this.originalReservationId
+                                exclude_reservation_id: this.originalReservationId 
                             })
                         });
-                        
                         const data = await response.json();
-                        
-                        if (data.available) {
-                            this.availabilityStatus = 'available';
-                            this.availabilityMessage = '{{ __('admin/reservation/edit.js_timeslot_available') }}';
+                        if (response.ok) {
+                            if (data.available) {
+                                this.availabilityStatus = 'available';
+                                this.availabilityMessage = '{{ __('admin/reservation/edit.js_timeslot_available') }}';
+                            } else {
+                                this.availabilityStatus = 'unavailable';
+                                this.availabilityMessage = data.message || '{{ __('admin/reservation/edit.js_timeslot_unavailable') }}';
+                            }
                         } else {
-                            this.availabilityStatus = 'unavailable';
-                            this.availabilityMessage = '{{ __('admin/reservation/edit.js_timeslot_unavailable') }}';
+                            throw new Error(data.message || 'Server error');
                         }
-                        
                         this.validateForm();
                     } catch (error) {
                         console.error('Error checking availability:', error);
@@ -449,14 +442,12 @@
                         this.availabilityMessage = '{{ __('admin/reservation/edit.js_availability_error') }}';
                     }
                 },
-                
                 submitForm() {
                     this.validateForm();
                     if (this.isFormValid && this.availabilityStatus === 'available') {
                         document.querySelector('form').submit();
                     }
                 },
-                
                 get currentMonthYear() {
                     const months = @json(__('admin/reservation/edit.months'));
                     const monthName = months[this.currentMonth];
@@ -465,56 +456,61 @@
                     }
                     return `${monthName} ${this.currentYear}`;
                 },
-                
                 openCalendarModal() {
                     if (!this.selectedMenu) {
                         alert('{{ __('admin/reservation/edit.js_select_menu_first_alert') }}');
                         return;
                     }
-                    
                     this.showCalendarModal = true;
-                    this.selectedDate = null;
-                    this.selectedTime = null;
                     this.availableTimes = [];
-                    
+                    if (this.reservationDateTime) {
+                        const dateTime = new Date(this.reservationDateTime);
+                        if (!isNaN(dateTime.getTime())) {
+                            this.currentYear = dateTime.getFullYear();
+                            this.currentMonth = dateTime.getMonth();
+                            this.selectedDate = `${dateTime.getFullYear()}-${String(dateTime.getMonth() + 1).padStart(2, '0')}-${String(dateTime.getDate()).padStart(2, '0')}`;
+                            this.selectedTime = `${String(dateTime.getHours()).padStart(2, '0')}:${String(dateTime.getMinutes()).padStart(2, '0')}`;
+                        }
+                    } else {
+                        const now = new Date();
+                        this.currentMonth = now.getMonth();
+                        this.currentYear = now.getFullYear();
+                        this.selectedDate = null;
+                        this.selectedTime = null;
+                    }
                     this.loadBlockedDates().then(() => {
                         this.generateCalendar();
+                        if (this.selectedDate) {
+                            this.generateAvailableTimes();
+                        }
                     }).catch(error => {
                         console.error('Error loading calendar data:', error);
-                        this.generateCalendar();
+                        this.generateCalendar(); 
                     });
                 },
-                
                 closeCalendarModal() { this.showCalendarModal = false; this.selectedDate = null; this.selectedTime = null; },
-                
                 generateCalendar() {
                     const firstDay = new Date(this.currentYear, this.currentMonth, 1);
                     const lastDay = new Date(this.currentYear, this.currentMonth + 1, 0);
                     const startDate = new Date(firstDay);
                     startDate.setDate(startDate.getDate() - firstDay.getDay());
-                    
                     const days = [];
                     const today = new Date();
                     today.setHours(0, 0, 0, 0);
-                    
                     for (let i = 0; i < 42; i++) {
                         const date = new Date(startDate);
                         date.setDate(startDate.getDate() + i);
-                        
                         const dateStr = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
                         const isCurrentMonth = date.getMonth() === this.currentMonth;
                         const isPast = date < today;
                         const dateAvailability = this.availabilityData.find(item => item.date === dateStr);
                         const isFullyBlocked = dateAvailability ? dateAvailability.is_blocked : false;
-                        
                         let hasAvailableTime = false, hasBlockedTimes = false, hasReservationBlocked = false;
-                        
                         if (dateAvailability && dateAvailability.available_hours) {
                              hasAvailableTime = dateAvailability.available_hours.some(hour => hour.available);
                              hasBlockedTimes = dateAvailability.has_blocked_periods || false;
                              hasReservationBlocked = dateAvailability.has_reservations || false;
                         }
-                        
                         days.push({
                             date: dateStr, day: date.getDate(), otherMonth: !isCurrentMonth, isPast: isPast,
                             isFullyBlocked: isFullyBlocked, hasBlockedTimes: hasBlockedTimes && !isFullyBlocked,
@@ -523,21 +519,17 @@
                             hasAvailableTime: hasAvailableTime, disabled: isPast || isFullyBlocked
                         });
                     }
-                    
                     this.calendarDays = days;
                 },
-                
                 selectDate(dateStr) {
                     const dateAvailability = this.availabilityData.find(item => item.date === dateStr);
                     this.isSelectedDateFullyBlocked = dateAvailability ? dateAvailability.is_blocked : false;
-                    
                     if (!this.isSelectedDateFullyBlocked) {
                         this.selectedDate = dateStr;
                         this.selectedTime = null;
                         this.generateAvailableTimes();
                     }
                 },
-                
                 generateAvailableTimes() {
                     const times = [];
                     const dateAvailability = this.availabilityData.find(item => item.date === this.selectedDate);
@@ -560,19 +552,15 @@
                     }
                     this.availableTimes = times;
                 },
-                
                 previousMonth() {
                     if (this.currentMonth === 0) { this.currentMonth = 11; this.currentYear--; } else { this.currentMonth--; }
                     this.loadBlockedDates().then(() => { this.generateCalendar(); });
                 },
-                
                 nextMonth() {
                     if (this.currentMonth === 11) { this.currentMonth = 0; this.currentYear++; } else { this.currentMonth++; }
                     this.loadBlockedDates().then(() => { this.generateCalendar(); });
                 },
-                
                 selectTime(timeStr) { this.selectedTime = timeStr; },
-                
                 confirmSelection() {
                     if (this.selectedDate && this.selectedTime && !this.isSelectedDateFullyBlocked) {
                         const dateTimeStr = `${this.selectedDate}T${this.selectedTime}`;
@@ -588,11 +576,10 @@
                         alert(this.isSelectedDateFullyBlocked ? '{{ __('admin/reservation/edit.date_fully_blocked_message') }}' : '{{ __('admin/reservation/edit.js_select_date_time_alert') }}');
                     }
                 },
-                
                 async loadBlockedDates() {
                     if (!this.selectedMenu) return;
-                    
                     try {
+                        const lastDayOfMonth = new Date(this.currentYear, this.currentMonth + 1, 0).getDate();
                         const response = await fetch('{{ route('admin.reservation.availability') }}', {
                             method: 'POST',
                             headers: {
@@ -602,20 +589,17 @@
                             body: JSON.stringify({
                                 menu_id: this.selectedMenu,
                                 start_date: `${this.currentYear}-${String(this.currentMonth + 1).padStart(2, '0')}-01`,
-                                end_date: `${this.currentYear}-${String(this.currentMonth + 1).padStart(2, '0')}-31`,
-                                exclude_reservation_id: this.originalReservationId
+                                end_date: `${this.currentYear}-${String(this.currentMonth + 1).padStart(2, '0')}-${String(lastDayOfMonth).padStart(2, '0')}`,
+                                exclude_reservation_id: this.originalReservationId 
                             })
                         });
-                        
                         const data = await response.json();
-                        
                         if (data.success && data.data) {
                             this.availabilityData = data.data;
                         } else {
                             console.error('Failed to load availability data:', data.message || 'Unknown error');
                             this.availabilityData = [];
                         }
-                        
                         this.generateCalendar();
                     } catch (error) {
                         console.error('Error loading blocked dates:', error);
@@ -625,8 +609,6 @@
                 }
             }
         }
-    
-        // Ensure CSRF token is available
         if (!document.querySelector('meta[name="csrf-token"]')) {
             const meta = document.createElement('meta');
             meta.name = 'csrf-token';

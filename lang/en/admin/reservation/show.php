@@ -1,5 +1,4 @@
 <?php
-
 return [
     'title' => 'Reservation Details #:id',
     'customer_info' => [
@@ -32,4 +31,5 @@ return [
         'notes_label' => 'Notes',
     ],
     'back_button' => 'Back to Calendar',
+    'edit_button' => 'Edit Reservation',
 ];

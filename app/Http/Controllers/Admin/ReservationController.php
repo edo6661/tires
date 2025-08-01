@@ -1,6 +1,5 @@
 <?php
 namespace App\Http\Controllers\Admin;
-
 use App\Events\BookingCompleted;
 use Carbon\Carbon;
 use App\Http\Controllers\Controller;
@@ -76,7 +75,7 @@ class ReservationController extends Controller
             });
         }
         $reservations = $query->with(['user', 'menu'])
-                            ->orderBy('reservation_datetime', 'desc')
+                            ->orderBy('created_at', 'desc')
                             ->paginate(15);
         $menus = Menu::where('is_active', true)
                                 ->get();
@@ -411,15 +410,14 @@ class ReservationController extends Controller
             $validator = Validator::make($request->all(), [
                 'menu_id' => 'nullable|integer|exists:menus,id',
                 'start_date' => 'required|date_format:Y-m-d',
-                'end_date' => 'required|date_format:Y-m-d|after_or_equal:start_date'
+                'end_date' => 'required|date_format:Y-m-d|after_or_equal:start_date',
+                'exclude_reservation_id' => 'nullable|integer|exists:reservations,id' 
             ]);
-
             if ($validator->fails()) {
                 Log::error('Validation failed for availability request', [
                     'errors' => $validator->errors(),
                     'request_data' => $request->all()
                 ]);
-                
                 return response()->json([
                     'success' => false,
                     'error' => 'Validation failed',
@@ -427,12 +425,10 @@ class ReservationController extends Controller
                     'data' => []
                 ], 422);
             }
-
             $menuId = $request->menu_id;
             $startDate = $request->start_date;
             $endDate = $request->end_date;
-
-                
+            $excludeReservationId = $request->exclude_reservation_id; 
             $availabilityData = [];
             $start = Carbon::parse($startDate);
             $end = Carbon::parse($endDate);
@@ -442,7 +438,8 @@ class ReservationController extends Controller
                 $existingReservations = $this->reservationService->getReservationsByDateRangeAndMenu(
                     $startDate, 
                     $endDate, 
-                    $menuId
+                    $menuId,
+                    $excludeReservationId 
                 );
             }
             $current = $start->copy();
@@ -545,7 +542,6 @@ class ReservationController extends Controller
     {
         try {
             $reservation = $this->reservationService->createReservation($request->validated());
-            
             BookingCompleted::dispatch($reservation);
             return redirect()->route('admin.reservation.calendar')
                 ->with('success', __('admin/reservation/create.notifications.creation_success'));
@@ -576,14 +572,34 @@ class ReservationController extends Controller
     public function update(ReservationRequest $request, $locale, int $id): RedirectResponse
     {
         try {
-            $reservation = $this->reservationService->updateReservation($id, $request->validated());
+            $validatedData = $request->validated();
+            Log::info('Updating reservation', [
+                'reservation_id' => $id,
+                'validated_data' => $validatedData
+            ]);
+            $reservation = $this->reservationService->updateReservation($id, $validatedData);
             if (!$reservation) {
                 return redirect()->route('admin.reservation.calendar')
                     ->with('error', __('admin/reservation/general.notifications.reservation_not_found'));
             }
-            return redirect()->route('admin.reservation.show', ['locale' => $locale, 'id' => $id])
+            return redirect()->route('admin.reservation.show', ['locale' => $locale, 'reservation' => $id])
                 ->with('success', __('admin/reservation/general.notifications.update_success'));
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            Log::error('Validation error in reservation update', [
+                'reservation_id' => $id,
+                'errors' => $e->errors(),
+                'input' => $request->all()
+            ]);
+            return redirect()->back()
+                ->withInput()
+                ->withErrors($e->errors())
+                ->with('error', __('admin/reservation/general.notifications.validation_failed'));
         } catch (\Exception $e) {
+            Log::error('Error updating reservation', [
+                'reservation_id' => $id,
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
             return redirect()->back()
                 ->withInput()
                 ->with('error', __('admin/reservation/general.notifications.update_failed', ['error' => $e->getMessage()]));
@@ -609,8 +625,13 @@ class ReservationController extends Controller
         try {
             $request->validate([
                 'menu_id' => 'required|integer|exists:menus,id',
-                'reservation_datetime' => 'required|date|after:now',
+                'reservation_datetime' => 'required|date',
                 'exclude_reservation_id' => 'nullable|integer|exists:reservations,id'
+            ]);
+            Log::info('AJAX availability check', [
+                'menu_id' => $request->menu_id,
+                'datetime' => $request->reservation_datetime,
+                'exclude_id' => $request->exclude_reservation_id
             ]);
             $available = $this->reservationService->checkAvailability(
                 $request->menu_id,
@@ -619,11 +640,17 @@ class ReservationController extends Controller
             );
             return response()->json([
                 'available' => $available,
-                'message' => $available ? __('admin/reservation/general.availability.available') : __('admin/reservation/general.availability.unavailable')
+                'message' => $available 
+                    ? __('admin/reservation/general.availability.available') 
+                    : __('admin/reservation/general.availability.unavailable')
             ]);
         } catch (\Exception $e) {
-            Log::error('Error checking availability: ' . $e->getMessage());
+            Log::error('Error checking availability: ' . $e->getMessage(), [
+                'request_data' => $request->all(),
+                'trace' => $e->getTraceAsString()
+            ]);
             return response()->json([
+                'available' => false,
                 'error' => __('admin/reservation/general.notifications.availability_check_error'),
                 'message' => $e->getMessage()
             ], 500);
