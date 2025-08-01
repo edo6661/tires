@@ -15,7 +15,7 @@
     {{-- <p>
         {{ __('app.dashboard') }}
     </p> --}}
-    <div class=" relative" x-data="{ sidebarOpen: false }">
+    <div class="relative" x-data="{ sidebarOpen: false }">
         @auth
             @if(auth()->user()->isAdmin())
                 <x-layouts.header.admin-nav />
