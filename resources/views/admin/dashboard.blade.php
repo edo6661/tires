@@ -32,14 +32,20 @@
                 <div class="bg-white rounded-lg shadow-sm p-6 border border-disabled/20 transform transition-all duration-500 ">
                     <h2 class="text-heading-lg font-semibold text-brand mb-4 border-b border-sub pb-2">{{ __('admin/dashboard.todo.title') }}</h2>
                     <div class="space-y-3">
-                        <div class="flex items-center justify-between p-3 rounded-lg bg-sub/20 hover:bg-sub/40 transition-all duration-300 group">
+                        <div class="flex items-center justify-between p-3 rounded-lg bg-sub/20 hover:bg-sub/40 transition-all duration-300 group cursor-pointer"
+                            @click="window.location.href='{{ route('admin.reservation.calendar',[
+                                'tab' => 'list'
+                            ]) }}';"
+                        >
                             <span class="text-body-md font-medium text-main-text group-hover:text-brand transition-colors duration-300">{{ __('admin/dashboard.todo.today_reservations') }}</span>
                             <div class="space-x-2 flex items-center">
                                 <span class="text-title-lg font-bold text-brand transform group-hover:scale-100 transition-transform duration-300">{{ $todayReservations->count() }}</span>
                                 <span class="text-body-md text-main-text/70">{{ __('admin/dashboard.todo.cases_unit') }}</span>
                             </div>
                         </div>
-                        <div class="flex items-center justify-between p-3 rounded-lg bg-sub/20 hover:bg-sub/40 transition-all duration-300 group">
+                        <div class="flex items-center justify-between p-3 rounded-lg bg-sub/20 hover:bg-sub/40 transition-all duration-300 group cursor-pointer"
+                            @click="window.location.href='{{ route('admin.contact.index') }}';"
+                        >
                             <span class="text-body-md font-medium text-main-text group-hover:text-brand transition-colors duration-300">{{ __('admin/dashboard.todo.contacts') }}</span>
                             <div class="space-x-2 flex items-center">
                                 <span class="text-title-lg font-bold text-brand transform group-hover:scale-100 transition-transform duration-300">{{ $pendingContactsCount }}</span>
@@ -101,7 +107,9 @@
                             </thead>
                             <tbody class="divide-y divide-disabled/30">
                                 @forelse($todayReservations as $reservation)
-                                    <tr class="hover:bg-sub/20 transition-all duration-300 transform">
+                                    <tr class="cursor-pointer hover:bg-sub/20 transition-all duration-300 transform"
+                                        @click="window.location.href='{{ route('admin.reservation.show', $reservation->id) }}';" 
+                                    >
                                         <td class="px-4 py-3 text-main-text">{{ $reservation->reservation_datetime->format('m/d H:i') }}</td>
                                         <td class="px-4 py-3 text-main-text/80">{{ $reservation->menu->name }}</td>
                                         <td class="px-4 py-3 text-main-text font-medium">
@@ -127,7 +135,9 @@
                         <span class="text-body-md text-main-text/70">></span>
                     </div>
                     <div class="space-y-4">
-                        <div class="flex items-center justify-between p-4 bg-sub/30 rounded-lg border border-sub/50 hover:bg-sub/50 hover:border-brand/30 transition-all duration-300 hover:scale-[1.02] transform group">
+                        <div class="flex items-center justify-between p-4 bg-sub/30 rounded-lg border border-sub/50 hover:bg-sub/50 hover:border-brand/30 transition-all duration-300 hover:scale-[1.02] transform group cursor-pointer"
+                            @click="window.location.href='{{ route('admin.reservation.calendar') }}';"
+                        >
                             <div class="flex items-center gap-2">
                                 <span class="text-body-md font-medium text-main-text group-hover:text-brand transition-colors duration-300">{{ __('admin/dashboard.status.reservations') }}</span>
                             </div>
@@ -136,7 +146,9 @@
                                 <div class="text-body-md text-main-text/70">{{ __('admin/dashboard.status.cases_unit') }}</div>
                             </div>
                         </div>
-                        <div class="flex items-center justify-between p-4 bg-sub/30 rounded-lg border border-sub/50 hover:bg-sub/50 hover:border-brand/30 transition-all duration-300 hover:scale-[1.02] transform group">
+                        <div class="flex items-center justify-between p-4 bg-sub/30 rounded-lg border border-sub/50 hover:bg-sub/50 hover:border-brand/30 transition-all duration-300 hover:scale-[1.02] transform group cursor-pointer"
+                            @click="window.location.href='{{ route('admin.customer.index') }}';"
+                        >
                             <div class="flex items-center gap-2">
                                 <span class="text-body-md font-medium text-main-text group-hover:text-brand transition-colors duration-300">{{ __('admin/dashboard.status.new_customers') }}</span>
                             </div>
