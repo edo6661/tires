@@ -37,6 +37,7 @@ return new class extends Migration
                 'shop_description',
                 'terms_of_use',
                 'privacy_policy',
+                'address'
             ]);
         });
     }

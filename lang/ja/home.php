@@ -23,7 +23,7 @@ return [
     ],
 
     // Navigation Links
-    'about_us' => '会社概要',
+    'about_us' => '当店について',
     'contact_us' => 'お問い合わせ',
     'terms_of_service' => '利用規約',
 

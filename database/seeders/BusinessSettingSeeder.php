@@ -17,7 +17,6 @@ class BusinessSettingSeeder extends Seeder
             
             $settingData = [
                 'phone_number' => '03-1234-5678',
-                'address' => '1-1-1 Shibuya, Shibuya-ku, Tokyo 150-0002',
                 'business_hours' => [
                     'monday' => ['open' => '09:00', 'close' => '18:00'],
                     'tuesday' => ['open' => '09:00', 'close' => '18:00'],
@@ -40,6 +39,7 @@ class BusinessSettingSeeder extends Seeder
                 'en' => [
                     'shop_name' => 'Tire Pro Service',
                     'access_information' => 'Near Shibuya Station, exit from the east gate and walk for 5 minutes.',
+                    'address' => '1-1-1 Shibuya, Shibuya-ku, Tokyo 150-0002',
                     'site_name' => 'Tire Pro Service',
                     'shop_description' => 'We are a professional tire service provider with over 10 years of experience.',
                     'terms_of_use' => 'By using our services, you agree to comply with the applicable terms and conditions.',
@@ -47,6 +47,7 @@ class BusinessSettingSeeder extends Seeder
                 ],
                 'ja' => [
                     'shop_name' => 'タイヤプロサービス',
+                    'address' => '東京都渋谷区渋谷1-1-1 〒150-0002',
                     'access_information' => '渋谷駅の近く、東口から出て徒歩5分です。',
                     'site_name' => 'タイヤプロサービス',
                     'shop_description' => '私たちは10年以上の経験を持つプロのタイヤサービスプロバイダーです。',

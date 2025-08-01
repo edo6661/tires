@@ -31,6 +31,7 @@ class BusinessSetting extends Model
             'shop_description',
             'terms_of_use',
             'privacy_policy',
+            'address',
         ];
     }
     protected function getDefaultTranslation(string $attribute)

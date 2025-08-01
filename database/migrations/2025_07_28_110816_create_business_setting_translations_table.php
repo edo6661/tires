@@ -11,6 +11,7 @@ return new class extends Migration
             $table->foreignId('business_setting_id')->constrained()->onDelete('cascade');
             $table->string('locale', 5); 
             $table->string('shop_name');
+            $table->text('address');
             $table->text('access_information')->nullable();
             $table->string('site_name')->nullable();
             $table->text('shop_description')->nullable();

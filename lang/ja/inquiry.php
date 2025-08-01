@@ -11,7 +11,7 @@ return [
     'location' => '所在地',
     'opening_hours' => '営業時間',
     'closed' => '休業日',
-    'about_us' => '会社概要',
+    'about_us' => '当店について',
     'terms_of_use' => '利用規約',
 
     // Days of the week (used in opening hours)
