@@ -215,7 +215,6 @@
                         this.errors = {}; 
                         let isValid = true;
                         const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-                        const phoneRegex = /^(\+)?([0-9\s-]{10,15})$/; 
                         if (!this.guestInfo.full_name.trim()) {
                             this.errors.full_name = this.translations.validation.full_name_required;
                             isValid = false;
@@ -234,10 +233,7 @@
                         if (!this.guestInfo.phone_number.trim()) {
                             this.errors.phone_number = this.translations.validation.phone_required;
                             isValid = false;
-                        } else if (!phoneRegex.test(this.guestInfo.phone_number)) {
-                            this.errors.phone_number = this.translations.validation.phone_invalid || 'Format nomor telepon tidak valid.';
-                            isValid = false;
-                        }
+                        } 
                         if (isValid) {
                             sessionStorage.setItem('guestInfo', JSON.stringify(this.guestInfo));
                             this.showConfirmation = true;
