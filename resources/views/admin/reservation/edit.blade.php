@@ -577,7 +577,7 @@
                     }
                 },
                 async loadBlockedDates() {
-                    if (!this.selectedMenu) return;
+                if (!this.selectedMenu) return;
                     try {
                         const lastDayOfMonth = new Date(this.currentYear, this.currentMonth + 1, 0).getDate();
                         const response = await fetch('{{ route('admin.reservation.availability') }}', {

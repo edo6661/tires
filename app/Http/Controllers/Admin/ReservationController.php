@@ -414,10 +414,7 @@ class ReservationController extends Controller
                 'exclude_reservation_id' => 'nullable|integer|exists:reservations,id' 
             ]);
             if ($validator->fails()) {
-                Log::error('Validation failed for availability request', [
-                    'errors' => $validator->errors(),
-                    'request_data' => $request->all()
-                ]);
+                
                 return response()->json([
                     'success' => false,
                     'error' => 'Validation failed',
@@ -573,10 +570,7 @@ class ReservationController extends Controller
     {
         try {
             $validatedData = $request->validated();
-            Log::info('Updating reservation', [
-                'reservation_id' => $id,
-                'validated_data' => $validatedData
-            ]);
+           
             $reservation = $this->reservationService->updateReservation($id, $validatedData);
             if (!$reservation) {
                 return redirect()->route('admin.reservation.calendar')
@@ -628,11 +622,7 @@ class ReservationController extends Controller
                 'reservation_datetime' => 'required|date',
                 'exclude_reservation_id' => 'nullable|integer|exists:reservations,id'
             ]);
-            Log::info('AJAX availability check', [
-                'menu_id' => $request->menu_id,
-                'datetime' => $request->reservation_datetime,
-                'exclude_id' => $request->exclude_reservation_id
-            ]);
+            
             $available = $this->reservationService->checkAvailability(
                 $request->menu_id,
                 $request->reservation_datetime,
