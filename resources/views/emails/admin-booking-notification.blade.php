@@ -125,6 +125,10 @@
             margin: 0 0 8px 0;
             font-size: 14px;
         }
+        a {
+            text-decoration: none;
+            color: #2b6cb0;
+        }
     </style>
 </head>
 <body>
@@ -198,11 +202,11 @@
             <div class="action-section">
                 <h4 style="margin-top: 0; color: #4a5568;">Admin Actions:</h4>
                 <p style="margin-bottom: 15px; font-size: 14px;">Click one of the buttons below to manage this reservation:</p>
-                
-                <a href="{{ config('app.url') }}/admin/reservations/{{ $reservation->id }}" class="action-button">
+
+                <a href="{{ route('admin.reservation.show', $reservation->id) }}" class="action-button">
                     📝 View Details
                 </a>
-                <a href="{{ config('app.url') }}/admin/reservations" class="action-button" style="background: #38a169;">
+                <a href="{{ route('admin.reservation.index') }}" class="action-button" style="background: #38a169;">
                     📋 All Reservations
                 </a>
             </div>
