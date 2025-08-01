@@ -16,6 +16,6 @@ return [
     'change_password_title' => 'パスワードの変更',
     'current_password_label' => '現在のパスワード',
     'new_password_label' => '新しいパスワード',
-    'confirm_password_label' => '新しいパスワードの確認',
+    'confirm_password_label' => '新しいパスワード（確認）',
     'change_password_button' => 'パスワードを変更する',
 ];

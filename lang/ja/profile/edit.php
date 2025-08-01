@@ -7,7 +7,7 @@ return [
             'label' => '氏名',
         ],
         'full_name_kana' => [
-            'label' => '氏名（フリガナ）',
+            'label' => '氏名（カナ）',
         ],
         'email' => [
             'label' => 'メールアドレス',
