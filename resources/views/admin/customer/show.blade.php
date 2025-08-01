@@ -18,10 +18,10 @@
                         <i class="fas fa-envelope mr-2"></i>{{ __('admin/customer/show.header.send_message_button') }}
                     </button> --}}
                 @endif
-                <button @click="exportData()"
+                {{-- <button @click="exportData()"
                         class="px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors">
                     <i class="fas fa-download mr-2"></i>{{ __('admin/customer/show.header.export_button') }}
-                </button>
+                </button> --}}
             </div>
         </div>
 
