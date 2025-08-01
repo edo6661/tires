@@ -5,6 +5,7 @@ namespace App\Providers;
 use App\Events\BookingCompleted;
 use App\Events\InquirySubmitted;
 use App\Events\PasswordResetRequested;
+use App\Listeners\SendAdminBookingNotification;
 use App\Listeners\SendBookingConfirmationEmail;
 use App\Listeners\SendInquiryNotification;
 use App\Listeners\SendPasswordResetNotification;
@@ -28,6 +29,7 @@ class EventProvider extends ServiceProvider
         ],
         BookingCompleted::class => [
             SendBookingConfirmationEmail::class,
+            SendAdminBookingNotification::class,
         ],
         ContactReplied::class => [ 
             SendAdminReplyNotification::class,
