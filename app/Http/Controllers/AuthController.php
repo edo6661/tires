@@ -68,7 +68,7 @@ class AuthController extends Controller
         if ($sent) {
             return back()->with('status', 'Link reset password telah dikirim ke email Anda.');
         }
-        return back()->withErrors(['email' => 'Terjadi kesalahan saat mengirim email reset password.']);
+        return back()->withErrors(['email' => 'Email does not exist']);
     }
     public function showResetPasswordForm(Request $request, $locale, string $token): View
     {
@@ -85,7 +85,7 @@ class AuthController extends Controller
             $request->password
         );
         if ($reset) {
-            return redirect()->route('login')->with('status', 'Password Anda berhasil direset. Silakan login dengan password baru.');
+            return redirect()->route('login')->with('status', 'Your password has been reset successfully. Please log in with your new password.');
         }
         return back()->withErrors(['email' => 'Token reset password tidak valid atau sudah kedaluwarsa.']);
     }
