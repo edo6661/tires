@@ -1,4 +1,3 @@
-{{-- resources/views/components/features/reservation/calendar/reservation-tooltip.blade.php --}}
 @props(['reservation', 'menu'])
 
 @php
@@ -6,7 +5,6 @@
     $borderColor = $menu->color;
 @endphp
 
-<!-- Arrow untuk tooltip -->
 <div 
     x-show="tooltipPosition === 'bottom' && tooltipHorizontal === 'left'"
     class="absolute -top-2 left-4 w-0 h-0 border-l-8 border-r-8 border-b-8 border-transparent border-b-white"
@@ -24,7 +22,6 @@
     class="absolute -bottom-2 right-4 w-0 h-0 border-l-8 border-r-8 border-t-8 border-transparent border-t-white"
 ></div>
 
-<!-- Tooltip Header dengan Menu Color -->
 <div class="px-4 py-3 border-b border-gray-200"
     style="background-color: {{ $backgroundColor }}; border-top: 3px solid {{ $borderColor }};">
     <div class="flex justify-between items-center gap-2">
@@ -45,9 +42,7 @@
     </div>
 </div>
 
-<!-- Tooltip Content -->
 <div class="px-4 py-3 space-y-3 text-sm">
-    <!-- Customer Info -->
     <div class="flex items-center space-x-3">
         <div class="w-8 h-8 rounded-full flex items-center justify-center"
             style="background-color: {{ $backgroundColor }};">
@@ -60,7 +55,6 @@
         </div>
     </div>
     
-    <!-- Menu Info dengan Color -->
     <div class="flex items-center space-x-3">
         <div class="w-8 h-8 rounded-full flex items-center justify-center"
             style="background-color: {{ $borderColor }};">
@@ -71,7 +65,6 @@
         </div>
     </div>
     
-    <!-- Reservation Details -->
     <div class="grid grid-cols-2 gap-3">
         <div class="flex items-center space-x-2">
             <i class="fas fa-clock text-gray-400 text-xs"></i>
@@ -91,7 +84,6 @@
         </div>
     </div>
     
-    <!-- Menu Price Info -->
     {{-- @if($menu->price)
         <div class="bg-gray-50 rounded-lg p-3">
             <div class="flex items-center justify-between">
@@ -101,7 +93,6 @@
         </div>
     @endif --}}
     
-    <!-- Notes -->
     @if($reservation->notes)
         <div class="bg-gray-50 rounded-lg p-3">
             <div class="flex items-start space-x-2">
@@ -115,7 +106,6 @@
     @endif
 </div>
 
-<!-- Tooltip Footer -->
 <div class="px-4 py-2 bg-gray-50 border-t border-gray-200 text-xs text-gray-500">
     <div class="flex items-center justify-between">
         <span>Click to view full details</span>

@@ -14,12 +14,12 @@
 >
     <div class="flex items-start flex-col gap-2">
         <div class="flex-1">
-            <div class="font-medium">
+            <div class="font-medium mx-2">
                 {{ $reservation->getFullName() }}
             </div>
         </div>
         <div class="flex items-start flex-col">
-            <div class="text-gray-900">{{ $reservation->reservation_datetime->format('H:i') }}
+            <div class="text-gray-900 mx-2">{{ $reservation->reservation_datetime->format('H:i') }}
                 - {{ $reservation->reservation_datetime->addMinutes($menu->required_time)->format('H:i') }}
             </div>
         </div>
@@ -38,7 +38,7 @@
             'left-0': tooltipHorizontal === 'left',
             'right-0': tooltipHorizontal === 'right'
         }"
-        class="absolute z-50 w-80 bg-white rounded-lg shadow-xl border border-gray-200 overflow-hidden"
+        class="absolute z-50 w-80 bg-white rounded-lg shadow-xl border border-gray-200 overflow-hidden md:max-w-full max-w-60"
         style="display: none;"
         href="{{ route('admin.reservation.show', $reservation->id) }}"
     >

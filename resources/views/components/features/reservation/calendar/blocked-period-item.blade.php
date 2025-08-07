@@ -8,9 +8,9 @@
 >
     <div class="flex flex-col gap-0.5">
         <div class="flex items-center space-x-2">
-            <span class="text-xs font-medium text-red-800">{{ __('admin/reservation/calendar.blocked_period.title') }}</span>
+            <span class="text-xs mx-2 font-medium text-red-800">{{ __('admin/reservation/calendar.blocked_period.title') }}</span>
         </div>
-        <span class="text-xs text-red-600">
+        <span class="text-xs mx-2 text-red-600">
             {{ $blockedPeriod->start_datetime->format('H:i') }} - 
             {{ $blockedPeriod->end_datetime->format('H:i') }}
         </span>
@@ -30,7 +30,7 @@
             'left-0': tooltipHorizontal === 'left',
             'right-0': tooltipHorizontal === 'right'
         }"
-        class="absolute z-50 w-72 bg-white rounded-lg shadow-xl border border-red-200 overflow-hidden"
+        class="absolute z-50 w-72 bg-white rounded-lg shadow-xl border border-red-200 overflow-hidden md:max-w-full max-w-60"
         style="display: none;"
     >
         <div 
