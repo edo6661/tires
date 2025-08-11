@@ -206,8 +206,8 @@ class ReservationController extends Controller
             return $reservation->reservation_datetime->format('Y-m-d');
         });
         $blockedPeriods = $this->blockedPeriodService->getByDateRange(
-    $startOfWeek->format('Y-m-d H:i:s'),
-    $endOfWeek->format('Y-m-d H:i:s')
+        $startOfWeek->format('Y-m-d H:i:s'),
+        $endOfWeek->format('Y-m-d H:i:s')
         );
         $blockedDates = $this->blockedPeriodService->getBlockedDatesInRange(
             $startOfWeek->format('Y-m-d H:i:s'),
