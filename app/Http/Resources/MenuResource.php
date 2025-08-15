@@ -11,7 +11,7 @@ class MenuResource extends JsonResource
     public function toArray(Request $request): array
     {
         $locale = App::getLocale();
-        
+
         return [
             'id' => $this->id,
             'name' => $this->getTranslatedAttribute('name', $locale),
@@ -71,7 +71,7 @@ class MenuResource extends JsonResource
     protected function isFallbackUsed(string $locale): bool
     {
         $translation = $this->translation($locale);
-        
+
         if (!$translation || empty($translation->name)) {
             return true;
         }
