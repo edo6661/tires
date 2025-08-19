@@ -1,29 +1,37 @@
 <?php
+
 namespace App\Http\Controllers;
+
 use App\Events\InquirySubmitted;
 use App\Services\BusinessSettingServiceInterface;
-use App\Services\ContactServiceInterface; 
+use App\Services\ContactServiceInterface;
 use App\Services\MenuServiceInterface;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth; 
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
+
 class HomeController extends Controller
 {
     public function __construct(
         protected MenuServiceInterface $menuService,
         protected BusinessSettingServiceInterface $businessSettingService,
-        protected ContactServiceInterface $contactService 
+        protected ContactServiceInterface $contactService
     ) {}
     public function index()
     {
         $menus = $this->menuService->getAllMenus();
         $businessSettings = $this->businessSettingService->getBusinessSettings();
-        return view('home', compact('businessSettings', 'menus'));   
+        return view('home', compact('businessSettings', 'menus'));
+    }
+    public function about()
+    {
+        $businessSettings = $this->businessSettingService->getBusinessSettings();
+        return view('about', compact('businessSettings'));
     }
     public function inquiry()
     {
         $businessSettings = $this->businessSettingService->getBusinessSettings();
-        return view('inquiry', compact('businessSettings'));   
+        return view('inquiry', compact('businessSettings'));
     }
     public function submitInquiry(Request $request)
     {

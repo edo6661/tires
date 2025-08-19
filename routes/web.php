@@ -8,7 +8,7 @@ use Illuminate\Support\Facades\Route;
 Route::get('/', function () {
     $defaultLocale = config('app.fallback_locale', 'en');
     $userLocale = request()->getPreferredLanguage(['en', 'ja']) ?? $defaultLocale;
-    
+
     return redirect()->route('home', ['locale' => $userLocale]);
 });
 
@@ -16,8 +16,9 @@ Route::prefix('{locale}')
     ->whereIn('locale', array_keys(SetLocale::getSupportedLocales()))
     ->middleware(['setLocale'])
     ->group(function () {
-        
+
         Route::get('/', [HomeController::class, 'index'])->name('home');
+        Route::get('/about', [HomeController::class, 'about'])->name('about');
         Route::get('/inquiry', [HomeController::class, 'inquiry'])->name('inquiry');
         Route::post('/inquiry', [HomeController::class, 'submitInquiry'])->name('inquiry.submit');
 
@@ -31,19 +32,19 @@ Route::prefix('{locale}')
 
         Route::middleware(['auth'])->group(function () {
             require __DIR__ . '/profile.php';
-            
+
             Route::name('customer.')->group(function () {
                 Route::get('/dashboard', function () {
                     return view('customer.dashboard');
                 })->name('dashboard');
-                
+
                 require __DIR__ . '/customer/reservation.php';
             });
-            
+
             Route::middleware('admin')->group(function () {
                 Route::name('admin.')->prefix('admin')->group(function () {
                     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
-                    
+
                     require __DIR__ . '/admin/announcement.php';
                     require __DIR__ . '/admin/blocked-period.php';
                     require __DIR__ . '/admin/business-setting.php';
@@ -64,10 +65,10 @@ Route::prefix('{locale}')
 Route::fallback(function () {
     $path = request()->path();
     $defaultLocale = config('app.fallback_locale', 'en');
-    
+
     if (!preg_match('/^(en|ja)\//', $path)) {
         return redirect('/' . $defaultLocale . '/' . $path, 301);
     }
-    
+
     abort(404);
 });
