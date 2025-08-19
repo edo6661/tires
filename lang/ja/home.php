@@ -26,11 +26,12 @@ return [
     'about_us' => '会社概要',
     'contact_us' => 'お問い合わせ',
     'terms_of_service' => '利用規約',
+    'privacy' => 'プライバシーポリシー',
 
     // Service Card
     'duration_unit' => '分',
     'book_button' => '予約する',
-    
+
     // Fallback/Empty State Content
     'empty_service_name' => '標準タイヤ交換',
     'empty_service_duration' => '60', // 空状態の所要時間（数字）

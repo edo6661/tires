@@ -21,6 +21,10 @@ Route::prefix('{locale}')
         Route::get('/about', [HomeController::class, 'about'])->name('about');
         Route::get('/inquiry', [HomeController::class, 'inquiry'])->name('inquiry');
         Route::post('/inquiry', [HomeController::class, 'submitInquiry'])->name('inquiry.submit');
+        Route::get('/contact', [HomeController::class, 'contact'])->name('contact');
+        Route::post('/contact', [HomeController::class, 'submitContact'])->name('contact.submit');
+        Route::get('/terms', [HomeController::class, 'terms'])->name('terms');
+        Route::get('/privacy', [HomeController::class, 'privacy'])->name('privacy');
 
         Route::prefix('api')->name('api.')->group(function () {
             Route::get('/menus', [HomeController::class, 'getMenusApi'])->name('menus');

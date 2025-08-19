@@ -57,10 +57,12 @@
                 <nav class="pt-6 border-t border-disabled/50 space-y-2">
                     <a href="{{ route('about') }}"
                         class="block text-link hover:text-link-hover text-body-md transition-colors duration-200">{{ __('home.about_us') }}</a>
-                    <a href="#"
+                    <a href="{{ route('inquiry') }}"
                         class="block text-link hover:text-link-hover text-body-md transition-colors duration-200">{{ __('home.contact_us') }}</a>
-                    <a href="#"
+                    <a href="{{ route('terms') }}"
                         class="block text-link hover:text-link-hover text-body-md transition-colors duration-200">{{ __('home.terms_of_service') }}</a>
+                    <a href="{{ route('privacy') }}"
+                        class="block text-link hover:text-link-hover text-body-md transition-colors duration-200">{{ __('home.privacy') }}</a>
                 </nav>
             </aside>
             <section aria-label="{{ __('home.services_list_aria') }}" class="space-y-6">

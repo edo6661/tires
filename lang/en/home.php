@@ -26,6 +26,7 @@ return [
     'about_us' => 'About Us',
     'contact_us' => 'Contact Us',
     'terms_of_service' => 'Terms of Service',
+    'privacy' => 'Privacy Policy',
 
     // Service Card
     'duration_unit' => 'min',

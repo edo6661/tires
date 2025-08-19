@@ -28,6 +28,16 @@ class HomeController extends Controller
         $businessSettings = $this->businessSettingService->getBusinessSettings();
         return view('about', compact('businessSettings'));
     }
+    public function terms()
+    {
+        $businessSettings = $this->businessSettingService->getBusinessSettings();
+        return view('terms', compact('businessSettings'));
+    }
+    public function privacy()
+    {
+        $businessSettings = $this->businessSettingService->getBusinessSettings();
+        return view('privacy', compact('businessSettings'));
+    }
     public function inquiry()
     {
         $businessSettings = $this->businessSettingService->getBusinessSettings();
@@ -59,5 +69,43 @@ class HomeController extends Controller
         $contact = $this->contactService->createContact($contactData);
         event(new InquirySubmitted($contact));
         return back()->with('success', 'Thank you for your inquiry! We will get back to you soon.');
+    }
+
+    public function contact()
+    {
+        $businessSettings = $this->businessSettingService->getBusinessSettings();
+        return view('contact', compact('businessSettings'));
+    }
+
+    public function submitContact(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'name' => 'required|string|max:255',
+            'email' => 'required|email|max:255',
+            'subject' => 'required|string|max:255',
+            'message' => 'required|string|max:2000',
+        ]);
+
+        if ($validator->fails()) {
+            return back()
+                ->withErrors($validator)
+                ->withInput()
+                ->with('error', __('contact.error_message'));
+        }
+
+        $contactData = [
+            'user_id' => Auth::id(), // Akan null jika user tidak login
+            'full_name' => $request->name,
+            'email' => $request->email,
+            'phone_number' => null, // Tidak ada field phone di form contact
+            'subject' => $request->subject,
+            'message' => $request->message,
+        ];
+
+        $contact = $this->contactService->createContact($contactData);
+
+        event(new InquirySubmitted($contact));
+
+        return back()->with('success', __('contact.success_message'));
     }
 }
