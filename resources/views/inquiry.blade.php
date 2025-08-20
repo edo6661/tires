@@ -6,12 +6,12 @@
                 <div class="flex items-center gap-2">
                     @if (isset($businessSettings->logo))
                         <img src="{{ asset('storage/' . $businessSettings->logo) }}"
-                            alt="{{ $businessSettings->business_name ?? 'Logo' }}" class="h-8 w-auto">
+                            alt="{{ $businessSettings->shop_name ?? 'Logo' }}" class="h-8 w-auto">
                     @else
                         <img src="{{ asset('images/logo-remove-bg.png') }}" alt="Logo" class="h-8 w-auto">
                     @endif
                     <h2 class="text-title-md font-bold font-jp text-brand">
-                        {{ $businessSettings->business_name ?? 'Takanawa Gateway City' }}
+                        {{ $businessSettings->shop_name ?? 'Takanawa Gateway City' }}
                     </h2>
                 </div>
 
