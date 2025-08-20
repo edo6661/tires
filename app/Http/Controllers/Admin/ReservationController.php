@@ -27,7 +27,7 @@ class ReservationController extends Controller
     ){}
     public function calendar(Request $request): View
     {
-        $view = $request->get('view', 'month'); 
+        $view = $request->get('view', 'month');
         $date = $request->get('date', Carbon::now()->format('Y-m-d'));
         $tab = $request->get('tab', 'calendar');
         if ($tab === 'list') {
@@ -81,7 +81,7 @@ class ReservationController extends Controller
                                 ->get();
         $statuses = [
             'pending' => 'Pending',
-            'confirmed' => 'Confirmed', 
+            'confirmed' => 'Confirmed',
             'completed' => 'Completed',
             'cancelled' => 'Cancelled'
         ];
@@ -224,9 +224,9 @@ class ReservationController extends Controller
             $weekDays[] = [
                 'date' => $day,
                 'isToday' => $dateString === Carbon::now()->format('Y-m-d'),
-                'isBlocked' => isset($blockedDates[$dateString]), 
-                'blockedPeriods' => $blockedDates[$dateString] ?? [], 
-                'blockedHours' => $blockedHours[$dateString] ?? [], 
+                'isBlocked' => isset($blockedDates[$dateString]),
+                'blockedPeriods' => $blockedDates[$dateString] ?? [],
+                'blockedHours' => $blockedHours[$dateString] ?? [],
                 'reservations' => $reservationsByDate->get($dateString, collect())
             ];
         }
@@ -290,8 +290,8 @@ class ReservationController extends Controller
             'hourlySlots',
             'reservations',
             'stats',
-            'blockedPeriods',  
-            'blockedHours'     
+            'blockedPeriods',
+            'blockedHours'
         ))->with('view', 'day');
     }
     private function generateCalendarDays(Carbon $currentMonth, $reservationsByDate, $blockedDates = null, $blockedHours = null): array
@@ -300,7 +300,7 @@ class ReservationController extends Controller
         $today = Carbon::now()->format('Y-m-d');
         $startDate = $currentMonth->copy()->startOfMonth();
         $dayOfWeek = $startDate->dayOfWeek;
-        if ($dayOfWeek !== 1) { 
+        if ($dayOfWeek !== 1) {
             $startDate->subDays($dayOfWeek === 0 ? 6 : $dayOfWeek - 1);
         }
         for ($i = 0; $i < 42; $i++) {
@@ -411,10 +411,10 @@ class ReservationController extends Controller
                 'menu_id' => 'nullable|integer|exists:menus,id',
                 'start_date' => 'required|date_format:Y-m-d',
                 'end_date' => 'required|date_format:Y-m-d|after_or_equal:start_date',
-                'exclude_reservation_id' => 'nullable|integer|exists:reservations,id' 
+                'exclude_reservation_id' => 'nullable|integer|exists:reservations,id'
             ]);
             if ($validator->fails()) {
-                
+
                 return response()->json([
                     'success' => false,
                     'error' => 'Validation failed',
@@ -425,7 +425,7 @@ class ReservationController extends Controller
             $menuId = $request->menu_id;
             $startDate = $request->start_date;
             $endDate = $request->end_date;
-            $excludeReservationId = $request->exclude_reservation_id; 
+            $excludeReservationId = $request->exclude_reservation_id;
             $availabilityData = [];
             $start = Carbon::parse($startDate);
             $end = Carbon::parse($endDate);
@@ -433,10 +433,10 @@ class ReservationController extends Controller
             $existingReservations = [];
             if ($menuId) {
                 $existingReservations = $this->reservationService->getReservationsByDateRangeAndMenu(
-                    $startDate, 
-                    $endDate, 
+                    $startDate,
+                    $endDate,
                     $menuId,
-                    $excludeReservationId 
+                    $excludeReservationId
                 );
             }
             $current = $start->copy();
@@ -448,8 +448,8 @@ class ReservationController extends Controller
                     if ($period->all_menus || ($menuId && $period->menu_id == $menuId)) {
                         $startDateTime = Carbon::parse($period->start_datetime);
                         $endDateTime = Carbon::parse($period->end_datetime);
-                        if ($current->between($startDateTime, $endDateTime) && 
-                            $startDateTime->format('H:i') == '00:00' && 
+                        if ($current->between($startDateTime, $endDateTime) &&
+                            $startDateTime->format('H:i') == '00:00' &&
                             $endDateTime->format('H:i') == '23:59') {
                             $isFullyBlocked = true;
                             break;
@@ -570,7 +570,7 @@ class ReservationController extends Controller
     {
         try {
             $validatedData = $request->validated();
-           
+
             $reservation = $this->reservationService->updateReservation($id, $validatedData);
             if (!$reservation) {
                 return redirect()->route('admin.reservation.calendar')
@@ -622,7 +622,7 @@ class ReservationController extends Controller
                 'reservation_datetime' => 'required|date',
                 'exclude_reservation_id' => 'nullable|integer|exists:reservations,id'
             ]);
-            
+
             $available = $this->reservationService->checkAvailability(
                 $request->menu_id,
                 $request->reservation_datetime,
@@ -630,8 +630,8 @@ class ReservationController extends Controller
             );
             return response()->json([
                 'available' => $available,
-                'message' => $available 
-                    ? __('admin/reservation/general.availability.available') 
+                'message' => $available
+                    ? __('admin/reservation/general.availability.available')
                     : __('admin/reservation/general.availability.unavailable')
             ]);
         } catch (\Exception $e) {

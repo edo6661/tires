@@ -1,11 +1,11 @@
-<x-layouts.app>
+ <x-layouts.app>
     <div class="flex flex-col items-center justify-center py-8 px-4">
         <div class="w-full max-w-xl bg-white p-6 md:p-8 rounded-lg shadow-md border border-disabled/50 transition-shadow duration-300 hover:shadow-xl">
             <div class="text-center mb-8">
                 <h1 class="text-title-lg font-bold text-brand">{{ __('register.brand_name') }}</h1>
                 <h2 class="text-title-md font-semibold text-main-text mt-2">{{ __('register.title') }}</h2>
             </div>
-            
+
             <form method="POST" action="{{ route('register') }}" class="space-y-6">
                 @csrf
                 @if(request('redirect'))
@@ -63,7 +63,7 @@
                         <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                     @enderror
                 </div>
-                
+
                 <div>
                     <label for="company_name" class="block text-body-md font-medium text-main-text mb-1">{{ __('register.company_name') }}</label>
                     <div class="relative">
@@ -175,7 +175,7 @@
                 <p class="text-main-text/90 text-body-md">
                     {{ __('register.already_have_account') }}
                 </p>
-                <a href="{{ route('login') . (request('redirect') ? '?redirect=' . urlencode(request('redirect')) : '') }}" 
+                <a href="{{ route('login') . (request('redirect') ? '?redirect=' . urlencode(request('redirect')) : '') }}"
                    class="mt-2 inline-block text-link hover:text-link-hover transition-colors duration-300 font-medium text-body-md">
                     {{ __('register.sign_in_link') }}
                 </a>
