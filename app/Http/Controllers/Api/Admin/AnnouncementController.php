@@ -34,11 +34,13 @@ class AnnouncementController extends Controller
         try {
             $data = $request->validated();
             $announcement = $this->announcementService->createAnnouncement($data);
-
+            foreach ($data['translations'] as $trans) {
+                $announcement->translations()->create($trans);
+            }
             return response()->json([
                 'success' => true,
                 'message' => 'Pengumuman berhasil dibuat.',
-                'data' => $announcement
+                'data' => $announcement->load('translations')
             ], 201);
         } catch (\Exception $e) {
             return response()->json([
@@ -82,6 +84,14 @@ class AnnouncementController extends Controller
                     'success' => false,
                     'message' => 'Pengumuman tidak ditemukan.'
                 ], 404);
+            }
+            if (!empty($data['translations'])) {
+                foreach ($data['translations'] as $trans) {
+                    $announcement->translations()->updateOrCreate(
+                        ['locale' => $trans['locale']], // cek per bahasa
+                        ['title' => $trans['title'], 'content' => $trans['content']]
+                    );
+                }
             }
 
             return response()->json([
