@@ -6,6 +6,7 @@ use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\MenuController;
 use App\Http\Controllers\Api\UserController;
 use App\Http\Controllers\Api\ReservationController;
+use App\Http\Controllers\Admin\QuestionnaireController;
 use App\Http\Controllers\Api\Admin\TireStorageController;
 
 
@@ -71,4 +72,11 @@ Route::prefix('v1')
                 Route::delete('/storages/bulk-delete', [TireStorageController::class, 'bulkDelete']);
                 Route::patch('/storages/bulk-end', [TireStorageController::class, 'bulkEnd']);
             });
+
+        Route::prefix('admin')->middleware(['auth:sanctum'])->group(function () {
+            Route::apiResource('questionnaires', QuestionnaireController::class);
+
+            Route::get('questionnaires-by-reservation', [QuestionnaireController::class, 'getByReservation']);
+            Route::post('questionnaires/validate-answers', [QuestionnaireController::class, 'validateAnswers']);
+        });
     });
