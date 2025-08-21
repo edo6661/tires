@@ -4,8 +4,9 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\MenuController;
-use App\Http\Controllers\Admin\UserController;
+use App\Http\Controllers\Api\UserController;
 use App\Http\Controllers\Api\ReservationController;
+use App\Http\Controllers\Api\Admin\TireStorageController;
 
 
 // default route API (cek user login dengan Sanctum)
@@ -34,17 +35,16 @@ Route::prefix('v1')
         // Route::get('/menus', [MenuController::class, 'index']);
         // Route::get('/menus/{id}', [MenuController::class, 'show']);
 
-        // Users API
-        // Route::middleware('auth:sanctum')->group(function () {
-        //     Route::get('/users', [UserController::class, 'index']);
-        //     Route::get('/users/{id}', [UserController::class, 'show']);
-        //     Route::post('/users', [UserController::class, 'store']);
-        //     Route::put('/users/{id}', [UserController::class, 'update']);
-        //     Route::delete('/users/{id}', [UserController::class, 'destroy']);
-        // });
+        Route::prefix('admin-users')
+            ->middleware(['auth:sanctum', 'admin'])
+            ->group(function () {
+                Route::apiResource('users', UserController::class);
+
+                // Reset password khusus admin
+                Route::post('/users/{id}/reset-password', [UserController::class, 'resetPassword']);
+            });
 
         // Reservations API Admin
-
         Route::prefix('admin-reservations')
             ->middleware(['auth:sanctum', 'admin'])
             ->group(function () {
@@ -59,5 +59,16 @@ Route::prefix('v1')
 
                 // 📌 Resource API (index, store, show, update, destroy)
                 Route::apiResource('reservations', ReservationController::class);
+            });
+
+        // Tire Storage Admin
+        Route::prefix('admin-tire-storages')
+            ->middleware(['auth:sanctum', 'admin'])
+            ->group(function () {
+                Route::apiResource('storages', TireStorageController::class);
+
+                Route::patch('/storages/{id}/end', [TireStorageController::class, 'end']);
+                Route::delete('/storages/bulk-delete', [TireStorageController::class, 'bulkDelete']);
+                Route::patch('/storages/bulk-end', [TireStorageController::class, 'bulkEnd']);
             });
     });
