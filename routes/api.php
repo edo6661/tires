@@ -8,6 +8,7 @@ use App\Http\Controllers\Api\UserController;
 use App\Http\Controllers\Api\ReservationController;
 use App\Http\Controllers\Admin\QuestionnaireController;
 use App\Http\Controllers\Api\Admin\TireStorageController;
+use App\Http\Controllers\Api\Admin\AnnouncementController;
 
 
 // default route API (cek user login dengan Sanctum)
@@ -79,4 +80,14 @@ Route::prefix('v1')
             Route::get('questionnaires-by-reservation', [QuestionnaireController::class, 'getByReservation']);
             Route::post('questionnaires/validate-answers', [QuestionnaireController::class, 'validateAnswers']);
         });
+
+        Route::prefix('admin')->middleware(['auth:sanctum', 'admin'])->group(function () {
+            Route::apiResource('announcements', AnnouncementController::class);
+
+            Route::patch('announcements/{id}/toggle-status', [AnnouncementController::class, 'toggleStatus']);
+            Route::patch('announcements/bulk-toggle-status', [AnnouncementController::class, 'bulkToggleStatus']);
+            Route::delete('announcements/bulk-delete', [AnnouncementController::class, 'bulkDelete']);
+        });
+
+        
     });
