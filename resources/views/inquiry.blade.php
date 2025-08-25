@@ -11,7 +11,7 @@
                         <img src="{{ asset('images/logo-remove-bg.png') }}" alt="Logo" class="h-8 w-auto">
                     @endif
                     <h2 class="text-title-md font-bold font-jp text-brand">
-                        {{ $businessSettings->shop_name ?? 'Takanawa Gateway City' }}
+                        {{ $businessSettings->shop_name ?: 'Takanawa Gateway City' }}
                     </h2>
                 </div>
 
@@ -19,7 +19,7 @@
                     <h3 class="text-heading-lg font-semibold text-main-text mb-2 font-jp">{{ __('inquiry.location') }}
                     </h3>
                     <p class="text-body-md text-main-text/90">
-                        {{ $businessSettings->address ?? '2095-8 Miyadera, Iruma-shi, Saitama-ken' }}</p>
+                        {{ $businessSettings->address ?: '2095-8 Miyadera, Iruma-shi, Saitama-ken' }}</p>
                 </div>
 
                 <div>
