@@ -45,19 +45,17 @@ Route::prefix('v1')
         });
 
         // Admin Menu Management
-        Route::prefix('admin-menus')
-            ->middleware(['auth:sanctum'])
-            ->group(function () {
-                Route::apiResource('/', MenuController::class);
+        Route::middleware(['auth:sanctum'])->group(function () {
+            Route::apiResource('admin-menus', MenuController::class);
 
-                // TAMBAHAN: Route untuk admin menu management
-                Route::patch('/{id}/toggle-status', [MenuController::class, 'toggleStatus']);
-                Route::delete('/bulk-delete', [MenuController::class, 'bulkDelete']);
-                Route::patch('/bulk-update-status', [MenuController::class, 'bulkUpdateStatus']);
-                Route::get('/search', [MenuController::class, 'search']);
-                Route::post('/calculate-end-time', [MenuController::class, 'calculateEndTime']);
-                Route::get('/{id}/available-slots', [MenuController::class, 'getAvailableSlots']);
-            });
+            Route::patch('admin-menus/{id}/toggle-status', [MenuController::class, 'toggleStatus']);
+            Route::delete('admin-menus/bulk-delete', [MenuController::class, 'bulkDelete']);
+            Route::patch('admin-menus/bulk-update-status', [MenuController::class, 'bulkUpdateStatus']);
+            Route::get('admin-menus/search', [MenuController::class, 'search']);
+            Route::post('admin-menus/calculate-end-time', [MenuController::class, 'calculateEndTime']);
+            Route::get('admin-menus/{id}/available-slots', [MenuController::class, 'getAvailableSlots']);
+        });
+
 
         Route::prefix('admin')->group(function () {
             Route::apiResource('announcements', AnnouncementController::class);
@@ -111,5 +109,3 @@ Route::prefix('v1')
             Route::post('questionnaires/validate-answers', [QuestionnaireController::class, 'validateAnswers']);
         });
     });
-
-
