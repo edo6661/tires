@@ -3,9 +3,10 @@
 
 namespace App\Repositories;
 
+use App\Models\Reservation;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Pagination\LengthAwarePaginator;
-use App\Models\Reservation;
+use Illuminate\Contracts\Pagination\CursorPaginator;
 
 interface ReservationRepositoryInterface
 {
@@ -26,4 +27,5 @@ interface ReservationRepositoryInterface
     public function checkAvailability(int $menuId, string $datetime, ?int $excludeReservationId = null): bool;
     public function bulkUpdateStatus(array $ids, string $status): bool;
     public function getByDateRangeAndMenu(string $startDate, string $endDate, int $menuId, ?int $excludeReservationId = null): Collection;
+    public function getCursorPaginated(int $perPage = 15, ?string $cursor = null): CursorPaginator;
 }

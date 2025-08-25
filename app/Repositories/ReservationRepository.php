@@ -1,12 +1,16 @@
 <?php
+
 namespace App\Repositories;
+
+use Carbon\Carbon;
 use App\Models\Menu;
 use App\Models\Reservation;
-use App\Repositories\ReservationRepositoryInterface;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Pagination\LengthAwarePaginator;
-use Carbon\Carbon;
-use Illuminate\Support\Facades\Log;
+use App\Repositories\ReservationRepositoryInterface;
+use Illuminate\Contracts\Pagination\CursorPaginator;
+
 class ReservationRepository implements ReservationRepositoryInterface
 {
     protected $model;
@@ -26,6 +30,16 @@ class ReservationRepository implements ReservationRepositoryInterface
             ->orderBy('reservation_datetime', 'desc')
             ->paginate($perPage);
     }
+    // cursor pagination
+    public function getCursorPaginated(int $limit = 10, ?string $cursor = null): CursorPaginator
+    {
+        return $this->model
+            ->with(['user', 'menu'])
+            ->orderBy('reservation_datetime', 'desc')
+            ->orderBy('id', 'desc')
+            ->cursorPaginate($limit, ['*'], 'cursor', $cursor);
+    }
+
     public function findById(int $id): ?Reservation
     {
         return $this->model->with(['user', 'menu', 'questionnaire', 'payments'])->find($id);
@@ -76,10 +90,10 @@ class ReservationRepository implements ReservationRepositoryInterface
     {
         return $this->model->with(['user', 'menu'])
             ->whereBetween('reservation_datetime', [
-                Carbon::parse($startDate)->startOfDay(), 
-                Carbon::parse($endDate)->endOfDay()      
+                Carbon::parse($startDate)->startOfDay(),
+                Carbon::parse($endDate)->endOfDay()
             ])
-            ->whereIn('status', ['pending', 'confirmed']) 
+            ->whereIn('status', ['pending', 'confirmed'])
             ->orderBy('reservation_datetime')
             ->get();
     }
@@ -141,7 +155,7 @@ class ReservationRepository implements ReservationRepositoryInterface
             $existingStart = Carbon::parse($reservation->reservation_datetime);
             $existingEnd = $existingStart->copy()->addMinutes($menu->required_time);
             if ($reservationTime->lt($existingEnd) && $endTime->gt($existingStart)) {
-               
+
                 return false;
             }
         }
@@ -151,7 +165,7 @@ class ReservationRepository implements ReservationRepositoryInterface
             $endTime->format('Y-m-d H:i:s')
         );
         if ($hasBlockedConflict) {
-            
+
             return false;
         }
         return true;
