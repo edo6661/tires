@@ -9,11 +9,14 @@ Route::get('/', function () {
     $defaultLocale = config('app.fallback_locale', 'en');
     $userLocale = request()->getPreferredLanguage(['en', 'ja']) ?? $defaultLocale;
 
-    return redirect()->route('home', ['locale' => $userLocale]);
+    // Convert locale to route prefix
+    $routePrefix = SetLocale::getRoutePrefix($userLocale);
+
+    return redirect()->route('home', ['locale' => $routePrefix]);
 });
 
 Route::prefix('{locale}')
-    ->whereIn('locale', array_keys(SetLocale::getSupportedLocales()))
+    ->whereIn('locale', SetLocale::getSupportedRoutePrefixes()) // Menggunakan method baru
     ->middleware(['setLocale'])
     ->group(function () {
 
@@ -69,9 +72,10 @@ Route::prefix('{locale}')
 Route::fallback(function () {
     $path = request()->path();
     $defaultLocale = config('app.fallback_locale', 'en');
+    $defaultRoutePrefix = SetLocale::getRoutePrefix($defaultLocale);
 
-    if (!preg_match('/^(en|ja)\//', $path)) {
-        return redirect('/' . $defaultLocale . '/' . $path, 301);
+    if (!preg_match('/^(en|jp)\//', $path)) { // Update regex untuk menggunakan jp
+        return redirect('/' . $defaultRoutePrefix . '/' . $path, 301);
     }
 
     abort(404);
