@@ -2,8 +2,10 @@
     {{-- Slot untuk SEO Meta Title --}}
     <x-slot name="title">{{ __('terms.title') }}</x-slot>
 
-    <div class="container">
-        <main class="wrapper">
+    <div class="flex flex-col md:flex-row gap-6 container">
+        <x-layouts.sidebar :business-settings="$businessSettings" />
+
+        <main class="flex-1 bg-white p-6 rounded-lg shadow-sm border border-gray-200">
             <h1 class="text-title-lg font-bold font-jp text-brand mb-6 pb-4 border-b border-disabled/50">
                 {{ __('terms.title') }}
             </h1>
@@ -21,3 +23,4 @@
         </main>
     </div>
 </x-layouts.app>
+
