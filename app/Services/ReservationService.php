@@ -8,6 +8,8 @@ use App\Services\ReservationServiceInterface;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Carbon\Carbon;
+use Illuminate\Contracts\Pagination\CursorPaginator;
+use Illuminate\Pagination\Cursor;
 
 class ReservationService implements ReservationServiceInterface
 {
@@ -26,6 +28,11 @@ class ReservationService implements ReservationServiceInterface
     public function getPaginatedReservations(int $perPage = 15): LengthAwarePaginator
     {
         return $this->reservationRepository->getPaginated($perPage);
+    }
+
+    public function getPaginatedReservationsCursor(int $perPage = 15, ?string $cursor = null): CursorPaginator
+    {
+        return $this->reservationRepository->getCursorPaginated($perPage, $cursor);
     }
 
     public function findReservation(int $id): ?Reservation
@@ -60,7 +67,7 @@ class ReservationService implements ReservationServiceInterface
         if (isset($data['reservation_datetime']) || isset($data['menu_id'])) {
             $menuId = $data['menu_id'] ?? $reservation->menu_id;
             $datetime = $data['reservation_datetime'] ?? $reservation->reservation_datetime;
-            
+
             if (!$this->checkAvailability($menuId, $datetime, $id)) {
                 throw new \Exception('Waktu reservasi tidak tersedia');
             }
@@ -175,7 +182,7 @@ class ReservationService implements ReservationServiceInterface
         $prefix = 'RES';
         $date = Carbon::now()->format('Ymd');
         $random = str_pad(mt_rand(1, 9999), 4, '0', STR_PAD_LEFT);
-        
+
         return $prefix . $date . $random;
     }
     public function getReservationsByDateRangeAndMenu(string $startDate, string $endDate, int $menuId, ?int $excludeReservationId = null): Collection
