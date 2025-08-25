@@ -25,7 +25,7 @@ class AuthController extends Controller
             $user = $this->authService->getCurrentUser();
 
             return response()->json([
-                'success' => true,
+                'status' => 'success',
                 'message' => 'Login berhasil',
                 'data' => [
                     'user' => $user,
@@ -35,7 +35,7 @@ class AuthController extends Controller
         }
 
         return response()->json([
-            'success' => false,
+            'status' => 'error',
             'message' => 'Email atau password salah'
         ], 401);
     }
@@ -46,7 +46,7 @@ class AuthController extends Controller
         $user = $this->authService->register($data);
 
         return response()->json([
-            'success' => true,
+            'status' => 'success',
             'message' => 'Registrasi berhasil',
             'data' => [
                 'user' => $user,
@@ -60,7 +60,7 @@ class AuthController extends Controller
         $request->user()->tokens()->delete();
 
         return response()->json([
-            'success' => true,
+            'status' => 'success',
             'message' => 'Logout berhasil'
         ]);
     }
@@ -70,10 +70,10 @@ class AuthController extends Controller
         $sent = $this->authService->sendPasswordResetLink($request->email);
 
         if ($sent) {
-            return response()->json(['success' => true, 'message' => 'Link reset password dikirim ke email']);
+            return response()->json(['status' => 'success', 'message' => 'Link reset password dikirim ke email']);
         }
 
-        return response()->json(['success' => false, 'message' => 'Email tidak ditemukan'], 404);
+        return response()->json(['status' => 'error', 'message' => 'Email tidak ditemukan'], 404);
     }
 
     public function resetPassword(ResetPasswordRequest $request): JsonResponse
@@ -85,9 +85,9 @@ class AuthController extends Controller
         );
 
         if ($reset) {
-            return response()->json(['success' => true, 'message' => 'Password berhasil direset']);
+            return response()->json(['status' => 'success', 'message' => 'Password berhasil direset']);
         }
 
-        return response()->json(['success' => false, 'message' => 'Token tidak valid atau sudah expired'], 400);
+        return response()->json(['status' => 'error', 'message' => 'Token tidak valid atau sudah expired'], 400);
     }
 }
