@@ -41,6 +41,7 @@ class HomeController extends Controller
     public function inquiry()
     {
         $businessSettings = $this->businessSettingService->getBusinessSettings();
+        // dd($businessSettings);
         return view('inquiry', compact('businessSettings'));
     }
     public function submitInquiry(Request $request)

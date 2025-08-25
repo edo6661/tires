@@ -9,11 +9,14 @@ Route::get('/', function () {
     $defaultLocale = config('app.fallback_locale', 'en');
     $userLocale = request()->getPreferredLanguage(['en', 'ja']) ?? $defaultLocale;
 
-    return redirect()->route('home', ['locale' => $userLocale]);
+    // Convert locale to route prefix
+    $routePrefix = SetLocale::getRoutePrefix($userLocale);
+
+    return redirect()->route('home', ['locale' => $routePrefix]);
 });
 
 Route::prefix('{locale}')
-    ->whereIn('locale', array_keys(SetLocale::getSupportedLocales()))
+    ->whereIn('locale', SetLocale::getSupportedRoutePrefixes()) // Menggunakan method baru
     ->middleware(['setLocale'])
     ->group(function () {
 
@@ -68,11 +71,24 @@ Route::prefix('{locale}')
 
 Route::fallback(function () {
     $path = request()->path();
-    $defaultLocale = config('app.fallback_locale', 'en');
+    $segments = explode('/', trim($path, '/'));
+    $firstSegment = $segments[0] ?? '';
 
-    if (!preg_match('/^(en|ja)\//', $path)) {
-        return redirect('/' . $defaultLocale . '/' . $path, 301);
+    // Get supported route prefixes
+    $supportedPrefixes = SetLocale::getSupportedRoutePrefixes();
+    $defaultLocale = config('app.fallback_locale', 'en');
+    $defaultRoutePrefix = SetLocale::getRoutePrefix($defaultLocale);
+
+    // Jika first segment adalah locale prefix yang valid, berarti route tidak ditemukan
+    if (in_array($firstSegment, $supportedPrefixes)) {
+        abort(404);
     }
 
-    abort(404);
+    // Jika bukan locale prefix yang valid, redirect dengan menambah default locale prefix
+    if (!empty($path)) {
+        return redirect('/' . $defaultRoutePrefix . '/' . $path, 301);
+    }
+
+    // Jika path kosong, redirect ke home dengan default locale
+    return redirect('/' . $defaultRoutePrefix, 301);
 });
