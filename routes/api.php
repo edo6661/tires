@@ -48,7 +48,7 @@ Route::prefix('v1')
         Route::prefix('admin-menus')
             ->middleware(['auth:sanctum'])
             ->group(function () {
-                Route::apiResource('admin-menus', MenuController::class);
+                Route::apiResource('/', MenuController::class);
 
                 // TAMBAHAN: Route untuk admin menu management
                 Route::patch('/{id}/toggle-status', [MenuController::class, 'toggleStatus']);
