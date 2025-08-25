@@ -71,12 +71,24 @@ Route::prefix('{locale}')
 
 Route::fallback(function () {
     $path = request()->path();
+    $segments = explode('/', trim($path, '/'));
+    $firstSegment = $segments[0] ?? '';
+
+    // Get supported route prefixes
+    $supportedPrefixes = SetLocale::getSupportedRoutePrefixes();
     $defaultLocale = config('app.fallback_locale', 'en');
     $defaultRoutePrefix = SetLocale::getRoutePrefix($defaultLocale);
 
-    if (!preg_match('/^(en|jp)\//', $path)) { // Update regex untuk menggunakan jp
+    // Jika first segment adalah locale prefix yang valid, berarti route tidak ditemukan
+    if (in_array($firstSegment, $supportedPrefixes)) {
+        abort(404);
+    }
+
+    // Jika bukan locale prefix yang valid, redirect dengan menambah default locale prefix
+    if (!empty($path)) {
         return redirect('/' . $defaultRoutePrefix . '/' . $path, 301);
     }
 
-    abort(404);
+    // Jika path kosong, redirect ke home dengan default locale
+    return redirect('/' . $defaultRoutePrefix, 301);
 });
