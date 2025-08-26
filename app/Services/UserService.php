@@ -7,6 +7,7 @@ use App\Repositories\UserRepositoryInterface;
 use App\Services\UserServiceInterface;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Pagination\LengthAwarePaginator;
+use Illuminate\Pagination\CursorPaginator; // ADD THIS
 use Illuminate\Support\Facades\Hash;
 
 class UserService implements UserServiceInterface
@@ -28,6 +29,36 @@ class UserService implements UserServiceInterface
         return $this->userRepository->getPaginated($perPage);
     }
 
+    // ADD CURSOR PAGINATION METHODS
+    public function getPaginatedUsersWithCursor(int $perPage = 15, ?string $cursor = null): CursorPaginator
+    {
+        return $this->userRepository->getCursorPaginated($perPage, $cursor);
+    }
+
+    public function searchUsersWithCursor(string $query, int $perPage = 15, ?string $cursor = null): CursorPaginator
+    {
+        if (empty(trim($query))) {
+            throw new \InvalidArgumentException('Query pencarian tidak boleh kosong');
+        }
+
+        return $this->userRepository->searchWithCursor($query, $perPage, $cursor);
+    }
+
+    public function getUsersByRoleWithCursor(string $role, int $perPage = 15, ?string $cursor = null): CursorPaginator
+    {
+        $allowedRoles = ['customer', 'admin'];
+        if (!in_array($role, $allowedRoles)) {
+            throw new \InvalidArgumentException('Role tidak valid: ' . $role);
+        }
+
+        return $this->userRepository->getByRoleWithCursor($role, $perPage, $cursor);
+    }
+
+    public function getUserReservations(int $userId, int $perPage = 15, ?string $cursor = null): CursorPaginator
+    {
+        return $this->userRepository->getUserReservationsWithCursor($userId, $perPage, $cursor);
+    }
+
     public function findUser(int $id): ?User
     {
         return $this->userRepository->findById($id);
@@ -35,22 +66,18 @@ class UserService implements UserServiceInterface
 
     public function createUser(array $data): User
     {
-        
         if ($this->findUserByEmail($data['email'])) {
             throw new \Exception('Email sudah digunakan');
         }
 
-        
         if (isset($data['password'])) {
             $data['password'] = Hash::make($data['password']);
         }
 
-        
         if (!isset($data['role'])) {
             $data['role'] = 'customer';
         }
 
-        
         $allowedRoles = ['customer', 'admin'];
         if (!in_array($data['role'], $allowedRoles)) {
             throw new \InvalidArgumentException('Role tidak valid: ' . $data['role']);
@@ -80,12 +107,10 @@ class UserService implements UserServiceInterface
             return false;
         }
 
-        
         if ($user->reservations()->whereIn('status', ['pending', 'confirmed'])->exists()) {
             throw new \Exception('Tidak bisa menghapus user yang memiliki reservasi aktif');
         }
 
-        
         if ($user->tireStorage()->where('status', 'active')->exists()) {
             throw new \Exception('Tidak bisa menghapus user yang memiliki penyimpanan ban aktif');
         }
@@ -178,5 +203,4 @@ class UserService implements UserServiceInterface
 
         return $updated !== null;
     }
-
 }

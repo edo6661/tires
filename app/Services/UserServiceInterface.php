@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Pagination\LengthAwarePaginator;
+use Illuminate\Pagination\CursorPaginator;
 
 interface UserServiceInterface
 {
@@ -25,5 +26,11 @@ interface UserServiceInterface
     public function getUsersByRole(string $role): Collection;
     public function changePassword(int $id, string $currentPassword, string $newPassword): bool;
     public function resetPassword(int $id, string $newPassword): bool;
-    
+
+    // ADD THESE CURSOR PAGINATION METHODS
+    public function getPaginatedUsersWithCursor(int $perPage = 15, ?string $cursor = null): CursorPaginator;
+    public function searchUsersWithCursor(string $query, int $perPage = 15, ?string $cursor = null): CursorPaginator;
+    public function getUsersByRoleWithCursor(string $role, int $perPage = 15, ?string $cursor = null): CursorPaginator;
+    public function getUserReservations(int $userId, int $perPage = 15, ?string $cursor = null): CursorPaginator;
+
 }

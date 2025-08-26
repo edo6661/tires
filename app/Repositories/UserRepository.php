@@ -5,9 +5,11 @@ namespace App\Repositories;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Pagination\LengthAwarePaginator;
+use Illuminate\Pagination\CursorPaginator; // ADD THIS
 use Carbon\Carbon;
-use App\Repositories\UserRepositoryInterface;   
-class UserRepository implements UserRepositoryInterface 
+use App\Repositories\UserRepositoryInterface;
+
+class UserRepository implements UserRepositoryInterface
 {
     protected $model;
 
@@ -25,6 +27,51 @@ class UserRepository implements UserRepositoryInterface
     {
         return $this->model->orderBy('created_at', 'desc')
             ->paginate($perPage);
+    }
+
+    // ADD CURSOR PAGINATION METHODS
+    public function getCursorPaginated(int $perPage = 15, ?string $cursor = null): CursorPaginator
+    {
+        return $this->model
+            ->orderBy('created_at', 'desc')
+            ->orderBy('id', 'desc')
+            ->cursorPaginate($perPage, ['*'], 'cursor', $cursor);
+    }
+
+    public function searchWithCursor(string $query, int $perPage = 15, ?string $cursor = null): CursorPaginator
+    {
+        return $this->model->where(function ($q) use ($query) {
+            $q->where('full_name', 'like', "%{$query}%")
+                ->orWhere('full_name_kana', 'like', "%{$query}%")
+                ->orWhere('email', 'like', "%{$query}%")
+                ->orWhere('phone_number', 'like', "%{$query}%");
+        })
+            ->orderBy('created_at', 'desc')
+            ->orderBy('id', 'desc')
+            ->cursorPaginate($perPage, ['*'], 'cursor', $cursor);
+    }
+
+    public function getByRoleWithCursor(string $role, int $perPage = 15, ?string $cursor = null): CursorPaginator
+    {
+        $allowedRoles = ['customer', 'admin'];
+        if (!in_array($role, $allowedRoles)) {
+            throw new \InvalidArgumentException('Role tidak valid');
+        }
+
+        return $this->model->where('role', $role)
+            ->orderBy('created_at', 'desc')
+            ->orderBy('id', 'desc')
+            ->cursorPaginate($perPage, ['*'], 'cursor', $cursor);
+    }
+
+    public function getUserReservationsWithCursor(int $userId, int $perPage = 15, ?string $cursor = null): CursorPaginator
+    {
+        return $this->model->findOrFail($userId)
+            ->reservations()
+            ->with(['menu'])
+            ->orderBy('reservation_datetime', 'desc')
+            ->orderBy('id', 'desc')
+            ->cursorPaginate($perPage, ['*'], 'cursor', $cursor);
     }
 
     public function findById(int $id): ?User
@@ -104,7 +151,7 @@ class UserRepository implements UserRepositoryInterface
     public function getDormantCustomers(): Collection
     {
         $sixMonthsAgo = Carbon::now()->subMonths(6);
-        
+
         return $this->model->whereHas('reservations', function ($query) use ($sixMonthsAgo) {
             $query->where('reservation_datetime', '<', $sixMonthsAgo)
                 ->where('status', 'completed');
@@ -127,6 +174,7 @@ class UserRepository implements UserRepositoryInterface
             ->orderBy('created_at', 'desc')
             ->get();
     }
+
     public function getByRole(string $role): Collection
     {
         $allowedRoles = ['customer', 'admin'];

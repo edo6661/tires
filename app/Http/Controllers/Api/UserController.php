@@ -2,80 +2,144 @@
 
 namespace App\Http\Controllers\Api;
 
-use App\Http\Controllers\Controller;
-use App\Http\Requests\UserRequest;
-use App\Services\UserServiceInterface;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
+use App\Http\Requests\UserRequest;
+use App\Http\Controllers\Controller;
+use App\Http\Resources\UserResource;
+use App\Http\Traits\ApiResponseTrait;
+use App\Services\UserServiceInterface;
+use Illuminate\Contracts\Pagination\CursorPaginator;
 
 class UserController extends Controller
 {
-    protected $userService;
+    use ApiResponseTrait;
 
-    public function __construct(UserServiceInterface $userService)
-    {
-        $this->userService = $userService;
-        $this->middleware(['auth:sanctum', 'admin']);
-    }
+    public function __construct(
+        protected UserServiceInterface $userService
+    ) {}
 
     /**
-     * 📌 List users (dengan pagination)
+     * Get all users with cursor pagination - UPDATED
      */
     public function index(Request $request): JsonResponse
     {
-        $users = $this->userService->getPaginatedUsers(
-            $request->get('per_page', 15)
-        );
+        try {
+            $perPage = min($request->get('per_page', 15), 100);
 
-        return response()->json([
-            'success' => true,
-            'data' => $users
-        ]);
+            if ($request->has('paginate') && $request->get('paginate') !== 'false') {
+                // Paginated response with cursor
+                $cursor = $request->get('cursor');
+                $users = $this->userService->getPaginatedUsersWithCursor($perPage, $cursor);
+                $collection = UserResource::collection($users);
+
+                $cursorInfo = $this->generateCursor($users);
+
+                return $this->successResponseWithCursor(
+                    $collection->resolve(),
+                    $cursorInfo,
+                    'Users retrieved successfully'
+                );
+            } else {
+                // Simple response without pagination
+                $users = $this->userService->getAllUsers();
+                $collection = UserResource::collection($users);
+
+                return $this->successResponse(
+                    $collection->resolve(),
+                    'Users retrieved successfully'
+                );
+            }
+        } catch (\Exception $e) {
+            return $this->errorResponse(
+                'Failed to retrieve users',
+                500,
+                [
+                    [
+                        'field' => 'general',
+                        'tag' => 'server_error',
+                        'value' => $e->getMessage(),
+                        'message' => 'An unexpected error occurred'
+                    ]
+                ]
+            );
+        }
     }
 
     /**
-     * 📌 Buat user baru
+     * Store a newly created user
      */
     public function store(UserRequest $request): JsonResponse
     {
         try {
             $user = $this->userService->createUser($request->validated());
 
-            return response()->json([
-                'success' => true,
-                'message' => 'User berhasil dibuat',
-                'data' => $user
-            ], 201);
+            return $this->successResponse(
+                new UserResource($user),
+                'User created successfully',
+                201
+            );
         } catch (\Exception $e) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Gagal membuat user: ' . $e->getMessage()
-            ], 400);
+            return $this->errorResponse(
+                'Failed to create user',
+                500,
+                [
+                    [
+                        'field' => 'general',
+                        'tag' => 'creation_failed',
+                        'value' => $e->getMessage(),
+                        'message' => 'User creation failed'
+                    ]
+                ]
+            );
         }
     }
 
     /**
-     * 📌 Detail user
+     * Display the specified user
      */
     public function show(int $id): JsonResponse
     {
-        $user = $this->userService->findUser($id);
+        try {
+            $user = $this->userService->findUser($id);
 
-        if (!$user) {
-            return response()->json([
-                'success' => false,
-                'message' => 'User tidak ditemukan'
-            ], 404);
+            if (!$user) {
+                return $this->errorResponse(
+                    'User not found',
+                    404,
+                    [
+                        [
+                            'field' => 'id',
+                            'tag' => 'not_found',
+                            'value' => $id,
+                            'message' => 'User with given ID does not exist'
+                        ]
+                    ]
+                );
+            }
+
+            return $this->successResponse(
+                new UserResource($user),
+                'User retrieved successfully'
+            );
+        } catch (\Exception $e) {
+            return $this->errorResponse(
+                'Failed to retrieve user',
+                500,
+                [
+                    [
+                        'field' => 'general',
+                        'tag' => 'retrieval_failed',
+                        'value' => $e->getMessage(),
+                        'message' => 'User retrieval failed'
+                    ]
+                ]
+            );
         }
-
-        return response()->json([
-            'success' => true,
-            'data' => $user
-        ]);
     }
 
     /**
-     * 📌 Update user
+     * Update the specified user
      */
     public function update(UserRequest $request, int $id): JsonResponse
     {
@@ -83,27 +147,42 @@ class UserController extends Controller
             $user = $this->userService->updateUser($id, $request->validated());
 
             if (!$user) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'User tidak ditemukan'
-                ], 404);
+                return $this->errorResponse(
+                    'User not found',
+                    404,
+                    [
+                        [
+                            'field' => 'id',
+                            'tag' => 'not_found',
+                            'value' => $id,
+                            'message' => 'User with given ID does not exist'
+                        ]
+                    ]
+                );
             }
 
-            return response()->json([
-                'success' => true,
-                'message' => 'User berhasil diperbarui',
-                'data' => $user
-            ]);
+            return $this->successResponse(
+                new UserResource($user),
+                'User updated successfully'
+            );
         } catch (\Exception $e) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Gagal memperbarui user: ' . $e->getMessage()
-            ], 400);
+            return $this->errorResponse(
+                'Failed to update user',
+                500,
+                [
+                    [
+                        'field' => 'general',
+                        'tag' => 'update_failed',
+                        'value' => $e->getMessage(),
+                        'message' => 'User update failed'
+                    ]
+                ]
+            );
         }
     }
 
     /**
-     * 📌 Hapus user
+     * Remove the specified user
      */
     public function destroy(int $id): JsonResponse
     {
@@ -111,52 +190,300 @@ class UserController extends Controller
             $success = $this->userService->deleteUser($id);
 
             if (!$success) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'User tidak ditemukan'
-                ], 404);
+                return $this->errorResponse(
+                    'User not found',
+                    404,
+                    [
+                        [
+                            'field' => 'id',
+                            'tag' => 'not_found',
+                            'value' => $id,
+                            'message' => 'User with given ID does not exist'
+                        ]
+                    ]
+                );
             }
 
-            return response()->json([
-                'success' => true,
-                'message' => 'User berhasil dihapus'
-            ]);
+            return $this->successResponse(
+                null,
+                'User deleted successfully'
+            );
         } catch (\Exception $e) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Gagal menghapus user: ' . $e->getMessage()
-            ], 400);
+            return $this->errorResponse(
+                'Failed to delete user',
+                500,
+                [
+                    [
+                        'field' => 'general',
+                        'tag' => 'deletion_failed',
+                        'value' => $e->getMessage(),
+                        'message' => 'User deletion failed'
+                    ]
+                ]
+            );
         }
     }
 
     /**
-     * 📌 Optional: Reset password user
+     * Search users - UPDATED
+     */
+    public function search(Request $request): JsonResponse
+    {
+        try {
+            $validated = $request->validate([
+                'q' => 'required|string|min:1|max:255',
+                'per_page' => 'sometimes|integer|min:1|max:100',
+                'cursor' => 'sometimes|string'
+            ]);
+
+            $query = $validated['q'];
+            $perPage = $validated['per_page'] ?? 15;
+            $cursor = $validated['cursor'] ?? null;
+
+            $users = $this->userService->searchUsersWithCursor($query, $perPage, $cursor);
+            $collection = UserResource::collection($users);
+
+            $cursorInfo = $this->generateCursor($users);
+            return $this->successResponseWithCursor(
+                $collection->resolve(),
+                $cursorInfo,
+                'User search completed successfully'
+            );
+
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            return $this->errorResponse(
+                'Validation failed',
+                422,
+                collect($e->errors())->map(function ($messages, $field) {
+                    return [
+                        'field' => $field,
+                        'tag' => 'validation_error',
+                        'value' => request($field),
+                        'message' => $messages[0]
+                    ];
+                })->values()->toArray()
+            );
+        } catch (\Exception $e) {
+            return $this->errorResponse(
+                'Search failed',
+                500,
+                [
+                    [
+                        'field' => 'general',
+                        'tag' => 'search_failed',
+                        'value' => $e->getMessage(),
+                        'message' => 'Search operation failed'
+                    ]
+                ]
+            );
+        }
+    }
+
+    /**
+     * Get users by role - UPDATED
+     */
+    public function byRole(Request $request, string $role): JsonResponse
+    {
+        try {
+            $allowedRoles = ['customer', 'admin'];
+
+            if (!in_array($role, $allowedRoles)) {
+                return $this->errorResponse(
+                    'Invalid role',
+                    400,
+                    [
+                        [
+                            'field' => 'role',
+                            'tag' => 'invalid_role',
+                            'value' => $role,
+                            'message' => 'Role must be one of: ' . implode(', ', $allowedRoles)
+                        ]
+                    ]
+                );
+            }
+
+            $perPage = min($request->get('per_page', 15), 100);
+            $cursor = $request->get('cursor');
+
+            $users = $this->userService->getUsersByRoleWithCursor($role, $perPage, $cursor);
+            $collection = UserResource::collection($users);
+
+            $cursorInfo = $this->generateCursor($users);
+            return $this->successResponseWithCursor(
+                $collection->resolve(),
+                $cursorInfo,
+                "Users with role '{$role}' retrieved successfully"
+            );
+
+        } catch (\Exception $e) {
+            return $this->errorResponse(
+                'Failed to retrieve users by role',
+                500,
+                [
+                    [
+                        'field' => 'general',
+                        'tag' => 'retrieval_failed',
+                        'value' => $e->getMessage(),
+                        'message' => 'Failed to retrieve users'
+                    ]
+                ]
+            );
+        }
+    }
+
+    /**
+     * Get customers only
+     */
+    public function customers(Request $request): JsonResponse
+    {
+        return $this->byRole($request, 'customer');
+    }
+
+    /**
+     * Get admins only
+     */
+    public function admins(Request $request): JsonResponse
+    {
+        return $this->byRole($request, 'admin');
+    }
+
+    /**
+     * Reset user password
      */
     public function resetPassword(Request $request, int $id): JsonResponse
     {
-        $request->validate([
-            'new_password' => 'required|string|min:8|confirmed'
-        ]);
-
         try {
-            $success = $this->userService->resetPassword($id, $request->new_password);
+            $validated = $request->validate([
+                'new_password' => 'required|string|min:8|confirmed'
+            ]);
+
+            $success = $this->userService->resetPassword($id, $validated['new_password']);
 
             if (!$success) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'User tidak ditemukan'
-                ], 404);
+                return $this->errorResponse(
+                    'User not found',
+                    404,
+                    [
+                        [
+                            'field' => 'id',
+                            'tag' => 'not_found',
+                            'value' => $id,
+                            'message' => 'User with given ID does not exist'
+                        ]
+                    ]
+                );
             }
 
-            return response()->json([
-                'success' => true,
-                'message' => 'Password berhasil direset'
-            ]);
+            return $this->successResponse(
+                null,
+                'Password reset successfully'
+            );
+
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            return $this->errorResponse(
+                'Validation failed',
+                422,
+                collect($e->errors())->map(function ($messages, $field) {
+                    return [
+                        'field' => $field,
+                        'tag' => 'validation_error',
+                        'value' => request($field),
+                        'message' => $messages[0]
+                    ];
+                })->values()->toArray()
+            );
         } catch (\Exception $e) {
-            return response()->json([
-                'success' => false,
-                'message' => $e->getMessage()
-            ], 400);
+            return $this->errorResponse(
+                'Failed to reset password',
+                500,
+                [
+                    [
+                        'field' => 'general',
+                        'tag' => 'reset_failed',
+                        'value' => $e->getMessage(),
+                        'message' => 'Password reset failed'
+                    ]
+                ]
+            );
         }
     }
+
+    /**
+     * Change user password
+     */
+    public function changePassword(Request $request, int $id): JsonResponse
+    {
+        try {
+            $validated = $request->validate([
+                'current_password' => 'required|string',
+                'new_password' => 'required|string|min:8|confirmed'
+            ]);
+
+            $success = $this->userService->changePassword(
+                $id,
+                $validated['current_password'],
+                $validated['new_password']
+            );
+
+            if (!$success) {
+                return $this->errorResponse(
+                    'Invalid current password or user not found',
+                    400,
+                    [
+                        [
+                            'field' => 'current_password',
+                            'tag' => 'invalid_password',
+                            'value' => null,
+                            'message' => 'Current password is incorrect or user not found'
+                        ]
+                    ]
+                );
+            }
+
+            return $this->successResponse(
+                null,
+                'Password changed successfully'
+            );
+
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            return $this->errorResponse(
+                'Validation failed',
+                422,
+                collect($e->errors())->map(function ($messages, $field) {
+                    return [
+                        'field' => $field,
+                        'tag' => 'validation_error',
+                        'value' => request($field),
+                        'message' => $messages[0]
+                    ];
+                })->values()->toArray()
+            );
+        } catch (\Exception $e) {
+            return $this->errorResponse(
+                'Failed to change password',
+                500,
+                [
+                    [
+                        'field' => 'general',
+                        'tag' => 'change_failed',
+                        'value' => $e->getMessage(),
+                        'message' => 'Password change failed'
+                    ]
+                ]
+            );
+        }
+    }
+
+    /**
+     * Helper methods
+     */
+    // private function generateCursor(CursorPaginator $paginator): array
+    // {
+    //     return [
+    //         'next_cursor' => $paginator->nextCursor() ? $paginator->nextCursor()->encode() : null,
+    //         'previous_cursor' => $paginator->previousCursor() ? $paginator->previousCursor()->encode() : null,
+    //         'has_next_page' => $paginator->hasMorePages(),
+    //         'per_page' => $paginator->perPage()
+    //     ];
+    // }
 }

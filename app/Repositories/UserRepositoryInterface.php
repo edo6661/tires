@@ -4,12 +4,20 @@ namespace App\Repositories;
 
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Pagination\LengthAwarePaginator;
+use Illuminate\Pagination\CursorPaginator; // ADD THIS
 use App\Models\User;
 
 interface UserRepositoryInterface
 {
     public function getAll(): Collection;
     public function getPaginated(int $perPage = 15): LengthAwarePaginator;
+
+    // ADD THESE CURSOR PAGINATION METHODS
+    public function getCursorPaginated(int $perPage = 15, ?string $cursor = null): CursorPaginator;
+    public function searchWithCursor(string $query, int $perPage = 15, ?string $cursor = null): CursorPaginator;
+    public function getByRoleWithCursor(string $role, int $perPage = 15, ?string $cursor = null): CursorPaginator;
+    public function getUserReservationsWithCursor(int $userId, int $perPage = 15, ?string $cursor = null): CursorPaginator;
+
     public function findById(int $id): ?User;
     public function create(array $data): User;
     public function update(int $id, array $data): ?User;
