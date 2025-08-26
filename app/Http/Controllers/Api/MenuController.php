@@ -260,62 +260,115 @@ class MenuController extends Controller
         }
     }
 
-    // public function search(Request $request): JsonResponse
-    // {
-    //     try {
-    //         $validated = $request->validate([
-    //             'query' => 'required|string|min:1|max:255',
-    //             'locale' => 'sometimes|string|in:en,ja',
-    //             'limit' => 'sometimes|integer|min:1|max:100', // Ubah dari per_page ke limit
-    //             'active_only' => 'sometimes|boolean',
-    //             'cursor' => 'sometimes|string'
-    //         ]);
+    /**
+     * Reorder menus (admin only)
+     */
+    public function reorder(Request $request): JsonResponse
+    {
+        try {
+            $validated = $request->validate([
+                'order' => 'required|array',
+                'order.*.id' => 'required|integer|exists:menus,id',
+                'order.*.display_order' => 'required|integer',
+            ]);
 
-    //         $query = $validated['query'];
-    //         $locale = $validated['locale'] ?? App::getLocale();
-    //         $limit = $validated['limit'] ?? 15;
-    //         $activeOnly = $validated['active_only'] ?? true;
-    //         $cursor = $validated['cursor'] ?? null;
+            $reordered = $this->menuService->reorderMenus($validated['order']);
 
-    //         $result = $this->menuService->searchMenusWithCursor($query, $locale, $activeOnly, $limit, $cursor);
-    //         $collection = MenuResource::collection($result['data']);
+            if (!$reordered) {
+                return $this->errorResponse(
+                    'Failed to reorder menus',
+                    500,
+                    [
+                        [
+                            'field' => 'order',
+                            'tag' => 'reorder_failed',
+                            'value' => $validated['order'],
+                            'message' => 'Could not reorder the specified menus'
+                        ]
+                    ]
+                );
+            }
 
-    //         $cursorInfo = $this->generateCursorInfo($result, $limit);
+            return $this->successResponse(
+                ['reordered_count' => count($validated['order'])],
+                'Menus reordered successfully'
+            );
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            return $this->errorResponse(
+                'Validation failed',
+                422,
+                collect($e->errors())->map(function ($messages, $field) {
+                    return [
+                        'field' => $field,
+                        'tag' => 'validation_error',
+                        'value' => request($field),
+                        'message' => $messages[0]
+                    ];
+                })->values()->toArray()
+            );
+        } catch (\Exception $e) {
+            return $this->errorResponse(
+                'Failed to reorder menus',
+                500,
+                [
+                    [
+                        'field' => 'general',
+                        'tag' => 'reorder_error',
+                        'value' => $e->getMessage(),
+                        'message' => 'Reorder operation failed'
+                    ]
+                ]
+            );
+        }
+    }
 
-    //         return $this->successResponseWithCursor(
-    //             $collection->resolve(),
-    //             $cursorInfo,
-    //             'Menu search completed successfully'
-    //         );
+    /**
+     * Get menu details for booking
+     */
+    public function getMenuDetails(int $id): JsonResponse
+    {
+        try {
+            $menu = $this->menuService->findMenu($id);
 
-    //     } catch (\Illuminate\Validation\ValidationException $e) {
-    //         return $this->errorResponse(
-    //             'Validation failed',
-    //             422,
-    //             collect($e->errors())->map(function ($messages, $field) {
-    //                 return [
-    //                     'field' => $field,
-    //                     'tag' => 'validation_error',
-    //                     'value' => request($field),
-    //                     'message' => $messages[0]
-    //                 ];
-    //             })->values()->toArray()
-    //         );
-    //     } catch (\Exception $e) {
-    //         return $this->errorResponse(
-    //             'Search failed',
-    //             500,
-    //             [
-    //                 [
-    //                     'field' => 'general',
-    //                     'tag' => 'search_failed',
-    //                     'value' => $e->getMessage(),
-    //                     'message' => 'Search operation failed'
-    //                 ]
-    //             ]
-    //         );
-    //     }
-    // }
+            if (!$menu) {
+                return $this->errorResponse(
+                    'Menu not found',
+                    404,
+                    [
+                        [
+                            'field' => 'id',
+                            'tag' => 'not_found',
+                            'value' => $id,
+                            'message' => 'Menu with given ID does not exist'
+                        ]
+                    ]
+                );
+            }
+
+            return $this->successResponse([
+                'id' => $menu->id,
+                'name' => $menu->name,
+                'description' => $menu->description,
+                'required_time' => $menu->required_time,
+                'price' => $menu->price,
+                'color' => $menu->color,
+                'photo_url' => $menu->photo_path ? asset('storage/' . $menu->photo_path) : null,
+            ], 'Menu details retrieved successfully');
+        } catch (\Exception $e) {
+            return $this->errorResponse(
+                'Failed to retrieve menu details',
+                500,
+                [
+                    [
+                        'field' => 'general',
+                        'tag' => 'retrieval_failed',
+                        'value' => $e->getMessage(),
+                        'message' => 'Menu details retrieval failed'
+                    ]
+                ]
+            );
+        }
+    }
 
     public function calculateEndTime(Request $request): JsonResponse
     {
