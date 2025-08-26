@@ -2,13 +2,14 @@
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\Api\AuthController as AuthApiController;
 use App\Http\Controllers\Api\MenuController;
 use App\Http\Controllers\Api\UserController;
+use App\Http\Controllers\Api\ProfileController;
 use App\Http\Controllers\Api\ReservationController;
 use App\Http\Controllers\Admin\QuestionnaireController;
 use App\Http\Controllers\Api\Admin\TireStorageController;
 use App\Http\Controllers\Api\Admin\AnnouncementController;
+use App\Http\Controllers\Api\AuthController as AuthApiController;
 
 // default route API (cek user login dengan Sanctum)
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
@@ -54,6 +55,7 @@ Route::prefix('v1')
             Route::get('admin-menus/search', [MenuController::class, 'search']);
             Route::post('admin-menus/calculate-end-time', [MenuController::class, 'calculateEndTime']);
             Route::get('admin-menus/{id}/available-slots', [MenuController::class, 'getAvailableSlots']);
+            Route::post('admin-menus/reorder', [MenuController::class, 'reorder']);
         });
 
 
@@ -74,22 +76,32 @@ Route::prefix('v1')
                 Route::post('/users/{id}/reset-password', [UserController::class, 'resetPassword']);
             });
 
-        // Reservations API Admin
-        Route::prefix('admin-reservations')
-            ->middleware(['auth:sanctum'])
-            ->group(function () {
+        // Reservation API routes
+        Route::prefix('reservations')->group(function () {
+            // Public routes
+            Route::get('/calendar', [ReservationController::class, 'getCalendarData']);
+            Route::get('/availability', [ReservationController::class, 'getAvailability']);
+            Route::get('/available-hours', [ReservationController::class, 'getAvailableHours']);
+            Route::post('/check-availability', [ReservationController::class, 'checkAvailability']);
 
-                // 📌 Bulk update status banyak reservasi sekaligus
-                Route::patch('/reservations/bulk-status', [ReservationController::class, 'bulkUpdateStatus'])
-                    ->name('reservations.bulk-status');
+            // admin
+            // Protected routes
+            Route::middleware('auth:sanctum')->group(function () {
+                Route::get('/', [ReservationController::class, 'index']);
+                Route::post('/', [ReservationController::class, 'store']);
+                Route::get('/{id}', [ReservationController::class, 'show']);
+                Route::put('/{id}', [ReservationController::class, 'update']);
+                Route::delete('/{id}', [ReservationController::class, 'destroy']);
 
-                // 📌 Ubah status reservasi (misal confirm, cancel, complete)
-                Route::patch('/reservations/{reservation}/status', [ReservationController::class, 'changeStatus'])
-                    ->name('reservations.change-status');
+                // Status management
+                Route::patch('/{id}/confirm', [ReservationController::class, 'confirm']);
+                Route::patch('/{id}/cancel', [ReservationController::class, 'cancel']);
+                Route::patch('/{id}/complete', [ReservationController::class, 'complete']);
 
-                // 📌 Resource API (index, store, show, update, destroy)
-                Route::apiResource('reservations', ReservationController::class);
+                // Bulk operations
+                Route::patch('/bulk/status', [ReservationController::class, 'bulkUpdateStatus']);
             });
+        });
 
         // Tire Storage Admin
         Route::prefix('admin-tire-storages')
@@ -107,5 +119,36 @@ Route::prefix('v1')
 
             Route::get('questionnaires-by-reservation', [QuestionnaireController::class, 'getByReservation']);
             Route::post('questionnaires/validate-answers', [QuestionnaireController::class, 'validateAnswers']);
+        });
+
+        // Public user routes
+        Route::prefix('users')->group(function () {
+            Route::get('/', [UserController::class, 'index']);
+            Route::get('/search', [UserController::class, 'search']);
+            Route::get('/customers', [UserController::class, 'customers']);
+            Route::get('/admins', [UserController::class, 'admins']);
+            Route::get('/role/{role}', [UserController::class, 'byRole']);
+            Route::get('/{id}', [UserController::class, 'show']);
+        });
+
+        // Protected user routes
+        Route::middleware('auth:sanctum')->group(function () {
+            // User management (admin only)
+            Route::middleware('admin')->group(function () {
+                Route::post('users', [UserController::class, 'store']);
+                Route::put('users/{id}', [UserController::class, 'update']);
+                Route::delete('users/{id}', [UserController::class, 'destroy']);
+                Route::patch('users/{id}/reset-password', [UserController::class, 'resetPassword']);
+                Route::patch('users/{id}/change-password', [UserController::class, 'changePassword']);
+            });
+
+            // Profile routes
+            Route::prefix('profile')->group(function () {
+                Route::get('/', [ProfileController::class, 'show']);
+                Route::put('/', [ProfileController::class, 'update']);
+                Route::patch('/password', [ProfileController::class, 'updatePassword']);
+                Route::get('/reservations', [ProfileController::class, 'reservations']);
+                Route::delete('/account', [ProfileController::class, 'deleteAccount']);
+            });
         });
     });
