@@ -6,7 +6,7 @@ use App\Http\Controllers\Api\MenuController;
 use App\Http\Controllers\Api\UserController;
 use App\Http\Controllers\Api\ProfileController;
 use App\Http\Controllers\Api\ReservationController;
-use App\Http\Controllers\Admin\QuestionnaireController;
+use App\Http\Controllers\Api\QuestionnaireController;
 use App\Http\Controllers\Api\Admin\TireStorageController;
 use App\Http\Controllers\Api\Admin\AnnouncementController;
 use App\Http\Controllers\Api\AuthController as AuthApiController;
@@ -149,6 +149,32 @@ Route::prefix('v1')
                 Route::patch('/password', [ProfileController::class, 'updatePassword']);
                 Route::get('/reservations', [ProfileController::class, 'reservations']);
                 Route::delete('/account', [ProfileController::class, 'deleteAccount']);
+            });
+        });
+
+        // Public questionnaire routes
+        Route::prefix('questionnaires')->group(function () {
+            Route::get('/', [QuestionnaireController::class, 'index']);
+            Route::get('/search', [QuestionnaireController::class, 'search']);
+            // Route::get('/filtered', [QuestionnaireController::class, 'filtered']);
+            Route::get('/completion-stats', [QuestionnaireController::class, 'getCompletionStats']);
+            Route::get('/status/{status}', [QuestionnaireController::class, 'byCompletionStatus']);
+            Route::get('/{id}', [QuestionnaireController::class, 'show']);
+            // Route::get('/{id}/summary', [QuestionnaireController::class, 'getAnswerSummary']);
+            Route::get('/reservation/{reservationId}', [QuestionnaireController::class, 'getByReservation']);
+            Route::post('/validate-answers', [QuestionnaireController::class, 'validateAnswers']);
+        });
+
+        // Protected questionnaire routes
+        Route::middleware('auth:sanctum')->group(function () {
+            // Customer can submit answers
+            Route::post('questionnaires/submit', [QuestionnaireController::class, 'submitAnswers']);
+
+            // Admin only routes
+            Route::middleware('admin')->group(function () {
+                Route::post('questionnaires', [QuestionnaireController::class, 'store']);
+                Route::put('questionnaires/{id}', [QuestionnaireController::class, 'update']);
+                Route::delete('questionnaires/{id}', [QuestionnaireController::class, 'destroy']);
             });
         });
     });

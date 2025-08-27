@@ -3,27 +3,70 @@
 namespace App\Http\Controllers\Api\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Http\Traits\ApiResponseTrait;
+use App\Http\Resources\AnnouncementResource;
 use App\Services\AnnouncementServiceInterface;
 use App\Http\Requests\AnnouncementRequest;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Support\Facades\App;
 
-
+/**
+ * @mixin \Illuminate\Http\Request
+ */
 class AnnouncementController extends Controller
 {
+    use ApiResponseTrait;
+
     public function __construct(
         protected AnnouncementServiceInterface $announcementService
     ) {}
 
     /**
-     * List semua pengumuman (paginate)
+     * List semua pengumuman (paginate / non-paginate)
      */
     public function index(Request $request): JsonResponse
     {
-        $perPage = $request->get('per_page', 15);
-        $announcements = $this->announcementService->getPaginatedAnnouncements($perPage);
+        try {
+            $perPage = min($request->get('per_page', 15), 100);
+            $locale = App::getLocale();
 
-        return response()->json($announcements);
+            if ($request->has('paginate') && $request->get('paginate') !== 'false') {
+                // Paginated response with cursor
+                $announcements = $this->announcementService->getPaginatedAnnouncements($perPage);
+                $collection = AnnouncementResource::collection($announcements);
+
+                $cursor = $this->generateCursor($announcements);
+
+                return $this->successResponseWithCursor(
+                    $collection->resolve(),
+                    $cursor,
+                    'Announcements retrieved successfully'
+                );
+            } else {
+                // Simple response without pagination
+                $announcements = $this->announcementService->getActiveAnnouncements();
+                $collection = AnnouncementResource::collection($announcements);
+
+                return $this->successResponse(
+                    $collection->resolve(),
+                    'Announcements retrieved successfully'
+                );
+            }
+        } catch (\Exception $e) {
+            return $this->errorResponse(
+                'Failed to retrieve announcements',
+                500,
+                [
+                    [
+                        'field' => 'general',
+                        'tag' => 'server_error',
+                        'value' => $e->getMessage(),
+                        'message' => 'An unexpected error occurred'
+                    ]
+                ]
+            );
+        }
     }
 
     /**
@@ -34,19 +77,23 @@ class AnnouncementController extends Controller
         try {
             $data = $request->validated();
             $announcement = $this->announcementService->createAnnouncement($data);
-            foreach ($data['translations'] as $trans) {
-                $announcement->translations()->create($trans);
-            }
-            return response()->json([
-                'success' => true,
-                'message' => 'Pengumuman berhasil dibuat.',
-                'data' => $announcement->load('translations')
-            ], 201);
+
+            return $this->successResponse(
+                new AnnouncementResource($announcement),
+                'Announcement created successfully',
+                201
+            );
         } catch (\Exception $e) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Terjadi kesalahan: ' . $e->getMessage()
-            ], 500);
+            return $this->errorResponse(
+                'Failed to create announcement',
+                500,
+                [[
+                    'field' => 'general',
+                    'tag' => 'server_error',
+                    'value' => $e->getMessage(),
+                    'message' => 'An unexpected error occurred'
+                ]]
+            );
         }
     }
 
@@ -58,16 +105,20 @@ class AnnouncementController extends Controller
         $announcement = $this->announcementService->findAnnouncement($id);
 
         if (!$announcement) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Pengumuman tidak ditemukan.'
-            ], 404);
+            return $this->errorResponse('Announcement not found', 404, [
+                [
+                    'field' => 'general',
+                    'tag' => 'not_found',
+                    'value' => null,
+                    'message' => 'Announcement not found'
+                ]
+            ]);
         }
 
-        return response()->json([
-            'success' => true,
-            'data' => $announcement
-        ]);
+        return $this->successResponse(
+            new AnnouncementResource($announcement),
+            'Announcement retrieved successfully'
+        );
     }
 
     /**
@@ -80,30 +131,31 @@ class AnnouncementController extends Controller
             $announcement = $this->announcementService->updateAnnouncement($id, $data);
 
             if (!$announcement) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Pengumuman tidak ditemukan.'
-                ], 404);
-            }
-            if (!empty($data['translations'])) {
-                foreach ($data['translations'] as $trans) {
-                    $announcement->translations()->updateOrCreate(
-                        ['locale' => $trans['locale']], // cek per bahasa
-                        ['title' => $trans['title'], 'content' => $trans['content']]
-                    );
-                }
+                return $this->errorResponse('Announcement not found', 404, [
+                    [
+                        'field' => 'general',
+                        'tag' => 'not_found',
+                        'value' => null,
+                        'message' => 'Announcement not found'
+                    ]
+                ]);
             }
 
-            return response()->json([
-                'success' => true,
-                'message' => 'Pengumuman berhasil diperbarui.',
-                'data' => $announcement
-            ]);
+            return $this->successResponse(
+                new AnnouncementResource($announcement),
+                'Announcement updated successfully'
+            );
         } catch (\Exception $e) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Terjadi kesalahan: ' . $e->getMessage()
-            ], 500);
+            return $this->errorResponse(
+                'Failed to update announcement',
+                500,
+                [[
+                    'field' => 'general',
+                    'tag' => 'server_error',
+                    'value' => $e->getMessage(),
+                    'message' => 'An unexpected error occurred'
+                ]]
+            );
         }
     }
 
@@ -116,112 +168,29 @@ class AnnouncementController extends Controller
             $deleted = $this->announcementService->deleteAnnouncement($id);
 
             if (!$deleted) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Pengumuman tidak ditemukan.'
-                ], 404);
+
+                return $this->errorResponse('Announcement not found', 404, [
+                    [
+                        'field' => 'general',
+                        'tag' => 'not_found',
+                        'value' => null,
+                        'message' => 'Announcement not found'
+                    ]
+                ]);
             }
 
-            return response()->json([
-                'success' => true,
-                'message' => 'Pengumuman berhasil dihapus.'
-            ]);
+            return $this->successResponse(null, 'Announcement deleted successfully');
         } catch (\Exception $e) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Terjadi kesalahan: ' . $e->getMessage()
-            ], 500);
-        }
-    }
-
-    /**
-     * Toggle status aktif/tidak
-     */
-    public function toggleStatus(int $id): JsonResponse
-    {
-        try {
-            $toggled = $this->announcementService->toggleAnnouncementStatus($id);
-
-            if (!$toggled) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Pengumuman tidak ditemukan.'
-                ], 404);
-            }
-
-            return response()->json([
-                'success' => true,
-                'message' => 'Status pengumuman berhasil diubah.'
-            ]);
-        } catch (\Exception $e) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Terjadi kesalahan: ' . $e->getMessage()
-            ], 500);
-        }
-    }
-
-    /**
-     * Bulk ubah status aktif/tidak
-     */
-    public function bulkToggleStatus(Request $request): JsonResponse
-    {
-        $request->validate([
-            'ids' => 'required|array',
-            'ids.*' => 'integer|exists:announcements,id',
-            'status' => 'required|boolean',
-        ]);
-
-        try {
-            foreach ($request->ids as $id) {
-                $announcement = $this->announcementService->findAnnouncement($id);
-                if ($announcement) {
-                    $announcement->is_active = $request->status;
-                    $announcement->save();
-                }
-            }
-
-            return response()->json([
-                'success' => true,
-                'message' => 'Status beberapa pengumuman berhasil diubah.'
-            ]);
-        } catch (\Exception $e) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Terjadi kesalahan: ' . $e->getMessage()
-            ], 500);
-        }
-    }
-
-    /**
-     * Bulk hapus pengumuman
-     */
-    public function bulkDelete(Request $request): JsonResponse
-    {
-        $request->validate([
-            'ids' => 'required|array',
-            'ids.*' => 'integer|exists:announcements,id',
-        ]);
-
-        try {
-            $success = $this->announcementService->bulkDeleteAnnouncements($request->ids);
-
-            if (!$success) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Tidak ada pengumuman yang dihapus.'
-                ], 400);
-            }
-
-            return response()->json([
-                'success' => true,
-                'message' => 'Beberapa pengumuman berhasil dihapus.'
-            ]);
-        } catch (\Exception $e) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Terjadi kesalahan: ' . $e->getMessage()
-            ], 500);
+            return $this->errorResponse(
+                'Failed to delete announcement',
+                500,
+                [[
+                    'field' => 'general',
+                    'tag' => 'server_error',
+                    'value' => $e->getMessage(),
+                    'message' => 'An unexpected error occurred'
+                ]]
+            );
         }
     }
 }

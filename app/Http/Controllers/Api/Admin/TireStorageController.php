@@ -3,13 +3,17 @@
 namespace App\Http\Controllers\Api\Admin;
 
 use Illuminate\Http\Request;
+use Illuminate\Http\JsonResponse;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\TireStorageRequest;
+use App\Http\Resources\TireStorageResource;
 use App\Services\TireStorageServiceInterface;
-use Illuminate\Http\JsonResponse;
+use App\Http\Traits\ApiResponseTrait;
 
 class TireStorageController extends Controller
 {
+    use ApiResponseTrait;
+
     public function __construct(
         protected TireStorageServiceInterface $tireStorageService,
     ) {
@@ -17,71 +21,89 @@ class TireStorageController extends Controller
     }
 
     /**
-     *  List semua penyimpanan ban dengan filter & pagination
+     * List semua penyimpanan ban dengan filter & pagination
      */
     public function index(Request $request): JsonResponse
     {
-        $filters = array_filter([
-            'status' => $request->input('status'),
-            'tire_brand' => $request->input('tire_brand'),
-            'tire_size' => $request->input('tire_size'),
-            'customer_name' => $request->input('customer_name'),
-        ]);
+        try {
+            $perPage = min($request->get('per_page', 15), 100);
 
-        $tireStorages = $this->tireStorageService->getPaginatedTireStoragesWithFilters(
-            $request->get('per_page', 15),
-            $filters
-        );
+            if ($request->boolean('paginate', true)) {
+                $tireStorages = $this->tireStorageService->getPaginatedTireStorages($perPage);
+                $collection = TireStorageResource::collection($tireStorages);
 
-        return response()->json([
-            'success' => true,
-            'data' => $tireStorages
-        ]);
+                $cursor = $this->generateCursor($tireStorages);
+
+                return $this->successResponseWithCursor(
+                    $collection->resolve(),
+                    $cursor,
+                    'Tire storages retrieved successfully'
+                );
+            }
+
+            $tireStorages = $this->tireStorageService->getActiveTireStorages();
+            $collection = TireStorageResource::collection($tireStorages);
+
+            return $this->successResponse(
+                $collection->resolve(),
+                'Tire storages retrieved successfully'
+            );
+        } catch (\Exception $e) {
+            return $this->errorResponse(
+                'Failed to retrieve tire storages',
+                500,
+                [
+                    [
+                        'field' => 'general',
+                        'tag' => 'server_error',
+                        'value' => $e->getMessage(),
+                        'message' => 'An unexpected error occurred'
+                    ]
+                ]
+            );
+        }
     }
 
     /**
-     *  Buat penyimpanan ban
+     * Buat penyimpanan ban
      */
     public function store(TireStorageRequest $request): JsonResponse
     {
         try {
             $tireStorage = $this->tireStorageService->createTireStorage($request->validated());
 
-            return response()->json([
-                'success' => true,
-                'message' => 'Penyimpanan ban berhasil dibuat',
-                'data' => $tireStorage
-            ], 201);
+            return $this->successResponse(
+                new TireStorageResource($tireStorage),
+                'Penyimpanan ban berhasil dibuat',
+                201
+            );
         } catch (\Exception $e) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Gagal membuat penyimpanan ban: ' . $e->getMessage()
-            ], 400);
+            return $this->errorResponse(
+                'Gagal membuat penyimpanan ban',
+                400,
+                [['field' => 'general', 'message' => $e->getMessage()]]
+            );
         }
     }
 
     /**
-     *  Detail penyimpanan ban
+     * Detail penyimpanan ban
      */
     public function show(int $id): JsonResponse
     {
         $tireStorage = $this->tireStorageService->findTireStorage($id);
 
         if (!$tireStorage) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Data tidak ditemukan'
-            ], 404);
+            return $this->errorResponse('Data tidak ditemukan', 404, [
+                ['field' => 'general', 'message' => 'Penyimpanan ban tidak ditemukan']
+            ]);
         }
 
-        return response()->json([
-            'success' => true,
-            'data' => $tireStorage
-        ]);
+        return $this->successResponse(new TireStorageResource($tireStorage));
     }
 
     /**
-     *  Update penyimpanan ban
+     * Update penyimpanan ban
      */
     public function update(TireStorageRequest $request, int $id): JsonResponse
     {
@@ -89,27 +111,26 @@ class TireStorageController extends Controller
             $tireStorage = $this->tireStorageService->updateTireStorage($id, $request->validated());
 
             if (!$tireStorage) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Data tidak ditemukan'
-                ], 404);
+                return $this->errorResponse('Data tidak ditemukan', 404, [
+                    ['field' => 'general', 'message' => 'Penyimpanan ban tidak ditemukan']
+                ]);
             }
 
-            return response()->json([
-                'success' => true,
-                'message' => 'Penyimpanan ban berhasil diperbarui',
-                'data' => $tireStorage
-            ]);
+            return $this->successResponse(
+                new TireStorageResource($tireStorage),
+                'Penyimpanan ban berhasil diperbarui'
+            );
         } catch (\Exception $e) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Gagal memperbarui penyimpanan ban: ' . $e->getMessage()
-            ], 400);
+            return $this->errorResponse(
+                'Gagal memperbarui penyimpanan ban',
+                400,
+                [['field' => 'general', 'message' => $e->getMessage()]]
+            );
         }
     }
 
     /**
-     *  Hapus penyimpanan ban
+     * Hapus penyimpanan ban
      */
     public function destroy(int $id): JsonResponse
     {
@@ -117,26 +138,21 @@ class TireStorageController extends Controller
             $success = $this->tireStorageService->deleteTireStorage($id);
 
             if (!$success) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Data tidak ditemukan'
-                ], 404);
+                return $this->errorResponse('Data tidak ditemukan', 404, [
+                    ['field' => 'general', 'message' => 'Penyimpanan ban tidak ditemukan']
+                ]);
             }
 
-            return response()->json([
-                'success' => true,
-                'message' => 'Penyimpanan ban berhasil dihapus'
-            ]);
+            return $this->successResponse(null, 'Penyimpanan ban berhasil dihapus');
         } catch (\Exception $e) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Gagal menghapus penyimpanan ban: ' . $e->getMessage()
-            ], 400);
+            return $this->errorResponse('Gagal menghapus penyimpanan ban', 400, [
+                ['field' => 'general', 'message' => $e->getMessage()]
+            ]);
         }
     }
 
     /**
-     *  Akhiri penyimpanan ban
+     * Akhiri penyimpanan ban
      */
     public function end(int $id): JsonResponse
     {
@@ -144,36 +160,30 @@ class TireStorageController extends Controller
             $success = $this->tireStorageService->endTireStorage($id);
 
             if (!$success) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Data tidak ditemukan'
-                ], 404);
+                return $this->errorResponse('Data tidak ditemukan', 404, [
+                    ['field' => 'general', 'message' => 'Penyimpanan ban tidak ditemukan']
+                ]);
             }
 
-            return response()->json([
-                'success' => true,
-                'message' => 'Penyimpanan ban berhasil diakhiri'
-            ]);
+            return $this->successResponse(null, 'Penyimpanan ban berhasil diakhiri');
         } catch (\Exception $e) {
-            return response()->json([
-                'success' => false,
-                'message' => $e->getMessage()
-            ], 400);
+            return $this->errorResponse($e->getMessage(), 400, [
+                ['field' => 'general', 'message' => 'Gagal mengakhiri penyimpanan ban']
+                ]);
         }
     }
 
     /**
-     *  Bulk hapus penyimpanan ban
+     * Bulk hapus penyimpanan ban
      */
     public function bulkDelete(Request $request): JsonResponse
     {
         $ids = $request->input('ids', []);
 
         if (empty($ids)) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Tidak ada data yang dipilih'
-            ], 400);
+            return $this->errorResponse('Tidak ada data yang dipilih', 400, [
+                ['field' => 'general', 'message' => 'Pilih setidaknya satu penyimpanan ban']
+            ]);
         }
 
         $deletedCount = 0;
@@ -182,38 +192,34 @@ class TireStorageController extends Controller
         foreach ($ids as $id) {
             try {
                 $success = $this->tireStorageService->deleteTireStorage($id);
-                if ($success) {
-                    $deletedCount++;
-                } else {
-                    $errors[] = "ID {$id} tidak ditemukan";
-                }
+                $success ? $deletedCount++ : $errors[] = "ID {$id} tidak ditemukan";
             } catch (\Exception $e) {
                 $errors[] = "Gagal hapus ID {$id}: {$e->getMessage()}";
             }
         }
 
-        return response()->json([
-            'success' => $deletedCount > 0,
-            'message' => $deletedCount > 0
-                ? "Berhasil menghapus {$deletedCount} data" . (!empty($errors) ? " (dengan error: " . implode(', ', $errors) . ")" : '')
-                : "Gagal menghapus data: " . implode(', ', $errors),
-            'deleted_count' => $deletedCount,
-            'errors' => $errors
-        ], $deletedCount > 0 ? 200 : 400);
+        return $this->successResponse(
+            [
+                'deleted_count' => $deletedCount,
+                'errors' => $errors,
+            ],
+            $deletedCount > 0
+                ? "Berhasil menghapus {$deletedCount} data"
+                : "Gagal menghapus data"
+        );
     }
 
     /**
-     *  Bulk akhiri penyimpanan ban
+     * Bulk akhiri penyimpanan ban
      */
     public function bulkEnd(Request $request): JsonResponse
     {
         $ids = $request->input('ids', []);
 
         if (empty($ids)) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Tidak ada data yang dipilih'
-            ], 400);
+            return $this->errorResponse('Tidak ada data yang dipilih', 400, [
+                ['field' => 'general', 'message' => 'Pilih setidaknya satu penyimpanan ban']
+            ]);
         }
 
         $endedCount = 0;
@@ -222,23 +228,20 @@ class TireStorageController extends Controller
         foreach ($ids as $id) {
             try {
                 $success = $this->tireStorageService->endTireStorage($id);
-                if ($success) {
-                    $endedCount++;
-                } else {
-                    $errors[] = "ID {$id} tidak ditemukan";
-                }
+                $success ? $endedCount++ : $errors[] = "ID {$id} tidak ditemukan";
             } catch (\Exception $e) {
                 $errors[] = "Gagal akhiri ID {$id}: {$e->getMessage()}";
             }
         }
 
-        return response()->json([
-            'success' => $endedCount > 0,
-            'message' => $endedCount > 0
-                ? "Berhasil mengakhiri {$endedCount} data" . (!empty($errors) ? " (dengan error: " . implode(', ', $errors) . ")" : '')
-                : "Gagal mengakhiri data: " . implode(', ', $errors),
-            'ended_count' => $endedCount,
-            'errors' => $errors
-        ], $endedCount > 0 ? 200 : 400);
+        return $this->successResponse(
+            [
+                'ended_count' => $endedCount,
+                'errors' => $errors,
+            ],
+            $endedCount > 0
+                ? "Berhasil mengakhiri {$endedCount} data"
+                : "Gagal mengakhiri data"
+        );
     }
 }

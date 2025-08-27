@@ -1,0 +1,72 @@
+<?php
+
+namespace App\Http\Resources;
+
+
+use App\Http\Resources\QuestionResource;
+use Illuminate\Http\Request;
+use Illuminate\Http\Resources\Json\JsonResource;
+
+
+class ReservationResource extends JsonResource
+{
+    /**
+     * Transform the resource into an array.
+     *
+     * @return array<string, mixed>
+     */
+   public function toArray(Request $request): array
+    {
+        return [
+            'id' => $this->id,
+            'reservation_number' => $this->reservation_number,
+            'reservation_datetime' => $this->reservation_datetime?->toISOString(),
+            'number_of_people' => $this->number_of_people,
+            'amount' => [
+                'raw' => $this->amount,
+                'formatted' => number_format($this->amount, 2)
+            ],
+            'status' => [
+                'value' => is_object($this->status) ? $this->status->value : $this->status,
+                'label' => is_object($this->status) && method_exists($this->status, 'label')
+                    ? $this->status->label()
+                    : ucfirst($this->status)
+            ],
+            'notes' => $this->notes,
+
+            // Customer Information
+            'customer_info' => [
+                'full_name' => $this->getFullName(),
+                'full_name_kana' => $this->getFullNameKana(),
+                'email' => $this->getEmail(),
+                'phone_number' => $this->getPhoneNumber(),
+                'is_guest' => $this->isGuestReservation(),
+            ],
+
+            // Relations (only include if loaded)
+            'user' => $this->whenLoaded('user', function () {
+                return [
+                    'id' => $this->user->id,
+                    'full_name' => $this->user->full_name,
+                    'email' => $this->user->email,
+                    'phone_number' => $this->user->phone_number,
+                ];
+            }),
+
+            'menu' => $this->whenLoaded('menu', function () {
+                return [
+                    'id' => $this->menu->id,
+                    'name' => $this->menu->name,
+                    'description' => $this->menu->description,
+                    'required_time' => $this->menu->required_time,
+                    'price' => $this->menu->price,
+                    'color' => $this->menu->color,
+                ];
+            }),
+
+            // Timestamps
+            'created_at' => $this->created_at?->toISOString(),
+            'updated_at' => $this->updated_at?->toISOString(),
+        ];
+    }
+}
