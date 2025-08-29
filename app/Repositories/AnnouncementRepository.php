@@ -4,6 +4,7 @@ namespace App\Repositories;
 
 use App\Models\Announcement;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Pagination\CursorPaginator;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\App;
 
@@ -45,6 +46,14 @@ class AnnouncementRepository implements AnnouncementRepositoryInterface
         return $this->model->withTranslations()
             ->orderBy('published_at', 'desc')
             ->paginate($perPage);
+    }
+
+    // getPaginatedWithCursor
+    public function getPaginatedWithCursor(int $perPage = 15, ?string $cursor = null): CursorPaginator
+    {
+        return $this->model->withTranslations()
+            ->orderBy('published_at', 'desc')
+            ->paginate($perPage, ['*'], 'cursor', $cursor);
     }
 
     public function findById(int $id): ?Announcement
@@ -131,7 +140,7 @@ class AnnouncementRepository implements AnnouncementRepositoryInterface
     public function searchByTitle(string $search, ?string $locale = null): Collection
     {
         $locale = $locale ?: App::getLocale();
-        
+
         return $this->model->whereTranslation('title', 'ILIKE', "%{$search}%", $locale)
             ->withTranslations($locale)
             ->orderBy('published_at', 'desc')

@@ -31,4 +31,9 @@ interface ReservationServiceInterface
     public function generateReservationNumber(): string;
     public function getReservationsByDateRangeAndMenu(string $startDate, string $endDate, int $menuId,?int $excludeReservationId = null): Collection;
     public function getPaginatedReservationsCursor(int $perPage = 15, ?string $cursor = null): CursorPaginator;
+
+    // Customer-specific methods
+    public function getCustomerReservationsWithCursor(int $userId, int $perPage = 15, ?string $cursor = null): CursorPaginator;
+    public function getReservationCountByUser(int $userId): int;
+    public function getRecentReservationsByUser(int $userId, int $limit = 5): Collection;
 }

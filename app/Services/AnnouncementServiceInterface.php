@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Models\Announcement;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Pagination\CursorPaginator;
 use Illuminate\Pagination\LengthAwarePaginator;
 
 interface AnnouncementServiceInterface
@@ -17,6 +18,6 @@ interface AnnouncementServiceInterface
     public function deleteAnnouncement(int $id): bool;
     public function toggleAnnouncementStatus(int $id): bool;
     public function bulkDeleteAnnouncements(array $ids): bool;
-
+    public function getPaginatedAnnouncementsWithCursor(int $perPage = 15, ?string $cursor = null): CursorPaginator;
     public function searchAnnouncementsByTitle(string $search, ?string $locale = null): Collection;
 }

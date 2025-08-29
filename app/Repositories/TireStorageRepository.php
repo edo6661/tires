@@ -3,6 +3,7 @@ namespace App\Repositories;
 use App\Models\TireStorage;
 use App\Repositories\TireStorageRepositoryInterface;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Pagination\CursorPaginator;
 use Illuminate\Pagination\LengthAwarePaginator;
 class TireStorageRepository implements TireStorageRepositoryInterface
 {
@@ -21,6 +22,15 @@ class TireStorageRepository implements TireStorageRepositoryInterface
             ->orderBy('created_at', 'desc')
             ->paginate($perPage);
     }
+
+    public function getPaginatedWithCursor(int $perPage = 15, ?string $cursor = null): CursorPaginator
+    {
+        return $this->model->with('user')
+            ->orderBy('created_at', 'desc')
+            ->orderBy('id', 'desc')
+            ->cursorPaginate($perPage, ['*'], 'cursor', $cursor);
+    }
+
     public function findById(int $id): ?TireStorage
     {
         return $this->model->with('user')->find($id);
@@ -107,5 +117,34 @@ class TireStorageRepository implements TireStorageRepositoryInterface
             });
         }
         return $query->paginate($perPage);
+    }
+
+    // Customer-specific methods
+    public function getByUserIdWithCursor(int $userId, int $perPage = 15, ?string $cursor = null): CursorPaginator
+    {
+        return $this->model
+            ->with('user')
+            ->where('user_id', $userId)
+            ->orderBy('created_at', 'desc')
+            ->orderBy('id', 'desc')
+            ->cursorPaginate($perPage, ['*'], 'cursor', $cursor);
+    }
+
+    public function getActiveCountByUserId(int $userId): int
+    {
+        return $this->model
+            ->where('user_id', $userId)
+            ->where('status', 'active')
+            ->count();
+    }
+
+    public function getRecentByUserId(int $userId, int $limit = 5): Collection
+    {
+        return $this->model
+            ->with('user')
+            ->where('user_id', $userId)
+            ->orderBy('created_at', 'desc')
+            ->limit($limit)
+            ->get();
     }
 }

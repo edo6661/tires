@@ -20,18 +20,8 @@ class UserResource extends JsonResource
             'company_address' => $this->company_address,
             'home_address' => $this->home_address,
             'date_of_birth' => $this->date_of_birth?->format('Y-m-d'),
-            'gender' => [
-                'value' => is_object($this->gender) ? $this->gender->value : $this->gender,
-                'label' => is_object($this->gender) && method_exists($this->gender, 'label')
-                    ? $this->gender->label()
-                    : ucfirst($this->gender ?? 'unknown')
-            ],
-            'role' => [
-                'value' => is_object($this->role) ? $this->role->value : $this->role,
-                'label' => is_object($this->role) && method_exists($this->role, 'label')
-                    ? $this->role->label()
-                    : ucfirst($this->role ?? 'customer')
-            ],
+            'gender' => $this->gender,
+            'role' => $this->role ?? 'customer',
             'is_admin' => $this->isAdmin(),
             'is_customer' => $this->isCustomer(),
             'email_verified_at' => $this->email_verified_at?->toISOString(),

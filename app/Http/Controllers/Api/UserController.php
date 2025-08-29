@@ -474,16 +474,5 @@ class UserController extends Controller
         }
     }
 
-    /**
-     * Helper methods
-     */
-    // private function generateCursor(CursorPaginator $paginator): array
-    // {
-    //     return [
-    //         'next_cursor' => $paginator->nextCursor() ? $paginator->nextCursor()->encode() : null,
-    //         'previous_cursor' => $paginator->previousCursor() ? $paginator->previousCursor()->encode() : null,
-    //         'has_next_page' => $paginator->hasMorePages(),
-    //         'per_page' => $paginator->perPage()
-    //     ];
-    // }
+
 }

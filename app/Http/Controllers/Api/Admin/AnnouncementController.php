@@ -33,7 +33,7 @@ class AnnouncementController extends Controller
 
             if ($request->has('paginate') && $request->get('paginate') !== 'false') {
                 // Paginated response with cursor
-                $announcements = $this->announcementService->getPaginatedAnnouncements($perPage);
+                $announcements = $this->announcementService->getPaginatedAnnouncementsWithCursor($perPage);
                 $collection = AnnouncementResource::collection($announcements);
 
                 $cursor = $this->generateCursor($announcements);

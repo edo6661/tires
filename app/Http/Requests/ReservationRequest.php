@@ -11,6 +11,7 @@ class ReservationRequest extends FormRequest
     public function rules(): array
     {
         $reservationId = $this->route('reservation');
+
         return [
             'reservation_number' => 'nullable|string|max:255|unique:reservations,reservation_number,' . $reservationId,
             'user_id' => 'nullable|exists:users,id',
@@ -27,7 +28,7 @@ class ReservationRequest extends FormRequest
                     $isAvailable = $reservationService->checkAvailability(
                         $this->input('menu_id'),
                         $value,
-                        $reservationId 
+                        $reservationId
                     );
                     if (!$isAvailable) {
                         $fail(__('admin/reservation/create.validation.reservation_datetime_unavailable'));
@@ -36,29 +37,42 @@ class ReservationRequest extends FormRequest
             ],
             'number_of_people' => 'required|integer|min:1',
             'amount' => 'required|numeric|min:0',
-            'status' => 'in:pending,confirmed,completed,cancelled',
+            'status' => 'nullable|in:pending,confirmed,completed,cancelled',
             'notes' => 'nullable|string',
-            'customer_type' => 'required|in:existing,guest', 
+
+            // Customer type validation - auto-detect if not provided
+            'customer_type' => 'nullable|in:existing,guest',
+
+            // Guest customer fields - only required when customer_type is explicitly provided as 'guest'
             'full_name' => [
-                Rule::requiredIf(fn () => $this->input('customer_type') === 'guest'),
+                Rule::requiredIf(function () {
+                    // Only required if customer_type is explicitly provided and set to 'guest'
+                    return $this->has('customer_type') && $this->input('customer_type') === 'guest';
+                }),
                 'nullable',
                 'string',
                 'max:255'
             ],
             'full_name_kana' => [
-                Rule::requiredIf(fn () => $this->input('customer_type') === 'guest'),
+                Rule::requiredIf(function () {
+                    return $this->has('customer_type') && $this->input('customer_type') === 'guest';
+                }),
                 'nullable',
                 'string',
                 'max:255'
             ],
             'email' => [
-                Rule::requiredIf(fn () => $this->input('customer_type') === 'guest'),
+                Rule::requiredIf(function () {
+                    return $this->has('customer_type') && $this->input('customer_type') === 'guest';
+                }),
                 'nullable',
                 'email',
                 'max:255'
             ],
             'phone_number' => [
-                Rule::requiredIf(fn () => $this->input('customer_type') === 'guest'),
+                Rule::requiredIf(function () {
+                    return $this->has('customer_type') && $this->input('customer_type') === 'guest';
+                }),
                 'nullable',
                 'string',
                 'max:20'
@@ -106,6 +120,21 @@ class ReservationRequest extends FormRequest
      */
     protected function prepareForValidation()
     {
-        
+        // Only auto-detect customer type if user_id is explicitly provided
+        // This allows for flexible reservation creation without forcing customer type
+        if (!$this->has('customer_type') && $this->has('user_id') && !is_null($this->input('user_id'))) {
+            $this->merge([
+                'customer_type' => 'existing'
+            ]);
+        }
+        // Important: Do NOT set customer_type to 'guest' automatically
+        // This allows reservations without customer information
+
+        // Set default status if not provided
+        if (!$this->has('status')) {
+            $this->merge([
+                'status' => 'pending'
+            ]);
+        }
     }
 }

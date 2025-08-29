@@ -28,4 +28,9 @@ interface ReservationRepositoryInterface
     public function bulkUpdateStatus(array $ids, string $status): bool;
     public function getByDateRangeAndMenu(string $startDate, string $endDate, int $menuId, ?int $excludeReservationId = null): Collection;
     public function getCursorPaginated(int $perPage = 15, ?string $cursor = null): CursorPaginator;
+
+    // Customer-specific methods
+    public function getByUserIdWithCursor(int $userId, int $perPage = 15, ?string $cursor = null): CursorPaginator;
+    public function getCountByUserId(int $userId): int;
+    public function getRecentByUserId(int $userId, int $limit = 5): Collection;
 }

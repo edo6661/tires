@@ -174,4 +174,30 @@ class ReservationRepository implements ReservationRepositoryInterface
     {
         return $this->model->whereIn('id', $ids)->update(['status' => $status]) > 0;
     }
+
+    // Customer-specific methods
+    public function getByUserIdWithCursor(int $userId, int $perPage = 15, ?string $cursor = null): CursorPaginator
+    {
+        return $this->model
+            ->with(['menu', 'questionnaire', 'payments'])
+            ->where('user_id', $userId)
+            ->orderBy('reservation_datetime', 'desc')
+            ->orderBy('id', 'desc')
+            ->cursorPaginate($perPage, ['*'], 'cursor', $cursor);
+    }
+
+    public function getCountByUserId(int $userId): int
+    {
+        return $this->model->where('user_id', $userId)->count();
+    }
+
+    public function getRecentByUserId(int $userId, int $limit = 5): Collection
+    {
+        return $this->model
+            ->with(['menu', 'questionnaire', 'payments'])
+            ->where('user_id', $userId)
+            ->orderBy('reservation_datetime', 'desc')
+            ->limit($limit)
+            ->get();
+    }
 }

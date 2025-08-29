@@ -9,6 +9,7 @@ use App\Services\TireStorageServiceInterface;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Carbon\Carbon;
+use Illuminate\Pagination\CursorPaginator;
 
 class TireStorageService implements TireStorageServiceInterface
 {
@@ -29,6 +30,11 @@ class TireStorageService implements TireStorageServiceInterface
         return $this->tireStorageRepository->getPaginated($perPage);
     }
 
+    public function getPaginatedTireStoragesWithCursor(int $perPage = 15, ?string $cursor = null): CursorPaginator
+    {
+        return $this->tireStorageRepository->getPaginatedWithCursor($perPage, $cursor);
+    }
+
     public function findTireStorage(int $id): ?TireStorage
     {
         return $this->tireStorageRepository->findById($id);
@@ -36,22 +42,22 @@ class TireStorageService implements TireStorageServiceInterface
 
     public function createTireStorage(array $data): TireStorage
     {
-        
+
         if (isset($data['storage_start_date']) && isset($data['planned_end_date'])) {
             $startDate = Carbon::parse($data['storage_start_date']);
             $endDate = Carbon::parse($data['planned_end_date']);
-            
+
             if ($endDate->lte($startDate)) {
                 throw new \InvalidArgumentException('Tanggal rencana selesai harus setelah tanggal mulai penyimpanan');
             }
         }
 
-        
+
         if (!isset($data['status'])) {
             $data['status'] = 'active';
         }
 
-        
+
         if (!isset($data['storage_fee'])) {
             $data['storage_fee'] = $this->calculateStorageFeeForNewStorage($data);
         }
@@ -66,17 +72,17 @@ class TireStorageService implements TireStorageServiceInterface
             return null;
         }
 
-        
+
         if (isset($data['storage_start_date']) || isset($data['planned_end_date'])) {
             $startDate = Carbon::parse($data['storage_start_date'] ?? $tireStorage->storage_start_date);
             $endDate = Carbon::parse($data['planned_end_date'] ?? $tireStorage->planned_end_date);
-            
+
             if ($endDate->lte($startDate)) {
                 throw new \InvalidArgumentException('Tanggal rencana selesai harus setelah tanggal mulai penyimpanan');
             }
         }
 
-        
+
         if (isset($data['storage_start_date']) || isset($data['planned_end_date'])) {
             $updatedData = array_merge($tireStorage->toArray(), $data);
             $data['storage_fee'] = $this->calculateStorageFeeForNewStorage($updatedData);
@@ -92,7 +98,7 @@ class TireStorageService implements TireStorageServiceInterface
             return false;
         }
 
-        
+
         if ($tireStorage->status === 'active') {
             throw new \Exception('Tidak bisa menghapus penyimpanan ban yang masih aktif');
         }
@@ -171,15 +177,15 @@ class TireStorageService implements TireStorageServiceInterface
 
         $startDate = Carbon::parse($data['storage_start_date']);
         $endDate = Carbon::parse($data['planned_end_date']);
-        
+
         $months = $startDate->diffInMonths($endDate);
         if ($months < 1) {
-            $months = 1; 
+            $months = 1;
         }
 
-        
-        $monthlyRate = 50000; 
-        
+
+        $monthlyRate = 50000;
+
         return $months * $monthlyRate;
     }
 
@@ -189,22 +195,43 @@ class TireStorageService implements TireStorageServiceInterface
     private function calculateStorageFeeForStorage(TireStorage $tireStorage): float
     {
         $startDate = Carbon::parse($tireStorage->storage_start_date);
-        $endDate = $tireStorage->status === 'ended' 
-            ? Carbon::parse($tireStorage->planned_end_date) 
+        $endDate = $tireStorage->status === 'ended'
+            ? Carbon::parse($tireStorage->planned_end_date)
             : Carbon::now();
-        
+
         $months = $startDate->diffInMonths($endDate);
         if ($months < 1) {
-            $months = 1; 
+            $months = 1;
         }
 
-        
-        $monthlyRate = 50000; 
-        
+
+        $monthlyRate = 50000;
+
         return $months * $monthlyRate;
     }
     public function getPaginatedTireStoragesWithFilters(int $perPage = 15, array $filters = []): LengthAwarePaginator
     {
         return $this->tireStorageRepository->getPaginatedWithFilters($perPage, $filters);
     }
+
+    // Customer-specific methods
+    // public function getTireStorageByUser(int $userId): Collection
+    // {
+    //     return $this->tireStorageRepository->getByUserId($userId);
+    // }
+
+    // public function getCustomerTireStorageWithCursor(int $userId, int $perPage = 15, ?string $cursor = null): CursorPaginator
+    // {
+    //     return $this->tireStorageRepository->getByUserIdWithCursor($userId, $perPage, $cursor);
+    // }
+
+    // public function getActiveTireStorageCountByUser(int $userId): int
+    // {
+    //     return $this->tireStorageRepository->getActiveCountByUserId($userId);
+    // }
+
+    // public function getRecentTireStorageByUser(int $userId, int $limit = 5): Collection
+    // {
+    //     return $this->tireStorageRepository->getRecentByUserId($userId, $limit);
+    // }
 }

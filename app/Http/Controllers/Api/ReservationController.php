@@ -81,20 +81,37 @@ class ReservationController extends Controller
     public function store(ReservationRequest $request): JsonResponse
     {
         try {
-            $reservation = $this->reservationService->createReservation($request->validated());
+            $validatedData = $request->validated();
+
+            // Remove customer_type from validated data as it's not stored in the database
+            unset($validatedData['customer_type']);
+
+            // Auto-assign authenticated user if no user_id is provided and user is authenticated
+            if (!isset($validatedData['user_id']) && $request->user()) {
+                $validatedData['user_id'] = $request->user()->id;
+            }
+
+            $reservation = $this->reservationService->createReservation($validatedData);
+
+            // Load user relationship if reservation has user_id
+            if ($reservation->user_id) {
+                $reservation->load('user');
+            }
 
             BookingCompleted::dispatch($reservation);
 
-            return response()->json([
-                'status' => 'success',
-                'message' => 'Reservation created successfully',
-                'data' => new ReservationResource($reservation)
-            ], 201);
+            return $this->successResponse(
+                new ReservationResource($reservation),
+                'Reservation created successfully',
+                201
+            );
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            return $this->validationErrorResponse($e->errors());
         } catch (\Exception $e) {
-            return response()->json([
-                'status' => 'error',
-                'message' => 'Failed to create reservation: ' . $e->getMessage()
-            ], 500);
+            return $this->errorResponse(
+                'Failed to create reservation: ' . $e->getMessage(),
+                500
+            );
         }
     }
 
@@ -107,21 +124,23 @@ class ReservationController extends Controller
             $reservation = $this->reservationService->findReservation($id);
 
             if (!$reservation) {
-                return response()->json([
-                    'status' => 'error',
-                    'message' => 'Reservation not found'
-                ], 404);
+                return $this->errorResponse('Reservation not found', 404);
             }
 
-            return response()->json([
-                'status' => 'success',
-                'data' => new ReservationResource($reservation)
-            ]);
+            // Load user relationship if reservation has user_id
+            if ($reservation->user_id) {
+                $reservation->load('user');
+            }
+
+            return $this->successResponse(
+                new ReservationResource($reservation),
+                'Reservation retrieved successfully'
+            );
         } catch (\Exception $e) {
-            return response()->json([
-                'status' => 'error',
-                'message' => 'Failed to retrieve reservation: ' . $e->getMessage()
-            ], 500);
+            return $this->errorResponse(
+                'Failed to retrieve reservation: ' . $e->getMessage(),
+                500
+            );
         }
     }
 
@@ -131,25 +150,33 @@ class ReservationController extends Controller
     public function update(ReservationRequest $request, int $id): JsonResponse
     {
         try {
-            $reservation = $this->reservationService->updateReservation($id, $request->validated());
+            $validatedData = $request->validated();
+
+            // Remove customer_type from validated data as it's not stored in the database
+            unset($validatedData['customer_type']);
+
+            $reservation = $this->reservationService->updateReservation($id, $validatedData);
 
             if (!$reservation) {
-                return response()->json([
-                    'status' => 'error',
-                    'message' => 'Reservation not found'
-                ], 404);
+                return $this->errorResponse('Reservation not found', 404);
             }
 
-            return response()->json([
-                'status' => 'success',
-                'message' => 'Reservation updated successfully',
-                'data' => new ReservationResource($reservation)
-            ]);
+            // Load user relationship if reservation has user_id
+            if ($reservation->user_id) {
+                $reservation->load('user');
+            }
+
+            return $this->successResponse(
+                new ReservationResource($reservation),
+                'Reservation updated successfully'
+            );
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            return $this->validationErrorResponse($e->errors());
         } catch (\Exception $e) {
-            return response()->json([
-                'status' => 'error',
-                'message' => 'Failed to update reservation: ' . $e->getMessage()
-            ], 500);
+            return $this->errorResponse(
+                'Failed to update reservation: ' . $e->getMessage(),
+                500
+            );
         }
     }
 
@@ -162,21 +189,18 @@ class ReservationController extends Controller
             $success = $this->reservationService->deleteReservation($id);
 
             if (!$success) {
-                return response()->json([
-                    'status' => 'error',
-                    'message' => 'Reservation not found'
-                ], 404);
+                return $this->errorResponse('Reservation not found', 404);
             }
 
-            return response()->json([
-                'status' => 'success',
-                'message' => 'Reservation deleted successfully'
-            ]);
+            return $this->successResponse(
+                null,
+                'Reservation deleted successfully'
+            );
         } catch (\Exception $e) {
-            return response()->json([
-                'status' => 'error',
-                'message' => 'Failed to delete reservation: ' . $e->getMessage()
-            ], 500);
+            return $this->errorResponse(
+                'Failed to delete reservation: ' . $e->getMessage(),
+                500
+            );
         }
     }
 
@@ -192,13 +216,8 @@ class ReservationController extends Controller
                 'exclude_reservation_id' => 'nullable|integer|exists:reservations,id'
             ]);
 
-
             if ($validator->fails()) {
-                return response()->json([
-                    'status' => 'error',
-                    'message' => 'Validation failed',
-                    'errors' => $validator->errors()
-                ], 422);
+                return $this->validationErrorResponse($validator->errors()->toArray());
             }
 
             $available = $this->reservationService->checkAvailability(
@@ -207,16 +226,15 @@ class ReservationController extends Controller
                 $request->exclude_reservation_id
             );
 
-            return response()->json([
-                'status' => 'success',
+            return $this->successResponse([
                 'available' => $available,
                 'message' => $available ? 'Time slot is available' : 'Time slot is not available'
-            ]);
+            ], 'Availability check completed');
         } catch (\Exception $e) {
-            return response()->json([
-                'status' => 'error',
-                'message' => 'Failed to check availability: ' . $e->getMessage()
-            ], 500);
+            return $this->errorResponse(
+                'Failed to check availability: ' . $e->getMessage(),
+                500
+            );
         }
     }
 
@@ -355,9 +373,9 @@ class ReservationController extends Controller
             return response()->json([
                 'status' => 'success',
                 'data' => $calendarData,
-                'current_month' => $currentMonth->format('F Y'),
-                'previous_month' => $currentMonth->copy()->subMonth()->format('Y-m'),
-                'next_month' => $currentMonth->copy()->addMonth()->format('Y-m')
+                    // 'current_month' => $currentMonth->format('F Y'),
+                    // 'previous_month' => $currentMonth->copy()->subMonth()->format('Y-m'),
+                    // 'next_month' => $currentMonth->copy()->addMonth()->format('Y-m')
             ]);
         } catch (\Exception $e) {
             return response()->json([

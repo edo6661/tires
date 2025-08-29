@@ -6,6 +6,7 @@ namespace App\Repositories;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Pagination\LengthAwarePaginator;
 use App\Models\TireStorage;
+use Illuminate\Pagination\CursorPaginator;
 
 interface TireStorageRepositoryInterface
 {
@@ -22,4 +23,10 @@ interface TireStorageRepositoryInterface
     public function getActiveByUserId(int $userId): Collection;
     public function getEndedByUserId(int $userId): Collection;
     public function getPaginatedWithFilters(int $perPage = 15, array $filters = []): LengthAwarePaginator;
+    public function getPaginatedWithCursor(int $perPage = 15, ?string $cursor = null): CursorPaginator;
+
+    // Customer-specific methods
+    // public function getByUserIdWithCursor(int $userId, int $perPage = 15, ?string $cursor = null): CursorPaginator;
+    // public function getActiveCountByUserId(int $userId): int;
+    // public function getRecentByUserId(int $userId, int $limit = 5): Collection;
 }

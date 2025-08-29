@@ -37,21 +37,30 @@ trait ApiResponseTrait
     /**
      * Error response
      */
-    public function errorResponse(string $message, ?int $code, ?array $errors, int $statusCode = 400): JsonResponse
+    public function errorResponse(string $message, int $statusCode = 400, ?array $errors = null): JsonResponse
     {
         $response = [
+            'status' => 'error',
             'message' => $message,
         ];
 
-        if ($code !== null) {
-            $response['code'] = $code;
-        }
-
         if ($errors !== null) {
-            $response['error'] = $errors; // Note: keeping 'error' as per your Dart model
+            $response['errors'] = $errors;
         }
 
         return response()->json($response, $statusCode);
+    }
+
+    /**
+     * Validation error response
+     */
+    public function validationErrorResponse(array $errors, string $message = 'Validation failed', int $statusCode = 422): JsonResponse
+    {
+        return response()->json([
+            'status' => 'error',
+            'message' => $message,
+            'errors' => $errors
+        ], $statusCode);
     }
 
     /**

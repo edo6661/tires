@@ -4,12 +4,24 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\MenuController;
 use App\Http\Controllers\Api\UserController;
+use App\Http\Controllers\Api\Customer\CustomerController;
+
 use App\Http\Controllers\Api\ProfileController;
 use App\Http\Controllers\Api\ReservationController;
 use App\Http\Controllers\Api\QuestionnaireController;
 use App\Http\Controllers\Api\Admin\TireStorageController;
 use App\Http\Controllers\Api\Admin\AnnouncementController;
 use App\Http\Controllers\Api\AuthController as AuthApiController;
+
+// Admin Controllers
+use App\Http\Controllers\Api\Admin\ContactController as ApiAdminContactController;
+use App\Http\Controllers\Api\Admin\CustomerController as ApiAdminCustomerController;
+use App\Http\Controllers\Api\Admin\DashboardController as ApiAdminDashboardController;
+use App\Http\Controllers\Api\Admin\QuestionnaireController as ApiAdminQuestionnaireController;
+use App\Http\Controllers\Api\Admin\BusinessSettingController as ApiAdminBusinessSettingController;
+use App\Http\Controllers\Api\Admin\FaqController as ApiAdminFaqController;
+use App\Http\Controllers\Api\Admin\PaymentController as ApiAdminPaymentController;
+use App\Http\Controllers\Api\Admin\BlockedPeriodController as ApiAdminBlockedPeriodController;
 
 // default route API (cek user login dengan Sanctum)
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
@@ -28,153 +40,199 @@ Route::prefix('v1')
             Route::post('/reset-password', [AuthApiController::class, 'resetPassword']);
 
             Route::middleware('auth:sanctum')->group(function () {
-                Route::get('/profile', [UserController::class, 'profile']);
                 Route::post('/logout', [AuthApiController::class, 'logout']);
             });
         });
 
-        // Public Menu API
-        Route::prefix('menus')->group(function () {
-            Route::get('/', [MenuController::class, 'index']);
-            Route::get('/{id}', [MenuController::class, 'show']);
-            // TAMBAHAN: Route untuk search menu
-            Route::get('/search', [MenuController::class, 'search']);
-            // TAMBAHAN: Route untuk calculate end time
-            Route::post('/calculate-end-time', [MenuController::class, 'calculateEndTime']);
-            // TAMBAHAN: Route untuk available slots
-            Route::get('/{id}/available-slots', [MenuController::class, 'getAvailableSlots']);
-        });
-
-        // Admin Menu Management
-        Route::middleware(['auth:sanctum'])->group(function () {
-            Route::apiResource('admin-menus', MenuController::class);
-
-            Route::patch('admin-menus/{id}/toggle-status', [MenuController::class, 'toggleStatus']);
-            Route::delete('admin-menus/bulk-delete', [MenuController::class, 'bulkDelete']);
-            Route::patch('admin-menus/bulk-update-status', [MenuController::class, 'bulkUpdateStatus']);
-            Route::get('admin-menus/search', [MenuController::class, 'search']);
-            Route::post('admin-menus/calculate-end-time', [MenuController::class, 'calculateEndTime']);
-            Route::get('admin-menus/{id}/available-slots', [MenuController::class, 'getAvailableSlots']);
-            Route::post('admin-menus/reorder', [MenuController::class, 'reorder']);
-        });
-
-
-        Route::prefix('admin')->group(function () {
-            Route::apiResource('announcements', AnnouncementController::class);
-
-            Route::patch('announcements/{id}/toggle-status', [AnnouncementController::class, 'toggleStatus']);
-            Route::patch('announcements/bulk-toggle-status', [AnnouncementController::class, 'bulkToggleStatus']);
-            Route::delete('announcements/bulk-delete', [AnnouncementController::class, 'bulkDelete']);
-        });
-
-        Route::prefix('admin-users')
+        // Customer endpoints (authenticated customers only)
+        Route::prefix('customer')
             ->middleware(['auth:sanctum'])
             ->group(function () {
+                // Customer profile management
+                Route::get('/profile', [CustomerController::class, 'profile']);
+                Route::put('/profile', [CustomerController::class, 'updateProfile']);
+                Route::patch('/change-password', [CustomerController::class, 'changePassword']);
+                Route::delete('/account', [CustomerController::class, 'deleteAccount']);
+
+                // Customer dashboard
+                Route::get('/dashboard', [CustomerController::class, 'dashboard']);
+
+                // Customer reservations - specific routes MUST come before parameterized routes
+                Route::get('/reservations', [CustomerController::class, 'reservations']);
+                Route::get('/reservations/calendar', [ReservationController::class, 'getCalendarData']);
+                Route::get('/reservations/availability', [ReservationController::class, 'getAvailability']);
+                Route::get('/reservations/available-hours', [ReservationController::class, 'getAvailableHours']);
+                Route::post('/reservations/check-availability', [ReservationController::class, 'checkAvailability']);
+                Route::post('/reservations', [ReservationController::class, 'store']); // Create reservation
+                Route::get('/reservations/{id}', [CustomerController::class, 'reservation']); // MUST be last
+
+                // Customer tire storage
+                Route::get('/tire-storage', [CustomerController::class, 'tireStorage']);
+                Route::get('/tire-storage/{id}', [CustomerController::class, 'tireStorageItem']);
+
+                // Menu access for customers
+                Route::prefix('menus')->group(function () {
+                    Route::get('/', [MenuController::class, 'index']);
+                    Route::get('/search', [MenuController::class, 'search']); // Specific route first
+                    Route::post('/calculate-end-time', [MenuController::class, 'calculateEndTime']);
+                    Route::get('/{id}', [MenuController::class, 'show']); // Parameterized route after specific ones
+                    Route::get('/{id}/available-slots', [MenuController::class, 'getAvailableSlots']);
+                });
+            });
+
+        // Admin Endpoint
+        Route::prefix('admin')
+            ->middleware(['auth:sanctum', 'admin'])
+            ->group(function () {
+                // Profile
+                Route::prefix('profile')->group(function () {
+                    Route::get('/', [ProfileController::class, 'show']);
+                    Route::put('/', [ProfileController::class, 'update']);
+                    Route::patch('/password', [ProfileController::class, 'updatePassword']);
+                    Route::get('/reservations', [ProfileController::class, 'reservations']);
+                    Route::delete('/account', [ProfileController::class, 'deleteAccount']);
+                });
+
+                // User Management
                 Route::apiResource('users', UserController::class);
+                Route::get('users/search', [UserController::class, 'search']);
+                Route::get('users/customers', [UserController::class, 'customers']);
+                Route::get('users/admins', [UserController::class, 'admins']);
+                Route::get('users/role/{role}', [UserController::class, 'byRole']);
+                Route::patch('users/{id}/reset-password', [UserController::class, 'resetPassword']);
+                Route::patch('users/{id}/change-password', [UserController::class, 'changePassword']);
 
-                // Reset password khusus admin
-                Route::post('/users/{id}/reset-password', [UserController::class, 'resetPassword']);
-            });
+                //  Menu Management
+                Route::apiResource('menus', MenuController::class);
+                Route::patch('menus/{id}/toggle-status', [MenuController::class, 'toggleStatus']);
+                Route::delete('menus/bulk-delete', [MenuController::class, 'bulkDelete']);
+                Route::patch('menus/bulk-update-status', [MenuController::class, 'bulkUpdateStatus']);
+                Route::get('menus/search', [MenuController::class, 'search']);
+                Route::post('menus/calculate-end-time', [MenuController::class, 'calculateEndTime']);
+                Route::get('menus/{id}/available-slots', [MenuController::class, 'getAvailableSlots']);
+                Route::post('menus/reorder', [MenuController::class, 'reorder']);
 
-        // Reservation API routes
-        Route::prefix('reservations')->group(function () {
-            // Public routes
-            Route::get('/calendar', [ReservationController::class, 'getCalendarData']);
-            Route::get('/availability', [ReservationController::class, 'getAvailability']);
-            Route::get('/available-hours', [ReservationController::class, 'getAvailableHours']);
-            Route::post('/check-availability', [ReservationController::class, 'checkAvailability']);
-
-            // admin
-            // Protected routes
-            Route::middleware('auth:sanctum')->group(function () {
-                Route::get('/', [ReservationController::class, 'index']);
-                Route::post('/', [ReservationController::class, 'store']);
-                Route::get('/{id}', [ReservationController::class, 'show']);
-                Route::put('/{id}', [ReservationController::class, 'update']);
-                Route::delete('/{id}', [ReservationController::class, 'destroy']);
-
-                // Status management
-                Route::patch('/{id}/confirm', [ReservationController::class, 'confirm']);
-                Route::patch('/{id}/cancel', [ReservationController::class, 'cancel']);
-                Route::patch('/{id}/complete', [ReservationController::class, 'complete']);
-
-                // Bulk operations
-                Route::patch('/bulk/status', [ReservationController::class, 'bulkUpdateStatus']);
-            });
-        });
-
-        // Tire Storage Admin
-        Route::prefix('admin-tire-storages')
-            ->middleware(['auth:sanctum'])
-            ->group(function () {
+                // Tire Storage Management
                 Route::apiResource('storages', TireStorageController::class);
-
                 Route::patch('/storages/{id}/end', [TireStorageController::class, 'end']);
                 Route::delete('/storages/bulk-delete', [TireStorageController::class, 'bulkDelete']);
                 Route::patch('/storages/bulk-end', [TireStorageController::class, 'bulkEnd']);
+
+
+                // Reservation Management
+                Route::apiResource('reservations', ReservationController::class);
+                Route::patch('reservations/{id}/confirm', [ReservationController::class, 'confirm']);
+                Route::patch('reservations/{id}/cancel', [ReservationController::class, 'cancel']);
+                Route::patch('reservations/{id}/complete', [ReservationController::class, 'complete']);
+                Route::patch('reservations/bulk/status', [ReservationController::class, 'bulkUpdateStatus']);
+
+                // Announcement
+                Route::apiResource('announcements', AnnouncementController::class);
+                Route::patch('announcements/{id}/toggle-status', [AnnouncementController::class, 'toggleStatus']);
+                Route::patch('announcements/bulk-toggle-status', [AnnouncementController::class, 'bulkToggleStatus']);
+                Route::delete('announcements/bulk-delete', [AnnouncementController::class, 'bulkDelete']);
+
+                // Questionnaire
+                Route::prefix('questionnaires')->group(function () {
+                    Route::apiResource('/', QuestionnaireController::class);
+                    Route::post('/submit', [QuestionnaireController::class, 'submitAnswers']);
+                    Route::get('/search', [QuestionnaireController::class, 'search']);
+                    // Route::get('/filtered', [QuestionnaireController::class, 'filtered']);
+                    Route::get('/completion-stats', [QuestionnaireController::class, 'getCompletionStats']);
+                    Route::get('/status/{status}', [QuestionnaireController::class, 'byCompletionStatus']);
+                    // Route::get('/{id}/summary', [QuestionnaireController::class, 'getAnswerSummary']);
+                    Route::get('/reservation/{reservationId}', [QuestionnaireController::class, 'getByReservation']);
+                    Route::post('/validate-answers', [QuestionnaireController::class, 'validateAnswers']);
+                });
+
+                // Admin Questionnaire Management
+                Route::prefix('admin-questionnaires')->group(function () {
+                    Route::get('/', [ApiAdminQuestionnaireController::class, 'index']);
+                    Route::post('/', [ApiAdminQuestionnaireController::class, 'store']);
+                    Route::get('/{id}', [ApiAdminQuestionnaireController::class, 'show']);
+                    Route::put('/{id}', [ApiAdminQuestionnaireController::class, 'update']);
+                    Route::delete('/{id}', [ApiAdminQuestionnaireController::class, 'destroy']);
+                    Route::get('/reservation/{reservationId}', [ApiAdminQuestionnaireController::class, 'getByReservation']);
+                    Route::post('/validate-answers', [ApiAdminQuestionnaireController::class, 'validateAnswers']);
+                });
+
+                // Contact Management
+                Route::prefix('contacts')->group(function () {
+                    Route::get('/', [ApiAdminContactController::class, 'index']);
+                    Route::get('/{id}', [ApiAdminContactController::class, 'show']);
+                    Route::put('/{id}', [ApiAdminContactController::class, 'update']);
+                    Route::delete('/{id}', [ApiAdminContactController::class, 'destroy']);
+                    Route::post('/{id}/reply', [ApiAdminContactController::class, 'reply']);
+                    Route::delete('/bulk-delete', [ApiAdminContactController::class, 'bulkDelete']);
+                    Route::post('/mark-as-replied', [ApiAdminContactController::class, 'markAsReplied']);
+                });
+
+                // Customer Management
+                Route::prefix('customers')->group(function () {
+                    Route::get('/', [ApiAdminCustomerController::class, 'index']);
+                    Route::get('/first-time', [ApiAdminCustomerController::class, 'getFirstTimeCustomers']);
+                    Route::get('/repeat-customers', [ApiAdminCustomerController::class, 'getRepeatCustomers']);
+                    Route::get('/dormant-customers', [ApiAdminCustomerController::class, 'getDormantCustomers']);
+                    Route::get('/search', [ApiAdminCustomerController::class, 'search']);
+                    Route::get('/type-counts', [ApiAdminCustomerController::class, 'getCustomerTypeCounts']);
+                    Route::get('/{id}', [ApiAdminCustomerController::class, 'show']);
+                });
+
+                // Dashboard
+                Route::get('/dashboard', [ApiAdminDashboardController::class, 'index']);
+
+                // Business Settings
+                Route::prefix('business-settings')->group(function () {
+                    Route::get('/', [ApiAdminBusinessSettingController::class, 'index']);
+                    Route::get('/business-hours', [ApiAdminBusinessSettingController::class, 'getBusinessHours']);
+                    Route::get('/top-image', [ApiAdminBusinessSettingController::class, 'getTopImage']);
+                    Route::put('/business-hours', [ApiAdminBusinessSettingController::class, 'updateBusinessHours']);
+                    Route::get('/{id}/edit', [ApiAdminBusinessSettingController::class, 'edit']);
+                    Route::put('/update', [ApiAdminBusinessSettingController::class, 'update']);
+                });
+
+                // FAQ Management
+                Route::prefix('faqs')->group(function () {
+                    Route::get('/', [ApiAdminFaqController::class, 'index']);
+                    Route::post('/', [ApiAdminFaqController::class, 'store']);
+                    Route::get('/active', [ApiAdminFaqController::class, 'getActiveFaqs']);
+                    Route::post('/reorder', [ApiAdminFaqController::class, 'reorder']);
+                    Route::get('/{id}', [ApiAdminFaqController::class, 'show']);
+                    Route::put('/{id}', [ApiAdminFaqController::class, 'update']);
+                    Route::delete('/{id}', [ApiAdminFaqController::class, 'destroy']);
+                    Route::patch('/{id}/toggle-status', [ApiAdminFaqController::class, 'toggleStatus']);
+                });
+
+                // Payment Management
+                Route::prefix('payments')->group(function () {
+                    Route::get('/', [ApiAdminPaymentController::class, 'index']);
+                    Route::post('/', [ApiAdminPaymentController::class, 'store']);
+                    Route::get('/revenue/total', [ApiAdminPaymentController::class, 'getTotalRevenue']);
+                    Route::get('/statistics', [ApiAdminPaymentController::class, 'getStatistics']);
+                    Route::post('/bulk-update-status', [ApiAdminPaymentController::class, 'bulkUpdateStatus']);
+                    Route::get('/status/{status}', [ApiAdminPaymentController::class, 'getByStatus']);
+                    Route::get('/user/{user_id}', [ApiAdminPaymentController::class, 'getByUser']);
+                    Route::get('/reservation/{reservation_id}', [ApiAdminPaymentController::class, 'getByReservation']);
+                    Route::get('/{id}', [ApiAdminPaymentController::class, 'show']);
+                    Route::put('/{id}', [ApiAdminPaymentController::class, 'update']);
+                    Route::delete('/{id}', [ApiAdminPaymentController::class, 'destroy']);
+                    Route::post('/{id}/process', [ApiAdminPaymentController::class, 'processPayment']);
+                });
+
+                // Blocked Period Management
+                Route::prefix('blocked-periods')->group(function () {
+                    Route::get('/', [ApiAdminBlockedPeriodController::class, 'index']);
+                    Route::post('/', [ApiAdminBlockedPeriodController::class, 'store']);
+                    Route::post('/check-conflict', [ApiAdminBlockedPeriodController::class, 'checkConflict']);
+                    Route::get('/calendar', [ApiAdminBlockedPeriodController::class, 'calendar']);
+                    Route::get('/calendar-with-conflicts', [ApiAdminBlockedPeriodController::class, 'calendarWithConflicts']);
+                    Route::get('/available-slots', [ApiAdminBlockedPeriodController::class, 'getAvailableSlots']);
+                    Route::post('/batch-check-conflicts', [ApiAdminBlockedPeriodController::class, 'batchCheckConflicts']);
+                    Route::post('/export', [ApiAdminBlockedPeriodController::class, 'export']);
+                    Route::delete('/bulk-delete', [ApiAdminBlockedPeriodController::class, 'bulkDelete']);
+                    Route::get('/{id}', [ApiAdminBlockedPeriodController::class, 'show']);
+                    Route::put('/{id}', [ApiAdminBlockedPeriodController::class, 'update']);
+                    Route::delete('/{id}', [ApiAdminBlockedPeriodController::class, 'destroy']);
+                });
             });
-
-        Route::prefix('admin')->middleware(['auth:sanctum'])->group(function () {
-            Route::apiResource('questionnaires', QuestionnaireController::class);
-
-            Route::get('questionnaires-by-reservation', [QuestionnaireController::class, 'getByReservation']);
-            Route::post('questionnaires/validate-answers', [QuestionnaireController::class, 'validateAnswers']);
-        });
-
-        // Public user routes
-        Route::prefix('users')->group(function () {
-            Route::get('/', [UserController::class, 'index']);
-            Route::get('/search', [UserController::class, 'search']);
-            Route::get('/customers', [UserController::class, 'customers']);
-            Route::get('/admins', [UserController::class, 'admins']);
-            Route::get('/role/{role}', [UserController::class, 'byRole']);
-            Route::get('/{id}', [UserController::class, 'show']);
-        });
-
-        // Protected user routes
-        Route::middleware('auth:sanctum')->group(function () {
-            // User management (admin only)
-            Route::middleware('admin')->group(function () {
-                Route::post('users', [UserController::class, 'store']);
-                Route::put('users/{id}', [UserController::class, 'update']);
-                Route::delete('users/{id}', [UserController::class, 'destroy']);
-                Route::patch('users/{id}/reset-password', [UserController::class, 'resetPassword']);
-                Route::patch('users/{id}/change-password', [UserController::class, 'changePassword']);
-            });
-
-            // Profile routes
-            Route::prefix('profile')->group(function () {
-                Route::get('/', [ProfileController::class, 'show']);
-                Route::put('/', [ProfileController::class, 'update']);
-                Route::patch('/password', [ProfileController::class, 'updatePassword']);
-                Route::get('/reservations', [ProfileController::class, 'reservations']);
-                Route::delete('/account', [ProfileController::class, 'deleteAccount']);
-            });
-        });
-
-        // Public questionnaire routes
-        Route::prefix('questionnaires')->group(function () {
-            Route::get('/', [QuestionnaireController::class, 'index']);
-            Route::get('/search', [QuestionnaireController::class, 'search']);
-            // Route::get('/filtered', [QuestionnaireController::class, 'filtered']);
-            Route::get('/completion-stats', [QuestionnaireController::class, 'getCompletionStats']);
-            Route::get('/status/{status}', [QuestionnaireController::class, 'byCompletionStatus']);
-            Route::get('/{id}', [QuestionnaireController::class, 'show']);
-            // Route::get('/{id}/summary', [QuestionnaireController::class, 'getAnswerSummary']);
-            Route::get('/reservation/{reservationId}', [QuestionnaireController::class, 'getByReservation']);
-            Route::post('/validate-answers', [QuestionnaireController::class, 'validateAnswers']);
-        });
-
-        // Protected questionnaire routes
-        Route::middleware('auth:sanctum')->group(function () {
-            // Customer can submit answers
-            Route::post('questionnaires/submit', [QuestionnaireController::class, 'submitAnswers']);
-
-            // Admin only routes
-            Route::middleware('admin')->group(function () {
-                Route::post('questionnaires', [QuestionnaireController::class, 'store']);
-                Route::put('questionnaires/{id}', [QuestionnaireController::class, 'update']);
-                Route::delete('questionnaires/{id}', [QuestionnaireController::class, 'destroy']);
-            });
-        });
     });

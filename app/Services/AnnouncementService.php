@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Models\Announcement;
 use App\Repositories\AnnouncementRepositoryInterface;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Pagination\CursorPaginator;
 use Illuminate\Pagination\LengthAwarePaginator;
 
 class AnnouncementService implements AnnouncementServiceInterface
@@ -26,14 +27,20 @@ class AnnouncementService implements AnnouncementServiceInterface
         return $this->announcementRepository->getActive();
     }
 
-    public function getPublishedAnnouncements(): Collection
-    {
-        return $this->announcementRepository->getPublished();
-    }
+    // public function getPublishedAnnouncements(): Collection
+    // {
+    //     return $this->announcementRepository->getPublished();
+    // }
 
     public function getPaginatedAnnouncements(int $perPage = 15): LengthAwarePaginator
     {
         return $this->announcementRepository->getPaginated($perPage);
+    }
+
+    // getPaginatedWithCursor
+    public function getPaginatedAnnouncementsWithCursor(int $perPage = 15, ?string $cursor = null): CursorPaginator
+    {
+        return $this->announcementRepository->getPaginatedWithCursor($perPage, $cursor);
     }
 
     public function findAnnouncement(int $id): ?Announcement
@@ -44,14 +51,18 @@ class AnnouncementService implements AnnouncementServiceInterface
     public function createAnnouncement(array $data): Announcement
     {
         // Validasi bahwa translations untuk EN dan JA harus ada
-        if (!isset($data['translations']) ||
+        if (
+            !isset($data['translations']) ||
             !isset($data['translations']['en']) ||
-            !isset($data['translations']['ja'])) {
+            !isset($data['translations']['ja'])
+        ) {
             throw new \InvalidArgumentException('Translations untuk English dan Japanese wajib diisi.');
         }
 
-        if (empty($data['translations']['en']['title']) ||
-            empty($data['translations']['ja']['title'])) {
+        if (
+            empty($data['translations']['en']['title']) ||
+            empty($data['translations']['ja']['title'])
+        ) {
             throw new \InvalidArgumentException('Title untuk English dan Japanese wajib diisi.');
         }
 
@@ -66,13 +77,17 @@ class AnnouncementService implements AnnouncementServiceInterface
     {
         // Validasi translations jika ada
         if (isset($data['translations'])) {
-            if (!isset($data['translations']['en']) ||
-                !isset($data['translations']['ja'])) {
+            if (
+                !isset($data['translations']['en']) ||
+                !isset($data['translations']['ja'])
+            ) {
                 throw new \InvalidArgumentException('Translations untuk English dan Japanese wajib diisi.');
             }
 
-            if (empty($data['translations']['en']['title']) ||
-                empty($data['translations']['ja']['title'])) {
+            if (
+                empty($data['translations']['en']['title']) ||
+                empty($data['translations']['ja']['title'])
+            ) {
                 throw new \InvalidArgumentException('Title untuk English dan Japanese wajib diisi.');
             }
         }

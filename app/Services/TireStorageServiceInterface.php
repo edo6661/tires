@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Models\TireStorage;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Pagination\CursorPaginator;
 use Illuminate\Pagination\LengthAwarePaginator;
 
 interface TireStorageServiceInterface
@@ -22,5 +23,6 @@ interface TireStorageServiceInterface
     public function getEndedTireStoragesByUser(int $userId): Collection;
     public function endTireStorage(int $id): bool;
     public function calculateStorageFee(int $id): float;
-    public function getPaginatedTireStoragesWithFilters(int $perPage = 15, array $filters = []): LengthAwarePaginator;   
+    public function getPaginatedTireStoragesWithFilters(int $perPage = 15, array $filters = []): LengthAwarePaginator;
+    public function getPaginatedTireStoragesWithCursor(int $perPage = 15, ?string $cursor = null): CursorPaginator;
 }

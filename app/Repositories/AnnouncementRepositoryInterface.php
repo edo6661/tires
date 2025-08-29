@@ -6,6 +6,7 @@ namespace App\Repositories;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Pagination\LengthAwarePaginator;
 use App\Models\Announcement;
+use Illuminate\Pagination\CursorPaginator;
 
 interface AnnouncementRepositoryInterface
 {
@@ -19,4 +20,5 @@ interface AnnouncementRepositoryInterface
     public function toggleActive(int $id): bool;
     public function bulkDelete(array $ids): bool;
     public function searchByTitle(string $search, ?string $locale = null): Collection;
+    public function getPaginatedWithCursor(int $perPage, ?string $cursor = null): CursorPaginator;
 }

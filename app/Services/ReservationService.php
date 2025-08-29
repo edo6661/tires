@@ -189,4 +189,20 @@ class ReservationService implements ReservationServiceInterface
     {
         return $this->reservationRepository->getByDateRangeAndMenu($startDate, $endDate, $menuId, $excludeReservationId);
     }
+
+    // Customer-specific methods
+    public function getCustomerReservationsWithCursor(int $userId, int $perPage = 15, ?string $cursor = null): CursorPaginator
+    {
+        return $this->reservationRepository->getByUserIdWithCursor($userId, $perPage, $cursor);
+    }
+
+    public function getReservationCountByUser(int $userId): int
+    {
+        return $this->reservationRepository->getCountByUserId($userId);
+    }
+
+    public function getRecentReservationsByUser(int $userId, int $limit = 5): Collection
+    {
+        return $this->reservationRepository->getRecentByUserId($userId, $limit);
+    }
 }

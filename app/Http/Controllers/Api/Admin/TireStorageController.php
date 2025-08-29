@@ -29,7 +29,7 @@ class TireStorageController extends Controller
             $perPage = min($request->get('per_page', 15), 100);
 
             if ($request->boolean('paginate', true)) {
-                $tireStorages = $this->tireStorageService->getPaginatedTireStorages($perPage);
+                $tireStorages = $this->tireStorageService->getPaginatedTireStoragesWithCursor($perPage);
                 $collection = TireStorageResource::collection($tireStorages);
 
                 $cursor = $this->generateCursor($tireStorages);
