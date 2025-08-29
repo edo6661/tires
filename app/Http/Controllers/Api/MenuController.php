@@ -34,7 +34,7 @@ class MenuController extends Controller
             if ($request->has('paginate') && $request->get('paginate') !== 'false') {
                 $cursor = $request->get('cursor');
                 // Paginated response with cursor
-                $menus = $this->menuService->getPaginatedMenus($perPage, $cursor);
+                $menus = $this->menuService->getPaginatedMenusWithCursor($perPage, $cursor);
                 $collection = MenuResource::collection($menus);
 
                 // Generate cursor info

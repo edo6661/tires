@@ -28,10 +28,14 @@ class MenuService implements MenuServiceInterface
     {
         return $this->menuRepository->getActive();
     }
-
-    public function getPaginatedMenus(int $perPage = 15, ?string $cursor = null): CursorPaginator
+    public function getPaginatedMenus(int $perPage = 15): LengthAwarePaginator
     {
-        return $this->menuRepository->getPaginated($perPage, $cursor);
+        return $this->menuRepository->getPaginated($perPage);
+    }
+
+    public function getPaginatedMenusWithCursor(int $perPage = 15, ?string $cursor = null): CursorPaginator
+    {
+        return $this->menuRepository->getPaginatedWithCursor($perPage, $cursor);
     }
 
     /**

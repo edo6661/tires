@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Services;
 
 use App\Models\Menu;
@@ -12,7 +13,8 @@ interface MenuServiceInterface
 {
     public function getAllMenus(): Collection;
     public function getActiveMenus(): Collection;
-    public function getPaginatedMenus(int $perPage = 15, ?string $cursor = null): CursorPaginator;
+    public function getPaginatedMenus(int $perPage = 15): LengthAwarePaginator;
+    public function getPaginatedMenusWithCursor(int $perPage = 15, ?string $cursor = null): CursorPaginator;
     public function getPaginatedActiveMenus(int $perPage = 15): LengthAwarePaginator;
     public function findMenu(int $id): ?Menu;
     public function createMenu(array $data): Menu;

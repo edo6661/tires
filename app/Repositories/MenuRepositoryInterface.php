@@ -12,7 +12,8 @@ interface MenuRepositoryInterface
 {
     public function getAll(): Collection;
     public function getActive(): Collection;
-    public function getPaginated(int $perPage = 15, ?string $cursor = null): CursorPaginator;
+    public function getPaginated(int $perPage = 15): LengthAwarePaginator;
+    public function getPaginatedWithCursor(int $perPage = 15, ?string $cursor = null): CursorPaginator;
     public function getPaginatedActive(int $perPage = 15): LengthAwarePaginator;
     public function findById(int $id): ?Menu;
     public function findByIdWithLocale(int $id, string $locale = null): ?Menu;

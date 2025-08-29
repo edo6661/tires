@@ -33,7 +33,14 @@ class MenuRepository implements MenuRepositoryInterface
             ->get();
     }
 
-    public function getPaginated(int $perPage = 15, ?string $cursor = null): CursorPaginator
+    public function getPaginated(int $perPage = 15): LengthAwarePaginator
+    {
+        return $this->model->withTranslations()
+            ->ordered()
+            ->paginate($perPage);
+    }
+
+    public function getPaginatedWithCursor(int $perPage = 15, ?string $cursor = null): CursorPaginator
     {
         return $this->model->withTranslations()
             ->ordered()
