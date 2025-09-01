@@ -2,18 +2,27 @@
 
 namespace App\Http\Controllers\Api\Customer;
 
+use Carbon\Carbon;
+use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
+use App\Events\BookingCompleted;
+use App\Events\InquirySubmitted;
+use Illuminate\Http\JsonResponse;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\UserResource;
+use Illuminate\Support\Facades\Auth;
+use App\Http\Traits\ApiResponseTrait;
+use App\Services\AuthServiceInterface;
+use App\Services\MenuServiceInterface;
+use App\Services\UserServiceInterface;
+use App\Http\Requests\ReservationRequest;
+use App\Services\ContactServiceInterface;
+use Illuminate\Support\Facades\Validator;
 use App\Http\Resources\ReservationResource;
 use App\Http\Resources\TireStorageResource;
-use App\Http\Traits\ApiResponseTrait;
-use App\Services\UserServiceInterface;
 use App\Services\ReservationServiceInterface;
 use App\Services\TireStorageServiceInterface;
-use App\Services\AuthServiceInterface;
-use Illuminate\Http\Request;
-use Illuminate\Http\JsonResponse;
-use Illuminate\Validation\Rule;
+use App\Services\BlockedPeriodServiceInterface;
 
 class CustomerController extends Controller
 {
@@ -24,6 +33,9 @@ class CustomerController extends Controller
         protected ReservationServiceInterface $reservationService,
         protected TireStorageServiceInterface $tireStorageService,
         protected AuthServiceInterface $authService,
+        protected MenuServiceInterface $menuService,
+        protected BlockedPeriodServiceInterface $blockedPeriodService,
+        protected ContactServiceInterface $contactService,
     ) {}
 
     /**
@@ -785,6 +797,967 @@ class CustomerController extends Controller
                         'tag' => 'retrieval_failed',
                         'value' => $e->getMessage(),
                         'message' => 'Dashboard retrieval failed'
+                    ]
+                ]
+            );
+        }
+    }
+
+    /**
+     * BOOKING FUNCTIONALITY - API equivalents of web booking controller methods
+     */
+
+    /**
+     * Get booking first step data (menu and calendar)
+     */
+    public function bookingFirstStep(string $menuId): JsonResponse
+    {
+        try {
+            $user = $this->authService->getCurrentUser();
+
+            // Ensure only customers can access this
+            if (!$user->isCustomer()) {
+                return $this->errorResponse(
+                    'Access denied',
+                    403,
+                    [
+                        [
+                            'field' => 'role',
+                            'tag' => 'access_denied',
+                            'value' => $user->role,
+                            'message' => 'Only customers can access this endpoint'
+                        ]
+                    ]
+                );
+            }
+
+            // Convert string to integer and validate
+            $menuIdInt = (int) $menuId;
+            if ($menuIdInt <= 0) {
+                return $this->errorResponse(
+                    'Invalid menu ID',
+                    400,
+                    [
+                        [
+                            'field' => 'menuId',
+                            'tag' => 'invalid_format',
+                            'value' => $menuId,
+                            'message' => 'Menu ID must be a positive integer'
+                        ]
+                    ]
+                );
+            }
+
+            $menu = $this->menuService->findMenu($menuIdInt);
+            if (!$menu) {
+                return $this->errorResponse(
+                    'Menu not found',
+                    404,
+                    [
+                        [
+                            'field' => 'menuId',
+                            'tag' => 'not_found',
+                            'value' => $menuId,
+                            'message' => 'Menu not found'
+                        ]
+                    ]
+                );
+            }
+
+            $currentMonth = Carbon::now()->startOfMonth();
+            $calendarData = $this->generateBookingCalendar($currentMonth, $menu->id);
+
+            return $this->successResponse(
+                [
+                    'menu' => [
+                        'id' => $menu->id,
+                        'name' => $menu->name,
+                        'required_time' => $menu->required_time,
+                        'description' => $menu->description,
+                        'price' => $menu->price,
+                    ],
+                    'calendar_data' => $calendarData,
+                    'current_month' => $currentMonth->format('Y-m')
+                ],
+                'Booking first step data retrieved successfully'
+            );
+        } catch (\Exception $e) {
+            return $this->errorResponse(
+                'Failed to retrieve booking data',
+                500,
+                [
+                    [
+                        'field' => 'general',
+                        'tag' => 'retrieval_failed',
+                        'value' => $e->getMessage(),
+                        'message' => 'Booking data retrieval failed'
+                    ]
+                ]
+            );
+        }
+    }
+
+    /**
+     * Get calendar data for booking
+     */
+    public function getCalendarData(Request $request): JsonResponse
+    {
+        try {
+            $user = $this->authService->getCurrentUser();
+
+            // Ensure only customers can access this
+            if (!$user->isCustomer()) {
+                return $this->errorResponse(
+                    'Access denied',
+                    403,
+                    [
+                        [
+                            'field' => 'role',
+                            'tag' => 'access_denied',
+                            'value' => $user->role,
+                            'message' => 'Only customers can access this endpoint'
+                        ]
+                    ]
+                );
+            }
+
+            $monthParam = $request->get('month', Carbon::now()->format('Y-m'));
+            $menuId = $request->get('menu_id');
+
+            if (!$menuId) {
+                return $this->errorResponse(
+                    'Menu ID is required',
+                    400,
+                    [
+                        [
+                            'field' => 'menu_id',
+                            'tag' => 'required',
+                            'value' => null,
+                            'message' => 'Menu ID is required'
+                        ]
+                    ]
+                );
+            }
+
+            try {
+                $currentMonth = Carbon::createFromFormat('Y-m', $monthParam)->startOfMonth();
+            } catch (\Exception $e) {
+                return $this->errorResponse(
+                    'Invalid month format',
+                    400,
+                    [
+                        [
+                            'field' => 'month',
+                            'tag' => 'invalid_format',
+                            'value' => $monthParam,
+                            'message' => 'Month must be in Y-m format (e.g., 2024-01)'
+                        ]
+                    ]
+                );
+            }
+
+            $calendarData = $this->generateBookingCalendar($currentMonth, (int) $menuId);
+
+            return $this->successResponse(
+                [
+                    'data' => $calendarData,
+                    'current_month' => $currentMonth->format('F Y'),
+                    'previous_month' => $currentMonth->copy()->subMonth()->format('Y-m'),
+                    'next_month' => $currentMonth->copy()->addMonth()->format('Y-m')
+                ],
+                'Calendar data retrieved successfully'
+            );
+        } catch (\Exception $e) {
+            return $this->errorResponse(
+                'Failed to retrieve calendar data',
+                500,
+                [
+                    [
+                        'field' => 'general',
+                        'tag' => 'retrieval_failed',
+                        'value' => $e->getMessage(),
+                        'message' => 'Calendar data retrieval failed'
+                    ]
+                ]
+            );
+        }
+    }
+
+    /**
+     * Get available hours for a specific date and menu
+     */
+    public function getAvailableHours(Request $request): JsonResponse
+    {
+        try {
+            $user = $this->authService->getCurrentUser();
+
+            // Ensure only customers can access this
+            if (!$user->isCustomer()) {
+                return $this->errorResponse(
+                    'Access denied',
+                    403,
+                    [
+                        [
+                            'field' => 'role',
+                            'tag' => 'access_denied',
+                            'value' => $user->role,
+                            'message' => 'Only customers can access this endpoint'
+                        ]
+                    ]
+                );
+            }
+
+            $date = $request->get('date');
+            $menuId = $request->get('menu_id');
+
+            if (!$date || !$menuId) {
+                return $this->errorResponse(
+                    'Date and menu_id are required',
+                    400,
+                    [
+                        [
+                            'field' => 'parameters',
+                            'tag' => 'required',
+                            'value' => compact('date', 'menuId'),
+                            'message' => 'Date and menu_id are required parameters'
+                        ]
+                    ]
+                );
+            }
+
+            try {
+                $selectedDate = Carbon::parse($date);
+            } catch (\Exception $e) {
+                return $this->errorResponse(
+                    'Invalid date format',
+                    400,
+                    [
+                        [
+                            'field' => 'date',
+                            'tag' => 'invalid_format',
+                            'value' => $date,
+                            'message' => 'Date must be in valid format (Y-m-d)'
+                        ]
+                    ]
+                );
+            }
+
+            $now = Carbon::now();
+            if ($selectedDate->isBefore($now->startOfDay())) {
+                return $this->successResponse(
+                    [
+                        'hours' => [],
+                        'message' => 'Cannot book for past dates'
+                    ],
+                    'No available hours for past dates'
+                );
+            }
+
+            $availableHours = $this->generateAvailableHours($selectedDate, (int) $menuId);
+
+            return $this->successResponse(
+                ['hours' => $availableHours],
+                'Available hours retrieved successfully'
+            );
+        } catch (\Exception $e) {
+            return $this->errorResponse(
+                'Failed to retrieve available hours',
+                500,
+                [
+                    [
+                        'field' => 'general',
+                        'tag' => 'retrieval_failed',
+                        'value' => $e->getMessage(),
+                        'message' => 'Available hours retrieval failed'
+                    ]
+                ]
+            );
+        }
+    }
+
+    /**
+     * Get menu details for booking
+     */
+    public function getMenuDetails(string $menuId): JsonResponse
+    {
+        try {
+            $user = $this->authService->getCurrentUser();
+
+            // Ensure only customers can access this
+            if (!$user->isCustomer()) {
+                return $this->errorResponse(
+                    'Access denied',
+                    403,
+                    [
+                        [
+                            'field' => 'role',
+                            'tag' => 'access_denied',
+                            'value' => $user->role,
+                            'message' => 'Only customers can access this endpoint'
+                        ]
+                    ]
+                );
+            }
+
+            // Convert string to integer and validate
+            $menuIdInt = (int) $menuId;
+            if ($menuIdInt <= 0) {
+                return $this->errorResponse(
+                    'Invalid menu ID',
+                    400,
+                    [
+                        [
+                            'field' => 'menuId',
+                            'tag' => 'invalid_format',
+                            'value' => $menuId,
+                            'message' => 'Menu ID must be a positive integer'
+                        ]
+                    ]
+                );
+            }
+
+            $menu = $this->menuService->findMenu($menuIdInt);
+            if (!$menu) {
+                return $this->errorResponse(
+                    'Menu not found',
+                    404,
+                    [
+                        [
+                            'field' => 'menuId',
+                            'tag' => 'not_found',
+                            'value' => $menuId,
+                            'message' => 'Menu not found'
+                        ]
+                    ]
+                );
+            }
+
+            return $this->successResponse(
+                [
+                    'menu' => [
+                        'id' => $menu->id,
+                        'name' => $menu->name,
+                        'required_time' => $menu->required_time,
+                        'description' => $menu->description,
+                        'price' => $menu->price,
+                    ]
+                ],
+                'Menu details retrieved successfully'
+            );
+        } catch (\Exception $e) {
+            return $this->errorResponse(
+                'Failed to retrieve menu details',
+                500,
+                [
+                    [
+                        'field' => 'general',
+                        'tag' => 'retrieval_failed',
+                        'value' => $e->getMessage(),
+                        'message' => 'Menu details retrieval failed'
+                    ]
+                ]
+            );
+        }
+    }
+
+    /**
+     * Create a new reservation (booking)
+     */
+    public function createReservation(ReservationRequest $request): JsonResponse
+    {
+        try {
+            $user = $this->authService->getCurrentUser();
+
+            // Ensure only customers can access this
+            if (!$user->isCustomer()) {
+                return $this->errorResponse(
+                    'Access denied',
+                    403,
+                    [
+                        [
+                            'field' => 'role',
+                            'tag' => 'access_denied',
+                            'value' => $user->role,
+                            'message' => 'Only customers can access this endpoint'
+                        ]
+                    ]
+                );
+            }
+
+            // Add user_id to the validated data to ensure reservation is linked to authenticated user
+            $validatedData = $request->validated();
+            $validatedData['user_id'] = $user->id;
+
+            $reservation = $this->reservationService->createReservation($validatedData);
+
+            // Dispatch booking completed event
+            BookingCompleted::dispatch($reservation);
+
+            return $this->successResponse(
+                [
+                    'reservation' => new ReservationResource($reservation),
+                    'reservation_number' => $reservation->reservation_number,
+                ],
+                'Reservation created successfully'
+            );
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            return $this->errorResponse(
+                'Validation failed',
+                422,
+                collect($e->errors())->map(function ($messages, $field) {
+                    return [
+                        'field' => $field,
+                        'tag' => 'validation_error',
+                        'value' => request($field),
+                        'message' => $messages[0]
+                    ];
+                })->values()->toArray()
+            );
+        } catch (\Exception $e) {
+            return $this->errorResponse(
+                'Failed to create reservation',
+                500,
+                [
+                    [
+                        'field' => 'general',
+                        'tag' => 'creation_failed',
+                        'value' => $e->getMessage(),
+                        'message' => 'Reservation creation failed'
+                    ]
+                ]
+            );
+        }
+    }
+
+    /**
+     * PRIVATE HELPER METHODS - Same as web booking controller
+     */
+
+    /**
+     * Generate booking calendar
+     */
+    private function generateBookingCalendar(Carbon $currentMonth, int $menuId): array
+    {
+        $startDate = $currentMonth->copy()->startOfMonth();
+        $endDate = $currentMonth->copy()->endOfMonth();
+
+        $reservations = $this->reservationService->getReservationsByDateRangeAndMenu(
+            $startDate->format('Y-m-d H:i:s'),
+            $endDate->format('Y-m-d H:i:s'),
+            $menuId
+        );
+
+        $reservationsByDate = $reservations->groupBy(function ($reservation) {
+            return $reservation->reservation_datetime->format('Y-m-d');
+        });
+
+        $blockedHours = $this->blockedPeriodService->getBlockedHoursInRange(
+            $startDate->format('Y-m-d H:i:s'),
+            $endDate->format('Y-m-d H:i:s')
+        );
+
+        $calendarDays = $this->generateCalendarDays(
+            $currentMonth,
+            $reservationsByDate,
+            $blockedHours,
+            $menuId
+        );
+
+        return [
+            'days' => $calendarDays,
+            'current_month' => $currentMonth,
+            'previous_month' => $currentMonth->copy()->subMonth()->format('Y-m'),
+            'next_month' => $currentMonth->copy()->addMonth()->format('Y-m')
+        ];
+    }
+
+    /**
+     * Generate calendar days
+     */
+    private function generateCalendarDays(
+        Carbon $currentMonth,
+        $reservationsByDate,
+        $blockedHours = null,
+        ?int $menuId = null
+    ): array {
+        $calendarDays = [];
+        $today = Carbon::now();
+        $todayString = $today->format('Y-m-d');
+
+        $startDate = $currentMonth->copy()->startOfMonth();
+        $dayOfWeek = $startDate->dayOfWeek;
+
+        if ($dayOfWeek !== 1) {
+            $startDate->subDays($dayOfWeek === 0 ? 6 : $dayOfWeek - 1);
+        }
+
+        for ($i = 0; $i < 42; $i++) {
+            $date = $startDate->copy()->addDays($i);
+            $dateString = $date->format('Y-m-d');
+
+            $isPastDate = $date->isBefore($today->startOfDay());
+            $hasAvailableHours = !$isPastDate && $this->hasAvailableHoursForDate($date, $menuId, $blockedHours, $reservationsByDate);
+            $bookingStatus = $this->getDateBookingStatus($date, $isPastDate, $hasAvailableHours);
+
+            $calendarDays[] = [
+                'date' => $dateString,
+                'day' => $date->day,
+                'isCurrentMonth' => $date->month === $currentMonth->month,
+                'isToday' => $dateString === $todayString,
+                'isPastDate' => $isPastDate,
+                'hasAvailableHours' => $hasAvailableHours,
+                'bookingStatus' => $bookingStatus,
+                'blockedHours' => $blockedHours[$dateString] ?? [],
+                'reservationCount' => $reservationsByDate->get($dateString, collect())->count()
+            ];
+        }
+
+        return $calendarDays;
+    }
+
+    /**
+     * Check if date has available hours
+     */
+    private function hasAvailableHoursForDate(Carbon $date, int $menuId, $blockedHours, $reservationsByDate): bool
+    {
+        $menu = $this->menuService->findMenu($menuId);
+        $requiredTime = $menu->required_time;
+        $dateString = $date->format('Y-m-d');
+        $now = Carbon::now();
+
+        $operatingHours = $this->getOperatingHours();
+        $closingTime = Carbon::parse($dateString . ' 21:00:00');
+
+        foreach ($operatingHours as $hour) {
+            $dateTime = Carbon::parse($dateString . ' ' . $hour);
+
+            if ($dateTime->isBefore($now)) {
+                continue;
+            }
+
+            $endTime = $dateTime->copy()->addMinutes($requiredTime);
+            if ($endTime->gt($closingTime)) {
+                continue;
+            }
+
+            if (isset($blockedHours[$dateString]) && in_array($hour, $blockedHours[$dateString])) {
+                continue;
+            }
+
+            $reservations = $reservationsByDate->get($dateString, collect());
+            $hasReservationAtThisHour = $reservations->contains(function ($reservation) use ($hour) {
+                return $reservation->reservation_datetime->format('H:i') === $hour;
+            });
+
+            if (!$hasReservationAtThisHour) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     * Get date booking status
+     */
+    private function getDateBookingStatus(Carbon $date, bool $isPastDate, bool $hasAvailableHours): string
+    {
+        if ($isPastDate) {
+            return 'past';
+        }
+
+        if (!$hasAvailableHours) {
+            return 'full';
+        }
+
+        return 'available';
+    }
+
+    /**
+     * Generate available hours for a date
+     */
+    private function generateAvailableHours(Carbon $selectedDate, int $menuId): array
+    {
+        $menu = $this->menuService->findMenu($menuId);
+        $requiredTime = $menu->required_time;
+        $dateString = $selectedDate->format('Y-m-d');
+        $now = Carbon::now();
+
+        $availableHours = [];
+
+        $blockedHours = $this->blockedPeriodService->getBlockedHoursInRange(
+            $selectedDate->format('Y-m-d H:i:s'),
+            $selectedDate->format('Y-m-d H:i:s')
+        );
+
+        $reservations = $this->reservationService->getReservationsByDateRangeAndMenu(
+            $selectedDate->format('Y-m-d H:i:s'),
+            $selectedDate->format('Y-m-d H:i:s'),
+            $menuId
+        );
+
+        $reservationsByHour = $reservations->groupBy(function ($reservation) {
+            return $reservation->reservation_datetime->format('H:i');
+        });
+
+        $operatingHours = $this->getOperatingHours();
+        $closingTime = Carbon::parse($dateString . ' 21:00:00');
+
+        foreach ($operatingHours as $hour) {
+            $dateTime = Carbon::parse($dateString . ' ' . $hour);
+
+            if ($dateTime->isBefore($now)) {
+                continue;
+            }
+
+            $endTime = $dateTime->copy()->addMinutes($requiredTime);
+            if ($endTime->gt($closingTime)) {
+                continue;
+            }
+
+            $isBlocked = isset($blockedHours[$dateString]) && in_array($hour, $blockedHours[$dateString]);
+            $hasReservation = $reservationsByHour->has($hour);
+
+            $status = 'available';
+            $indicator = '';
+            if ($isBlocked) {
+                $status = 'blocked';
+                $indicator = 'Blocked';
+            } elseif ($hasReservation) {
+                $status = 'reserved';
+                $indicator = 'Reserved';
+            }
+
+            $availableHours[] = [
+                'time' => $hour,
+                'datetime' => $dateTime->format('Y-m-d H:i:s'),
+                'status' => $status,
+                'available' => $status === 'available',
+                'indicator' => $indicator
+            ];
+        }
+
+        return $availableHours;
+    }
+
+    /**
+     * Get operating hours
+     */
+    private function getOperatingHours(): array
+    {
+        $hours = [];
+        for ($i = 8; $i <= 20; $i++) {
+            $hours[] = sprintf('%02d:00', $i);
+        }
+        return $hours;
+    }
+
+
+    public function submitInquiry(Request $request): JsonResponse
+    {
+        try {
+            $user = Auth::user(); // Get authenticated user (if any)
+
+            // Validation rules - make name, email optional if user is authenticated
+            $rules = [
+                'subject' => 'required|string|max:255',
+                'message' => 'required|string|max:2000',
+            ];
+
+            // If user is not authenticated, require name and email
+            if (!$user) {
+                $rules['name'] = 'required|string|max:255';
+                $rules['email'] = 'required|email|max:255';
+            }
+
+            // Phone is always optional
+            $rules['phone'] = 'nullable|string|max:20';
+
+            $validator = Validator::make($request->all(), $rules);
+
+            if ($validator->fails()) {
+                return $this->errorResponse(
+                    'Validation failed',
+                    422,
+                    collect($validator->errors())->map(function ($messages, $field) {
+                        return [
+                            'field' => $field,
+                            'tag' => 'validation_error',
+                            'value' => request($field),
+                            'message' => $messages[0]
+                        ];
+                    })->values()->toArray()
+                );
+            }
+
+            // Prepare contact data with auto-fill for authenticated users
+            $contactData = [
+                'user_id' => $user ? $user->id : null,
+                'full_name' => $user ? $user->full_name : $request->name,
+                'email' => $user ? $user->email : $request->email,
+                'phone_number' => $request->phone ?? ($user ? $user->phone_number : null),
+                'subject' => $request->subject,
+                'message' => $request->message,
+            ];
+
+            $contact = $this->contactService->createContact($contactData);
+            event(new InquirySubmitted($contact));
+
+            $responseData = [
+                'inquiry_id' => $contact->id,
+                'reference_number' => $contact->created_at->format('YmdHis') . $contact->id,
+            ];
+
+            // Add user info to response if authenticated
+            if ($user) {
+                $responseData['submitted_by'] = $user->full_name;
+                $responseData['email'] = $user->email;
+                $responseData['auto_filled'] = true;
+            } else {
+                $responseData['submitted_by'] = $request->name;
+                $responseData['email'] = $request->email;
+                $responseData['auto_filled'] = false;
+            }
+
+            return $this->successResponse(
+                $responseData,
+                'Thank you for your inquiry! We will get back to you soon.'
+            );
+        } catch (\Exception $e) {
+            return $this->errorResponse(
+                'Failed to submit inquiry',
+                500,
+                [
+                    [
+                        'field' => 'general',
+                        'tag' => 'submission_failed',
+                        'value' => $e->getMessage(),
+                        'message' => 'Inquiry submission failed'
+                    ]
+                ]
+            );
+        }
+    }
+
+    /**
+     * INQUIRY AND CONTACT FUNCTIONALITY
+     */
+
+    /**
+     * Submit customer inquiry
+     */
+    // public function submitInquiry(Request $request): JsonResponse
+    // {
+    //     try {
+    //         $user = $this->authService->getCurrentUser();
+
+    //         // Ensure only customers can access this
+    //         if (!$user->isCustomer()) {
+    //             return $this->errorResponse(
+    //                 'Access denied',
+    //                 403,
+    //                 [
+    //                     [
+    //                         'field' => 'role',
+    //                         'tag' => 'access_denied',
+    //                         'value' => $user->role,
+    //                         'message' => 'Only customers can access this endpoint'
+    //                     ]
+    //                 ]
+    //             );
+    //         }
+
+    //         $validator = Validator::make($request->all(), [
+    //             'subject' => 'required|string|max:255',
+    //             'message' => 'required|string|max:2000',
+    //             'phone' => 'nullable|string|max:20',
+    //         ]);
+
+    //         if ($validator->fails()) {
+    //             return $this->errorResponse(
+    //                 'Validation failed',
+    //                 422,
+    //                 collect($validator->errors())->map(function ($messages, $field) {
+    //                     return [
+    //                         'field' => $field,
+    //                         'tag' => 'validation_error',
+    //                         'value' => request($field),
+    //                         'message' => $messages[0]
+    //                     ];
+    //                 })->values()->toArray()
+    //             );
+    //         }
+
+    //         $contactData = [
+    //             'user_id' => $user->id,
+    //             'full_name' => $user->full_name,
+    //             'email' => $user->email,
+    //             'phone_number' => $request->phone ?? $user->phone_number,
+    //             'subject' => $request->subject,
+    //             'message' => $request->message,
+    //         ];
+
+    //         $contact = $this->contactService->createContact($contactData);
+    //         event(new InquirySubmitted($contact));
+
+    //         return $this->successResponse(
+    //             [
+    //                 'inquiry_id' => $contact->id,
+    //                 'reference_number' => $contact->created_at->format('YmdHis') . $contact->id,
+    //                 'submitted_by' => $user->full_name,
+    //                 'email' => $user->email
+    //             ],
+    //             'Your inquiry has been submitted successfully! We will get back to you soon.'
+    //         );
+    //     } catch (\Exception $e) {
+    //         return $this->errorResponse(
+    //             'Failed to submit inquiry',
+    //             500,
+    //             [
+    //                 [
+    //                     'field' => 'general',
+    //                     'tag' => 'submission_failed',
+    //                     'value' => $e->getMessage(),
+    //                     'message' => 'Inquiry submission failed'
+    //                 ]
+    //             ]
+    //         );
+    //     }
+    // }
+
+    /**
+     * Submit customer contact message
+     */
+    public function submitContact(Request $request): JsonResponse
+    {
+        try {
+            $user = $this->authService->getCurrentUser();
+
+            // Ensure only customers can access this
+            if (!$user->isCustomer()) {
+                return $this->errorResponse(
+                    'Access denied',
+                    403,
+                    [
+                        [
+                            'field' => 'role',
+                            'tag' => 'access_denied',
+                            'value' => $user->role,
+                            'message' => 'Only customers can access this endpoint'
+                        ]
+                    ]
+                );
+            }
+
+            $validator = Validator::make($request->all(), [
+                'subject' => 'required|string|max:255',
+                'message' => 'required|string|max:2000',
+            ]);
+
+            if ($validator->fails()) {
+                return $this->errorResponse(
+                    'Validation failed',
+                    422,
+                    collect($validator->errors())->map(function ($messages, $field) {
+                        return [
+                            'field' => $field,
+                            'tag' => 'validation_error',
+                            'value' => request($field),
+                            'message' => $messages[0]
+                        ];
+                    })->values()->toArray()
+                );
+            }
+
+            $contactData = [
+                'user_id' => $user->id,
+                'full_name' => $user->full_name,
+                'email' => $user->email,
+                'phone_number' => $user->phone_number,
+                'subject' => $request->subject,
+                'message' => $request->message,
+            ];
+
+            $contact = $this->contactService->createContact($contactData);
+            event(new InquirySubmitted($contact));
+
+            return $this->successResponse(
+                [
+                    'contact_id' => $contact->id,
+                    'reference_number' => $contact->created_at->format('YmdHis') . $contact->id,
+                    'submitted_by' => $user->full_name,
+                    'email' => $user->email
+                ],
+                'Your message has been sent successfully! We will get back to you soon.'
+            );
+        } catch (\Exception $e) {
+            return $this->errorResponse(
+                'Failed to submit contact message',
+                500,
+                [
+                    [
+                        'field' => 'general',
+                        'tag' => 'submission_failed',
+                        'value' => $e->getMessage(),
+                        'message' => 'Contact submission failed'
+                    ]
+                ]
+            );
+        }
+    }
+
+    /**
+     * Get customer inquiry history
+     */
+    public function getInquiryHistory(Request $request): JsonResponse
+    {
+        try {
+            $user = $this->authService->getCurrentUser();
+
+            // Ensure only customers can access this
+            if (!$user->isCustomer()) {
+                return $this->errorResponse(
+                    'Access denied',
+                    403,
+                    [
+                        [
+                            'field' => 'role',
+                            'tag' => 'access_denied',
+                            'value' => $user->role,
+                            'message' => 'Only customers can access this endpoint'
+                        ]
+                    ]
+                );
+            }
+
+            // Get customer's contact history
+            $contacts = $this->contactService->getContactsByUser($user->id);
+
+            return $this->successResponse(
+                $contacts->map(function ($contact) {
+                    return [
+                        'id' => $contact->id,
+                        'subject' => $contact->subject,
+                        'message' => $contact->message,
+                        'phone_number' => $contact->phone_number,
+                        'status' => $contact->status ?? 'pending',
+                        'reference_number' => $contact->created_at->format('YmdHis') . $contact->id,
+                        'submitted_at' => $contact->created_at->format('Y-m-d H:i:s'),
+                        'replied_at' => $contact->replied_at ? $contact->replied_at->format('Y-m-d H:i:s') : null,
+                    ];
+                }),
+                'Customer inquiry history retrieved successfully'
+            );
+        } catch (\Exception $e) {
+            return $this->errorResponse(
+                'Failed to retrieve inquiry history',
+                500,
+                [
+                    [
+                        'field' => 'general',
+                        'tag' => 'retrieval_failed',
+                        'value' => $e->getMessage(),
+                        'message' => 'Inquiry history retrieval failed'
                     ]
                 ]
             );

@@ -32,6 +32,17 @@ Route::prefix('v1')
     ->middleware(['apiSetLocale'])
     ->group(function () {
 
+        // Public endpoints (no authentication required)
+        Route::prefix('public')->group(function () {
+            // Public menu access
+            Route::get('/menus', [MenuController::class, 'index']);
+            Route::get('/menus/{id}', [MenuController::class, 'show']);
+
+            // Contact and inquiry endpoints
+            Route::post('/contact', [\App\Http\Controllers\Api\ContactController::class, 'submitContact']);
+            Route::post('/inquiry', [\App\Http\Controllers\Api\ContactController::class, 'submitInquiry']);
+        });
+
         // Auth
         Route::prefix('auth')->group(function () {
             Route::post('/login', [AuthApiController::class, 'login']);
@@ -57,6 +68,15 @@ Route::prefix('v1')
                 // Customer dashboard
                 Route::get('/dashboard', [CustomerController::class, 'dashboard']);
 
+                // Customer booking functionality
+                Route::prefix('booking')->group(function () {
+                    Route::get('/first-step/{menuId}', [CustomerController::class, 'bookingFirstStep']);
+                    Route::get('/calendar-data', [CustomerController::class, 'getCalendarData']);
+                    Route::get('/available-hours', [CustomerController::class, 'getAvailableHours']);
+                    Route::get('/menu-details/{menuId}', [CustomerController::class, 'getMenuDetails']);
+                    Route::post('/create-reservation', [CustomerController::class, 'createReservation']);
+                });
+
                 // Customer reservations - specific routes MUST come before parameterized routes
                 Route::get('/reservations', [CustomerController::class, 'reservations']);
                 Route::get('/reservations/summary', [CustomerController::class, 'reservationsSummary']);
@@ -69,6 +89,11 @@ Route::prefix('v1')
                 Route::post('/reservations/check-availability', [ReservationController::class, 'checkAvailability']);
                 Route::post('/reservations', [ReservationController::class, 'store']); // Create reservation
                 Route::get('/reservations/{id}', [CustomerController::class, 'reservation']); // MUST be last
+
+                // Customer inquiry and contact
+                Route::post('/inquiry', [CustomerController::class, 'submitInquiry']);
+                Route::post('/contact', [CustomerController::class, 'submitContact']);
+                Route::get('/inquiry-history', [CustomerController::class, 'getInquiryHistory']);
 
                 // Customer tire storage
                 Route::get('/tire-storage', [CustomerController::class, 'tireStorage']);
