@@ -41,7 +41,7 @@
                             <input type="text"
                                    id="shop_name"
                                    name="shop_name"
-                                   value="{{ old('shop_name', $businessSettings->shop_name ?? '') }}"
+                                   value="{{ old('shop_name', $businessSettings->shop_name ?: '') }}"
                                    class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                                    required>
                         </div>
@@ -52,7 +52,7 @@
                             <input type="text"
                                    id="phone_number"
                                    name="phone_number"
-                                   value="{{ old('phone_number', $businessSettings->phone_number ?? '') }}"
+                                   value="{{ old('phone_number', $businessSettings->phone_number ?: '') }}"
                                    class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                                    required>
                         </div>
@@ -64,14 +64,14 @@
                                       name="address"
                                       rows="3"
                                       class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                                      required>{{ old('address', $businessSettings->address ?? '') }}</textarea>
+                                      required>{{ old('address', $businessSettings->address ?: '') }}</textarea>
                         </div>
                         <div>
                             <label for="website_url" class="block text-sm font-medium text-gray-700 mb-1">{{ __('admin/business-setting/edit.labels.website_url') }}</label>
                             <input type="url"
                                    id="website_url"
                                    name="website_url"
-                                   value="{{ old('website_url', $businessSettings->website_url ?? '') }}"
+                                   value="{{ old('website_url', $businessSettings->website_url ?: '') }}"
                                    class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                                    placeholder="{{ __('admin/business-setting/edit.placeholders.website_url') }}">
                         </div>
@@ -95,14 +95,14 @@
                                 'saturday' => __('admin/business-setting/edit.days.saturday'),
                                 'sunday' => __('admin/business-setting/edit.days.sunday')
                             ];
-                            $currentHours = old('business_hours', $businessSettings->business_hours ?? []);
+                            $currentHours = old('business_hours', $businessSettings->business_hours ?: []);
                         @endphp
                         @foreach($days as $day => $dayName)
                             @php
-                                $dayData = $currentHours[$day] ?? ['closed' => true];
+                                $dayData = $currentHours[$day] ?? [];
                                 $isClosed = isset($dayData['closed']) && $dayData['closed'];
-                                $openTime = $dayData['open'] ?? '09:00';
-                                $closeTime = $dayData['close'] ?? '18:00';
+                                $openTime = isset($dayData['open']) ? $dayData['open'] : '09:00';
+                                $closeTime = isset($dayData['close']) ? $dayData['close'] : '18:00';
                             @endphp
                             <div class="border border-gray-200 rounded-lg p-4">
                                 <div class="flex items-center justify-between mb-3">
@@ -154,7 +154,7 @@
                             <input type="text"
                                    id="site_name"
                                    name="site_name"
-                                   value="{{ old('site_name', $businessSettings->site_name ?? '') }}"
+                                   value="{{ old('site_name', $businessSettings->site_name ?: '') }}"
                                    class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
                         </div>
                         <div>
@@ -163,7 +163,7 @@
                                 <input type="checkbox"
                                        name="site_public"
                                        value="1"
-                                       {{ old('site_public', $businessSettings->site_public ?? false) ? 'checked' : '' }}
+                                       {{ old('site_public', $businessSettings->site_public ?: false) ? 'checked' : '' }}
                                        class="rounded border-gray-300 text-blue-600 shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50">
                                 <span class="ml-2 text-sm text-gray-700">{{ __('admin/business-setting/edit.labels.make_site_public') }}</span>
                             </label>
@@ -173,7 +173,7 @@
                             <input type="email"
                                    id="reply_email"
                                    name="reply_email"
-                                   value="{{ old('reply_email', $businessSettings->reply_email ?? '') }}"
+                                   value="{{ old('reply_email', $businessSettings->reply_email ?: '') }}"
                                    class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
                         </div>
                         <div>
@@ -181,7 +181,7 @@
                             <input type="text"
                                    id="google_analytics_id"
                                    name="google_analytics_id"
-                                   value="{{ old('google_analytics_id', $businessSettings->google_analytics_id ?? '') }}"
+                                   value="{{ old('google_analytics_id', $businessSettings->google_analytics_id ?: '') }}"
                                    class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                                    placeholder="{{ __('admin/business-setting/edit.placeholders.google_analytics_id') }}">
                         </div>
@@ -204,7 +204,7 @@
                                       name="shop_description"
                                       rows="4"
                                       class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                                      placeholder="{{ __('admin/business-setting/edit.placeholders.shop_description') }}">{{ old('shop_description', $businessSettings->shop_description ?? '') }}</textarea>
+                                      placeholder="{{ __('admin/business-setting/edit.placeholders.shop_description') }}">{{ old('shop_description', $businessSettings->shop_description ?: '') }}</textarea>
                         </div>
                         <div>
                             <label for="access_information" class="block text-sm font-medium text-gray-700 mb-1">{{ __('admin/business-setting/edit.labels.access_information') }}</label>
@@ -212,7 +212,7 @@
                                       name="access_information"
                                       rows="3"
                                       class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                                      placeholder="{{ __('admin/business-setting/edit.placeholders.access_information') }}">{{ old('access_information', $businessSettings->access_information ?? '') }}</textarea>
+                                      placeholder="{{ __('admin/business-setting/edit.placeholders.access_information') }}">{{ old('access_information', $businessSettings->access_information ?: '') }}</textarea>
                         </div>
                         <div>
                             <label for="top_image" class="block text-sm font-medium text-gray-700 mb-1">{{ __('admin/business-setting/edit.labels.top_image') }}</label>
@@ -252,7 +252,7 @@
                                       name="terms_of_use"
                                       rows="6"
                                       class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                                      placeholder="{{ __('admin/business-setting/edit.placeholders.terms_of_use') }}">{{ old('terms_of_use', $businessSettings->terms_of_use ?? '') }}</textarea>
+                                      placeholder="{{ __('admin/business-setting/edit.placeholders.terms_of_use') }}">{{ old('terms_of_use', $businessSettings->terms_of_use ?: '') }}</textarea>
                         </div>
                         <div>
                             <label for="privacy_policy" class="block text-sm font-medium text-gray-700 mb-1">{{ __('admin/business-setting/edit.labels.privacy_policy') }}</label>
@@ -260,7 +260,7 @@
                                       name="privacy_policy"
                                       rows="6"
                                       class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                                      placeholder="{{ __('admin/business-setting/edit.placeholders.privacy_policy') }}">{{ old('privacy_policy', $businessSettings->privacy_policy ?? '') }}</textarea>
+                                      placeholder="{{ __('admin/business-setting/edit.placeholders.privacy_policy') }}">{{ old('privacy_policy', $businessSettings->privacy_policy ?: '') }}</textarea>
                         </div>
                     </div>
                 </div>
