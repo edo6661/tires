@@ -205,4 +205,37 @@ class ReservationService implements ReservationServiceInterface
     {
         return $this->reservationRepository->getRecentByUserId($userId, $limit);
     }
+
+    public function getCustomerReservationsByStatus(int $userId, string $status): Collection
+    {
+        // Validate status
+        $allowedStatuses = ['pending', 'confirmed', 'completed', 'cancelled'];
+        if (!in_array($status, $allowedStatuses)) {
+            throw new \InvalidArgumentException('Status tidak valid: ' . $status);
+        }
+
+        return $this->reservationRepository->getByUserIdAndStatus($userId, $status);
+    }
+
+    public function getCustomerReservationsByStatusWithCursor(int $userId, string $status, int $perPage = 15, ?string $cursor = null): CursorPaginator
+    {
+        // Validate status
+        $allowedStatuses = ['pending', 'confirmed', 'completed', 'cancelled'];
+        if (!in_array($status, $allowedStatuses)) {
+            throw new \InvalidArgumentException('Status tidak valid: ' . $status);
+        }
+
+        return $this->reservationRepository->getByUserIdAndStatusWithCursor($userId, $status, $perPage, $cursor);
+    }
+
+    public function getReservationCountByUserAndStatus(int $userId, string $status): int
+    {
+        // Validate status
+        $allowedStatuses = ['pending', 'confirmed', 'completed', 'cancelled'];
+        if (!in_array($status, $allowedStatuses)) {
+            throw new \InvalidArgumentException('Status tidak valid: ' . $status);
+        }
+
+        return $this->reservationRepository->getCountByUserIdAndStatus($userId, $status);
+    }
 }

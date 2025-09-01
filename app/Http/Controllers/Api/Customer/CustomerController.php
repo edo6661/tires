@@ -570,6 +570,167 @@ class CustomerController extends Controller
     }
 
     /**
+     * Get customer reservations by status
+     */
+    public function reservationsByStatus(Request $request, string $status): JsonResponse
+    {
+        try {
+            $user = $this->authService->getCurrentUser();
+
+            // Ensure only customers can access this
+            if (!$user->isCustomer()) {
+                return $this->errorResponse(
+                    'Access denied',
+                    403,
+                    [
+                        [
+                            'field' => 'role',
+                            'tag' => 'access_denied',
+                            'value' => $user->role,
+                            'message' => 'Only customers can access this endpoint'
+                        ]
+                    ]
+                );
+            }
+
+            // Validate status parameter
+            $allowedStatuses = ['pending', 'confirmed', 'completed', 'cancelled'];
+            if (!in_array($status, $allowedStatuses)) {
+                return $this->errorResponse(
+                    'Invalid status',
+                    400,
+                    [
+                        [
+                            'field' => 'status',
+                            'tag' => 'invalid_value',
+                            'value' => $status,
+                            'message' => 'Status must be one of: ' . implode(', ', $allowedStatuses)
+                        ]
+                    ]
+                );
+            }
+
+            $perPage = min($request->get('per_page', 10), 100);
+
+            if ($request->has('paginate') && $request->get('paginate') !== 'false') {
+                $cursor = $request->get('cursor');
+                $reservations = $this->reservationService->getCustomerReservationsByStatusWithCursor($user->id, $status, $perPage, $cursor);
+                $collection = ReservationResource::collection($reservations);
+
+                $cursorInfo = $this->generateCursor($reservations);
+
+                return $this->successResponseWithCursor(
+                    $collection->resolve(),
+                    $cursorInfo,
+                    'Customer reservations with status ' . $status . ' retrieved successfully'
+                );
+            } else {
+                $reservations = $this->reservationService->getCustomerReservationsByStatus($user->id, $status);
+                $collection = ReservationResource::collection($reservations);
+
+                return $this->successResponse(
+                    $collection->resolve(),
+                    'Customer reservations with status ' . $status . ' retrieved successfully'
+                );
+            }
+        } catch (\InvalidArgumentException $e) {
+            return $this->errorResponse(
+                'Invalid status parameter',
+                400,
+                [
+                    [
+                        'field' => 'status',
+                        'tag' => 'invalid_argument',
+                        'value' => $status,
+                        'message' => $e->getMessage()
+                    ]
+                ]
+            );
+        } catch (\Exception $e) {
+            return $this->errorResponse(
+                'Failed to retrieve reservations by status',
+                500,
+                [
+                    [
+                        'field' => 'general',
+                        'tag' => 'retrieval_failed',
+                        'value' => $e->getMessage(),
+                        'message' => 'Reservations retrieval failed'
+                    ]
+                ]
+            );
+        }
+    }
+
+    /**
+     * Get customer pending reservations
+     */
+    public function pendingReservations(Request $request): JsonResponse
+    {
+        return $this->reservationsByStatus($request, 'pending');
+    }
+
+    /**
+     * Get customer completed reservations
+     */
+    public function completedReservations(Request $request): JsonResponse
+    {
+        return $this->reservationsByStatus($request, 'completed');
+    }
+
+    /**
+     * Get customer reservations summary by status
+     */
+    public function reservationsSummary(): JsonResponse
+    {
+        try {
+            $user = $this->authService->getCurrentUser();
+
+            // Ensure only customers can access this
+            if (!$user->isCustomer()) {
+                return $this->errorResponse(
+                    'Access denied',
+                    403,
+                    [
+                        [
+                            'field' => 'role',
+                            'tag' => 'access_denied',
+                            'value' => $user->role,
+                            'message' => 'Only customers can access this endpoint'
+                        ]
+                    ]
+                );
+            }
+
+            $summary = [
+                'total' => $this->reservationService->getReservationCountByUser($user->id),
+                'pending' => $this->reservationService->getReservationCountByUserAndStatus($user->id, 'pending'),
+                'confirmed' => $this->reservationService->getReservationCountByUserAndStatus($user->id, 'confirmed'),
+                'completed' => $this->reservationService->getReservationCountByUserAndStatus($user->id, 'completed'),
+                'cancelled' => $this->reservationService->getReservationCountByUserAndStatus($user->id, 'cancelled'),
+            ];
+
+            return $this->successResponse(
+                $summary,
+                'Customer reservations summary retrieved successfully'
+            );
+        } catch (\Exception $e) {
+            return $this->errorResponse(
+                'Failed to retrieve reservations summary',
+                500,
+                [
+                    [
+                        'field' => 'general',
+                        'tag' => 'retrieval_failed',
+                        'value' => $e->getMessage(),
+                        'message' => 'Reservations summary retrieval failed'
+                    ]
+                ]
+            );
+        }
+    }
+
+    /**
      * Get customer dashboard summary
      */
     public function dashboard(): JsonResponse
@@ -593,7 +754,7 @@ class CustomerController extends Controller
                 );
             }
 
-            // Get s// ummary data
+            // Get summary data
             $totalReservations = $this->reservationService->getReservationCountByUser($user->id);
             // $activeTireStorage = $this->tireStorageService->getActiveTireStorageCountByUser($user->id);
             $recentReservations = $this->reservationService->getRecentReservationsByUser($user->id, 3);
@@ -602,6 +763,8 @@ class CustomerController extends Controller
             $dashboardData = [
                 'summary' => [
                     'total_reservations' => $totalReservations,
+                    'pending_reservations' => $this->reservationService->getReservationCountByUserAndStatus($user->id, 'pending'),
+                    'completed_reservations' => $this->reservationService->getReservationCountByUserAndStatus($user->id, 'completed'),
                     // 'active_tire_storage' => $activeTireStorage,
                 ],
                 'recent_reservations' => ReservationResource::collection($recentReservations)->resolve(),

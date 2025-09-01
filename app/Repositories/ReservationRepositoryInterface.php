@@ -33,4 +33,7 @@ interface ReservationRepositoryInterface
     public function getByUserIdWithCursor(int $userId, int $perPage = 15, ?string $cursor = null): CursorPaginator;
     public function getCountByUserId(int $userId): int;
     public function getRecentByUserId(int $userId, int $limit = 5): Collection;
+    public function getByUserIdAndStatus(int $userId, string $status): Collection;
+    public function getByUserIdAndStatusWithCursor(int $userId, string $status, int $perPage = 15, ?string $cursor = null): CursorPaginator;
+    public function getCountByUserIdAndStatus(int $userId, string $status): int;
 }

@@ -36,4 +36,7 @@ interface ReservationServiceInterface
     public function getCustomerReservationsWithCursor(int $userId, int $perPage = 15, ?string $cursor = null): CursorPaginator;
     public function getReservationCountByUser(int $userId): int;
     public function getRecentReservationsByUser(int $userId, int $limit = 5): Collection;
+    public function getCustomerReservationsByStatus(int $userId, string $status): Collection;
+    public function getCustomerReservationsByStatusWithCursor(int $userId, string $status, int $perPage = 15, ?string $cursor = null): CursorPaginator;
+    public function getReservationCountByUserAndStatus(int $userId, string $status): int;
 }

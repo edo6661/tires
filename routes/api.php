@@ -59,6 +59,10 @@ Route::prefix('v1')
 
                 // Customer reservations - specific routes MUST come before parameterized routes
                 Route::get('/reservations', [CustomerController::class, 'reservations']);
+                Route::get('/reservations/summary', [CustomerController::class, 'reservationsSummary']);
+                Route::get('/reservations/pending', [CustomerController::class, 'pendingReservations']);
+                Route::get('/reservations/completed', [CustomerController::class, 'completedReservations']);
+                Route::get('/reservations/status/{status}', [CustomerController::class, 'reservationsByStatus']);
                 Route::get('/reservations/calendar', [ReservationController::class, 'getCalendarData']);
                 Route::get('/reservations/availability', [ReservationController::class, 'getAvailability']);
                 Route::get('/reservations/available-hours', [ReservationController::class, 'getAvailableHours']);
