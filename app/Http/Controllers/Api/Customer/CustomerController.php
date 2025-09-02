@@ -958,15 +958,12 @@ class CustomerController extends Controller
 
             $calendarData = $this->generateBookingCalendar($currentMonth, (int) $menuId);
 
-            return $this->successResponse(
-                [
-                    'data' => $calendarData,
-                    // 'current_month' => $currentMonth->format('F Y'),
-                    // 'previous_month' => $currentMonth->copy()->subMonth()->format('Y-m'),
-                    // 'next_month' => $currentMonth->copy()->addMonth()->format('Y-m')
-                ],
-                'Calendar data retrieved successfully'
-            );
+            return $this->successResponse([
+                'current_month' => $currentMonth->format('Y-m'),
+                'previous_month' => $currentMonth->copy()->subMonth()->format('Y-m'),
+                'next_month' => $currentMonth->copy()->addMonth()->format('Y-m'),
+                'days' => $calendarData['days'], // hasil dari generateBookingCalendar
+            ], 'Calendar data retrieved successfully');
         } catch (\Exception $e) {
             return $this->errorResponse(
                 'Failed to retrieve calendar data',
