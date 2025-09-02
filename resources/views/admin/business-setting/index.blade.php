@@ -42,15 +42,15 @@
                     <div class="space-y-4">
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-1">{{ __('admin/business-setting/index.basic_info.shop_name') }}</label>
-                            <p class="text-gray-900">{{ $businessSettings->shop_name ?? __('admin/business-setting/index.not_set') }}</p>
+                            <p class="text-gray-900">{{ $businessSettings->shop_name ?: __('admin/business-setting/index.not_set') }}</p>
                         </div>
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-1">{{ __('admin/business-setting/index.basic_info.phone_number') }}</label>
-                            <p class="text-gray-900">{{ $businessSettings->phone_number ?? __('admin/business-setting/index.not_set') }}</p>
+                            <p class="text-gray-900">{{ $businessSettings->phone_number ?: __('admin/business-setting/index.not_set') }}</p>
                         </div>
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-1">{{ __('admin/business-setting/index.basic_info.address') }}</label>
-                            <p class="text-gray-900">{{ $businessSettings->address ?? __('admin/business-setting/index.not_set') }}</p>
+                            <p class="text-gray-900">{{ $businessSettings->address ?: __('admin/business-setting/index.not_set') }}</p>
                         </div>
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-1">{{ __('admin/business-setting/index.basic_info.website_url') }}</label>
@@ -105,7 +105,7 @@
                     <div class="space-y-4">
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-1">{{ __('admin/business-setting/index.site_settings.site_name') }}</label>
-                            <p class="text-gray-900">{{ $businessSettings->site_name ?? __('admin/business-setting/index.not_set') }}</p>
+                            <p class="text-gray-900">{{ $businessSettings->site_name ?: __('admin/business-setting/index.not_set') }}</p>
                         </div>
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-1">{{ __('admin/business-setting/index.site_settings.site_status') }}</label>
@@ -125,11 +125,11 @@
                         </div>
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-1">{{ __('admin/business-setting/index.site_settings.reply_email') }}</label>
-                            <p class="text-gray-900">{{ $businessSettings->reply_email ?? __('admin/business-setting/index.not_set') }}</p>
+                            <p class="text-gray-900">{{ $businessSettings->reply_email ?: __('admin/business-setting/index.not_set') }}</p>
                         </div>
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-1">{{ __('admin/business-setting/index.site_settings.google_analytics_id') }}</label>
-                            <p class="text-gray-900">{{ $businessSettings->google_analytics_id ?? __('admin/business-setting/index.not_set') }}</p>
+                            <p class="text-gray-900">{{ $businessSettings->google_analytics_id ?: __('admin/business-setting/index.not_set') }}</p>
                         </div>
                     </div>
                 </div>
@@ -143,7 +143,7 @@
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-1">{{ __('admin/business-setting/index.description_image.shop_description.label') }}</label>
                             <p class="text-gray-900 text-sm">
-                                {{ $businessSettings->shop_description ?? __('admin/business-setting/index.description_image.shop_description.not_set') }}
+                                {{ $businessSettings->shop_description ?: __('admin/business-setting/index.description_image.shop_description.not_set') }}
                             </p>
                         </div>
                         <div>
@@ -161,7 +161,7 @@
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-1">{{ __('admin/business-setting/index.description_image.access_information.label') }}</label>
                             <p class="text-gray-900 text-sm">
-                                {{ $businessSettings->access_information ?? __('admin/business-setting/index.description_image.access_information.not_set') }}
+                                {{ $businessSettings->access_information ?: __('admin/business-setting/index.description_image.access_information.not_set') }}
                             </p>
                         </div>
                     </div>
@@ -177,7 +177,7 @@
                             <label class="block text-sm font-medium text-gray-700 mb-2">{{ __('admin/business-setting/index.policies_terms.terms_of_use.label') }}</label>
                             <div class="bg-gray-50 rounded-lg p-3 max-h-32 overflow-y-auto">
                                 <p class="text-sm text-gray-700">
-                                    {{ $businessSettings->terms_of_use ?? __('admin/business-setting/index.policies_terms.terms_of_use.not_set') }}
+                                    {{ $businessSettings->terms_of_use ?: __('admin/business-setting/index.policies_terms.terms_of_use.not_set') }}
                                 </p>
                             </div>
                         </div>
@@ -185,7 +185,7 @@
                             <label class="block text-sm font-medium text-gray-700 mb-2">{{ __('admin/business-setting/index.policies_terms.privacy_policy.label') }}</label>
                             <div class="bg-gray-50 rounded-lg p-3 max-h-32 overflow-y-auto">
                                 <p class="text-sm text-gray-700">
-                                    {{ $businessSettings->privacy_policy ?? __('admin/business-setting/index.policies_terms.privacy_policy.not_set') }}
+                                    {{ $businessSettings->privacy_policy ?: __('admin/business-setting/index.policies_terms.privacy_policy.not_set') }}
                                 </p>
                             </div>
                         </div>
