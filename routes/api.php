@@ -83,11 +83,11 @@ Route::prefix('v1')
                 Route::get('/reservations/pending', [CustomerController::class, 'pendingReservations']);
                 Route::get('/reservations/completed', [CustomerController::class, 'completedReservations']);
                 Route::get('/reservations/status/{status}', [CustomerController::class, 'reservationsByStatus']);
-                Route::get('/reservations/calendar', [ReservationController::class, 'getCalendarData']);
+                // Route::get('/reservations/calendar', [ReservationController::class, 'getCalendarData']);
                 Route::get('/reservations/availability', [ReservationController::class, 'getAvailability']);
-                Route::get('/reservations/available-hours', [ReservationController::class, 'getAvailableHours']);
+                // Route::get('/reservations/available-hours', [ReservationController::class, 'getAvailableHours']);
                 Route::post('/reservations/check-availability', [ReservationController::class, 'checkAvailability']);
-                Route::post('/reservations', [ReservationController::class, 'store']); // Create reservation
+                // Route::post('/reservations', [ReservationController::class, 'store']); // Create reservation
                 Route::get('/reservations/{id}', [CustomerController::class, 'reservation']); // MUST be last
 
                 // Customer inquiry and contact
@@ -96,8 +96,8 @@ Route::prefix('v1')
                 Route::get('/inquiry-history', [CustomerController::class, 'getInquiryHistory']);
 
                 // Customer tire storage
-                Route::get('/tire-storage', [CustomerController::class, 'tireStorage']);
-                Route::get('/tire-storage/{id}', [CustomerController::class, 'tireStorageItem']);
+                // Route::get('/tire-storage', [CustomerController::class, 'tireStorage']);
+                // Route::get('/tire-storage/{id}', [CustomerController::class, 'tireStorageItem']);
 
                 // Menu access for customers
                 Route::prefix('menus')->group(function () {

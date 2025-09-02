@@ -961,9 +961,9 @@ class CustomerController extends Controller
             return $this->successResponse(
                 [
                     'data' => $calendarData,
-                    'current_month' => $currentMonth->format('F Y'),
-                    'previous_month' => $currentMonth->copy()->subMonth()->format('Y-m'),
-                    'next_month' => $currentMonth->copy()->addMonth()->format('Y-m')
+                    // 'current_month' => $currentMonth->format('F Y'),
+                    // 'previous_month' => $currentMonth->copy()->subMonth()->format('Y-m'),
+                    // 'next_month' => $currentMonth->copy()->addMonth()->format('Y-m')
                 ],
                 'Calendar data retrieved successfully'
             );
