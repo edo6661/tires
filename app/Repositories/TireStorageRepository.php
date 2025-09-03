@@ -130,6 +130,28 @@ class TireStorageRepository implements TireStorageRepositoryInterface
             ->cursorPaginate($perPage, ['*'], 'cursor', $cursor);
     }
 
+    public function getCountByUserId(int $userId): int
+    {
+        return $this->model
+            ->where('user_id', $userId)
+            ->count();
+    }
+
+    public function getCountByUserIdAndStatus(int $userId, string $status): int
+    {
+        return $this->model
+            ->where('user_id', $userId)
+            ->where('status', $status)
+            ->count();
+    }
+
+    public function getTotalTiresCountByUserId(int $userId): int
+    {
+        return $this->model
+            ->where('user_id', $userId)
+            ->sum('quantity');
+    }
+
     public function getActiveCountByUserId(int $userId): int
     {
         return $this->model

@@ -15,6 +15,7 @@ class TireStorageService implements TireStorageServiceInterface
 {
     protected $tireStorageRepository;
 
+
     public function __construct(TireStorageRepositoryInterface $tireStorageRepository)
     {
         $this->tireStorageRepository = $tireStorageRepository;
@@ -215,23 +216,38 @@ class TireStorageService implements TireStorageServiceInterface
     }
 
     // Customer-specific methods
-    // public function getTireStorageByUser(int $userId): Collection
-    // {
-    //     return $this->tireStorageRepository->getByUserId($userId);
-    // }
+    public function getTireStorageByUser(int $userId): Collection
+    {
+        return $this->tireStorageRepository->getByUserId($userId);
+    }
 
-    // public function getCustomerTireStorageWithCursor(int $userId, int $perPage = 15, ?string $cursor = null): CursorPaginator
-    // {
-    //     return $this->tireStorageRepository->getByUserIdWithCursor($userId, $perPage, $cursor);
-    // }
+    public function getCustomerTireStorageWithCursor(int $userId, int $perPage = 15, ?string $cursor = null): CursorPaginator
+    {
+        return $this->tireStorageRepository->getByUserIdWithCursor($userId, $perPage, $cursor);
+    }
 
-    // public function getActiveTireStorageCountByUser(int $userId): int
-    // {
-    //     return $this->tireStorageRepository->getActiveCountByUserId($userId);
-    // }
+    public function getTireStorageCountByUser(int $userId): int
+    {
+        return $this->tireStorageRepository->getCountByUserId($userId);
+    }
 
-    // public function getRecentTireStorageByUser(int $userId, int $limit = 5): Collection
-    // {
-    //     return $this->tireStorageRepository->getRecentByUserId($userId, $limit);
-    // }
+    public function getTireStorageCountByUserAndStatus(int $userId, string $status): int
+    {
+        return $this->tireStorageRepository->getCountByUserIdAndStatus($userId, $status);
+    }
+
+    public function getTotalTiresCountByUser(int $userId): int
+    {
+        return $this->tireStorageRepository->getTotalTiresCountByUserId($userId);
+    }
+
+    public function getActiveTireStorageCountByUser(int $userId): int
+    {
+        return $this->tireStorageRepository->getActiveCountByUserId($userId);
+    }
+
+    public function getRecentTireStorageByUser(int $userId, int $limit = 5): Collection
+    {
+        return $this->tireStorageRepository->getRecentByUserId($userId, $limit);
+    }
 }

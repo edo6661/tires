@@ -96,8 +96,8 @@ Route::prefix('v1')
                 Route::get('/inquiry-history', [CustomerController::class, 'getInquiryHistory']);
 
                 // Customer tire storage
-                // Route::get('/tire-storage', [CustomerController::class, 'tireStorage']);
-                // Route::get('/tire-storage/{id}', [CustomerController::class, 'tireStorageItem']);
+                Route::get('/tire-storage', [CustomerController::class, 'tireStorage']);
+                Route::get('/tire-storage/{id}', [CustomerController::class, 'tireStorageItem']);
 
                 // Menu access for customers
                 Route::prefix('menus')->group(function () {

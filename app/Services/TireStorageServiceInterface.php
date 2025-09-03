@@ -25,4 +25,13 @@ interface TireStorageServiceInterface
     public function calculateStorageFee(int $id): float;
     public function getPaginatedTireStoragesWithFilters(int $perPage = 15, array $filters = []): LengthAwarePaginator;
     public function getPaginatedTireStoragesWithCursor(int $perPage = 15, ?string $cursor = null): CursorPaginator;
+
+    // Customer-specific methods
+    public function getTireStorageByUser(int $userId): Collection;
+    public function getCustomerTireStorageWithCursor(int $userId, int $perPage = 15, ?string $cursor = null): CursorPaginator;
+    public function getTireStorageCountByUser(int $userId): int;
+    public function getTireStorageCountByUserAndStatus(int $userId, string $status): int;
+    public function getTotalTiresCountByUser(int $userId): int;
+    public function getActiveTireStorageCountByUser(int $userId): int;
+    public function getRecentTireStorageByUser(int $userId, int $limit = 5): Collection;
 }
