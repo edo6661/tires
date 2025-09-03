@@ -39,7 +39,7 @@ Route::prefix('v1')
             Route::get('/menus/{id}', [MenuController::class, 'show']);
 
             // Contact and inquiry endpoints
-            Route::post('/contact', [\App\Http\Controllers\Api\ContactController::class, 'submitContact']);
+            // Route::post('/contact', [\App\Http\Controllers\Api\ContactController::class, 'submitContact']);
             Route::post('/inquiry', [\App\Http\Controllers\Api\ContactController::class, 'submitInquiry']);
         });
 
@@ -61,7 +61,7 @@ Route::prefix('v1')
             ->group(function () {
                 // Customer profile management
                 Route::get('/profile', [CustomerController::class, 'profile']);
-                Route::put('/profile', [CustomerController::class, 'updateProfile']);
+                Route::patch('/profile', [CustomerController::class, 'updateProfile']);
                 Route::patch('/change-password', [CustomerController::class, 'changePassword']);
                 Route::delete('/account', [CustomerController::class, 'deleteAccount']);
 
@@ -92,7 +92,7 @@ Route::prefix('v1')
 
                 // Customer inquiry and contact
                 Route::post('/inquiry', [CustomerController::class, 'submitInquiry']);
-                Route::post('/contact', [CustomerController::class, 'submitContact']);
+                // Route::post('/contact', [CustomerController::class, 'submitContact']);
                 Route::get('/inquiry-history', [CustomerController::class, 'getInquiryHistory']);
 
                 // Customer tire storage
@@ -116,20 +116,20 @@ Route::prefix('v1')
                 // Profile
                 Route::prefix('profile')->group(function () {
                     Route::get('/', [ProfileController::class, 'show']);
-                    Route::put('/', [ProfileController::class, 'update']);
+                    Route::patch('/', [ProfileController::class, 'update']);
                     Route::patch('/password', [ProfileController::class, 'updatePassword']);
                     Route::get('/reservations', [ProfileController::class, 'reservations']);
                     Route::delete('/account', [ProfileController::class, 'deleteAccount']);
                 });
 
                 // User Management
-                Route::apiResource('users', UserController::class);
                 Route::get('users/search', [UserController::class, 'search']);
+                Route::apiResource('users', UserController::class);
                 Route::get('users/customers', [UserController::class, 'customers']);
                 Route::get('users/admins', [UserController::class, 'admins']);
                 Route::get('users/role/{role}', [UserController::class, 'byRole']);
                 Route::patch('users/{id}/reset-password', [UserController::class, 'resetPassword']);
-                Route::patch('users/{id}/change-password', [UserController::class, 'changePassword']);
+                // Route::patch('users/{id}/change-password', [UserController::class, 'changePassword']);
 
                 //  Menu Management
                 Route::apiResource('menus', MenuController::class);
@@ -179,7 +179,7 @@ Route::prefix('v1')
                     Route::get('/', [ApiAdminQuestionnaireController::class, 'index']);
                     Route::post('/', [ApiAdminQuestionnaireController::class, 'store']);
                     Route::get('/{id}', [ApiAdminQuestionnaireController::class, 'show']);
-                    Route::put('/{id}', [ApiAdminQuestionnaireController::class, 'update']);
+                    Route::patch('/{id}', [ApiAdminQuestionnaireController::class, 'update']);
                     Route::delete('/{id}', [ApiAdminQuestionnaireController::class, 'destroy']);
                     Route::get('/reservation/{reservationId}', [ApiAdminQuestionnaireController::class, 'getByReservation']);
                     Route::post('/validate-answers', [ApiAdminQuestionnaireController::class, 'validateAnswers']);
@@ -189,7 +189,7 @@ Route::prefix('v1')
                 Route::prefix('contacts')->group(function () {
                     Route::get('/', [ApiAdminContactController::class, 'index']);
                     Route::get('/{id}', [ApiAdminContactController::class, 'show']);
-                    Route::put('/{id}', [ApiAdminContactController::class, 'update']);
+                    Route::patch('/{id}', [ApiAdminContactController::class, 'update']);
                     Route::delete('/{id}', [ApiAdminContactController::class, 'destroy']);
                     Route::post('/{id}/reply', [ApiAdminContactController::class, 'reply']);
                     Route::delete('/bulk-delete', [ApiAdminContactController::class, 'bulkDelete']);
@@ -215,9 +215,9 @@ Route::prefix('v1')
                     Route::get('/', [ApiAdminBusinessSettingController::class, 'index']);
                     Route::get('/business-hours', [ApiAdminBusinessSettingController::class, 'getBusinessHours']);
                     Route::get('/top-image', [ApiAdminBusinessSettingController::class, 'getTopImage']);
-                    Route::put('/business-hours', [ApiAdminBusinessSettingController::class, 'updateBusinessHours']);
+                    Route::patch('/business-hours', [ApiAdminBusinessSettingController::class, 'updateBusinessHours']);
                     Route::get('/{id}/edit', [ApiAdminBusinessSettingController::class, 'edit']);
-                    Route::put('/update', [ApiAdminBusinessSettingController::class, 'update']);
+                    Route::patch('/update', [ApiAdminBusinessSettingController::class, 'update']);
                 });
 
                 // FAQ Management
@@ -227,7 +227,7 @@ Route::prefix('v1')
                     Route::get('/active', [ApiAdminFaqController::class, 'getActiveFaqs']);
                     Route::post('/reorder', [ApiAdminFaqController::class, 'reorder']);
                     Route::get('/{id}', [ApiAdminFaqController::class, 'show']);
-                    Route::put('/{id}', [ApiAdminFaqController::class, 'update']);
+                    Route::patch('/{id}', [ApiAdminFaqController::class, 'update']);
                     Route::delete('/{id}', [ApiAdminFaqController::class, 'destroy']);
                     Route::patch('/{id}/toggle-status', [ApiAdminFaqController::class, 'toggleStatus']);
                 });
@@ -243,7 +243,7 @@ Route::prefix('v1')
                     Route::get('/user/{user_id}', [ApiAdminPaymentController::class, 'getByUser']);
                     Route::get('/reservation/{reservation_id}', [ApiAdminPaymentController::class, 'getByReservation']);
                     Route::get('/{id}', [ApiAdminPaymentController::class, 'show']);
-                    Route::put('/{id}', [ApiAdminPaymentController::class, 'update']);
+                    Route::patch('/{id}', [ApiAdminPaymentController::class, 'update']);
                     Route::delete('/{id}', [ApiAdminPaymentController::class, 'destroy']);
                     Route::post('/{id}/process', [ApiAdminPaymentController::class, 'processPayment']);
                 });
@@ -260,7 +260,7 @@ Route::prefix('v1')
                     Route::post('/export', [ApiAdminBlockedPeriodController::class, 'export']);
                     Route::delete('/bulk-delete', [ApiAdminBlockedPeriodController::class, 'bulkDelete']);
                     Route::get('/{id}', [ApiAdminBlockedPeriodController::class, 'show']);
-                    Route::put('/{id}', [ApiAdminBlockedPeriodController::class, 'update']);
+                    Route::patch('/{id}', [ApiAdminBlockedPeriodController::class, 'update']);
                     Route::delete('/{id}', [ApiAdminBlockedPeriodController::class, 'destroy']);
                 });
             });

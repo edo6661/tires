@@ -98,7 +98,7 @@ class UserController extends Controller
     /**
      * Display the specified user
      */
-    public function show(int $id): JsonResponse
+    public function show($id): JsonResponse
     {
         try {
             $user = $this->userService->findUser($id);
@@ -249,7 +249,6 @@ class UserController extends Controller
                 $cursorInfo,
                 'User search completed successfully'
             );
-
         } catch (\Illuminate\Validation\ValidationException $e) {
             return $this->errorResponse(
                 'Validation failed',
@@ -314,7 +313,6 @@ class UserController extends Controller
                 $cursorInfo,
                 "Users with role '{$role}' retrieved successfully"
             );
-
         } catch (\Exception $e) {
             return $this->errorResponse(
                 'Failed to retrieve users by role',
@@ -378,7 +376,6 @@ class UserController extends Controller
                 null,
                 'Password reset successfully'
             );
-
         } catch (\Illuminate\Validation\ValidationException $e) {
             return $this->errorResponse(
                 'Validation failed',
@@ -444,7 +441,6 @@ class UserController extends Controller
                 null,
                 'Password changed successfully'
             );
-
         } catch (\Illuminate\Validation\ValidationException $e) {
             return $this->errorResponse(
                 'Validation failed',
@@ -473,6 +469,4 @@ class UserController extends Controller
             );
         }
     }
-
-
 }
