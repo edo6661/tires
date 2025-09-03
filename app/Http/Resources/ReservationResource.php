@@ -26,12 +26,7 @@ class ReservationResource extends JsonResource
                 'raw' => $this->amount,
                 'formatted' => number_format($this->amount, 2)
             ],
-            'status' => [
-                'value' => is_object($this->status) ? $this->status->value : $this->status,
-                'label' => is_object($this->status) && method_exists($this->status, 'label')
-                    ? $this->status->label()
-                    : ucfirst($this->status)
-            ],
+            'status' => $this->status,
             'notes' => $this->notes,
 
             // Customer Information

@@ -1541,8 +1541,7 @@ class CustomerController extends Controller
 
             return $this->successResponse(
                 [
-                    'reservation' => new ReservationResource($reservation),
-                    'reservation_number' => $reservation->reservation_number,
+                    new ReservationResource($reservation),
                 ],
                 'Reservation created successfully'
             );
