@@ -1540,9 +1540,8 @@ class CustomerController extends Controller
             BookingCompleted::dispatch($reservation);
 
             return $this->successResponse(
-                [
-                    new ReservationResource($reservation),
-                ],
+
+                new ReservationResource($reservation),
                 'Reservation created successfully'
             );
         } catch (\Illuminate\Validation\ValidationException $e) {
