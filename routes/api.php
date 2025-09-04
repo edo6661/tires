@@ -97,12 +97,11 @@ Route::prefix('v1')
 
                 // Customer tire storage
                 Route::get('/tire-storage', [CustomerController::class, 'tireStorage']);
-                Route::get('/tire-storage/{id}', [CustomerController::class, 'tireStorageItem']);
                 Route::post('/tire-storage', [CustomerController::class, 'createTireStorage']);
-                Route::post('/tire-storage/{id}/pickup', [CustomerController::class, 'requestTirePickup']);
-                Route::patch('/tire-storage/{id}', [CustomerController::class, 'updateTireStorage']);
-
                 Route::get('/tire-storage/summary', [CustomerController::class, 'getTireStorageSummary']);
+                Route::get('/tire-storage/{id}', [CustomerController::class, 'tireStorageItem']);
+                Route::patch('/tire-storage/{id}', [CustomerController::class, 'updateTireStorage']);
+                Route::post('/tire-storage/{id}/pickup', [CustomerController::class, 'requestTirePickup']);
 
                 // Menu access for customers
                 Route::prefix('menus')->group(function () {

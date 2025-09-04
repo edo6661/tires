@@ -16,6 +16,7 @@ use Carbon\Carbon;
 
 /**
  * @mixin \Illuminate\Http\Request
+ * @tags Public,Admin
  */
 class MenuController extends Controller
 {

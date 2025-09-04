@@ -19,7 +19,7 @@ class UserResource extends JsonResource
             'department' => $this->department,
             'company_address' => $this->company_address,
             'home_address' => $this->home_address,
-            'date_of_birth' => $this->date_of_birth?->format('Y-m-d'),
+            'date_of_birth' => $this->date_of_birth?->toJSONString(),
             'gender' => $this->gender,
             'role' => $this->role ?? 'customer',
             'is_admin' => $this->isAdmin(),

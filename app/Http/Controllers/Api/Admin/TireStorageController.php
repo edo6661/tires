@@ -10,6 +10,9 @@ use App\Http\Resources\TireStorageResource;
 use App\Services\TireStorageServiceInterface;
 use App\Http\Traits\ApiResponseTrait;
 
+/**
+ * @tags Admin
+ */
 class TireStorageController extends Controller
 {
     use ApiResponseTrait;

@@ -11,6 +11,9 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
 
+/**
+ * @tags Public
+ */
 class ContactController extends Controller
 {
     use ApiResponseTrait;

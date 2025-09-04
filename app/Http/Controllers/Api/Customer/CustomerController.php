@@ -24,6 +24,9 @@ use App\Services\ReservationServiceInterface;
 use App\Services\TireStorageServiceInterface;
 use App\Services\BlockedPeriodServiceInterface;
 
+/**
+ * @tags Customer
+ */
 class CustomerController extends Controller
 {
     use ApiResponseTrait;
@@ -40,6 +43,12 @@ class CustomerController extends Controller
 
     /**
      * Get customer profile
+     *
+     * @tags Customer
+     * @summary Get current customer profile information
+     * @description Retrieve the profile information of the currently authenticated customer
+     * @response 200 {"status": "success", "message": "Customer profile retrieved successfully", "data": {"id": 1, "full_name": "John Doe", "email": "john@example.com"}}
+     * @response 403 {"status": "error", "message": "Access denied", "errors": []}
      */
     public function profile(): JsonResponse
     {
@@ -84,6 +93,22 @@ class CustomerController extends Controller
 
     /**
      * Update customer profile
+     *
+     * @tags Customer
+     * @summary Update customer profile information
+     * @description Update the profile information of the currently authenticated customer
+     * @bodyParam full_name string required Customer's full name
+     * @bodyParam full_name_kana string required Customer's full name in Katakana
+     * @bodyParam phone_number string required Customer's phone number
+     * @bodyParam email string required Customer's email address
+     * @bodyParam company_name string optional Company name
+     * @bodyParam department string optional Department
+     * @bodyParam company_address string optional Company address
+     * @bodyParam home_address string optional Home address
+     * @bodyParam date_of_birth date optional Date of birth
+     * @bodyParam gender string optional Gender (male, female, other)
+     * @response 200 {"status": "success", "message": "Customer profile updated successfully", "data": {}}
+     * @response 422 {"status": "error", "message": "Validation failed", "errors": []}
      */
     public function updateProfile(Request $request): JsonResponse
     {
@@ -156,6 +181,14 @@ class CustomerController extends Controller
 
     /**
      * Get customer reservations
+     *
+     * @tags Customer
+     * @summary Get customer reservations list
+     * @description Retrieve all reservations for the currently authenticated customer with optional pagination
+     * @queryParam per_page integer optional Number of items per page (max 100)
+     * @queryParam cursor string optional Cursor for pagination
+     * @queryParam paginate string optional Enable pagination (default: true)
+     * @response 200 {"status": "success", "message": "Customer reservations retrieved successfully", "data": []}
      */
     public function reservations(Request $request): JsonResponse
     {
