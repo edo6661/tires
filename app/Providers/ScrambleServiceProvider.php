@@ -34,25 +34,8 @@ class ScrambleServiceProvider extends ServiceProvider
                 \Dedoc\Scramble\Support\Generator\SecurityScheme::http('bearer', 'sanctum')
             );
 
-            // Add tags for better organization
-            $openApi->tags([
-                [
-                    'name' => 'Authentication',
-                    'description' => 'Authentication endpoints for login, register, and password reset'
-                ],
-                [
-                    'name' => 'Public',
-                    'description' => 'Public endpoints that do not require authentication'
-                ],
-                [
-                    'name' => 'Customer',
-                    'description' => 'Customer-specific endpoints for profile, reservations, and tire storage'
-                ],
-                [
-                    'name' => 'Admin',
-                    'description' => 'Administrative endpoints for managing users, reservations, and system settings'
-                ]
-            ]);
+            // Add tags for better organization - using direct modification
+            // $openApi->tags method doesn't exist, so we'll rely on @tags annotations in controllers
         });
     }
 }

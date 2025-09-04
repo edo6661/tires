@@ -1574,7 +1574,7 @@ class CustomerController extends Controller
 
             return $this->successResponse(
 
-                new ReservationResource($reservation),
+                new ReservationResource($reservation->load('menu')),
                 'Reservation created successfully'
             );
         } catch (\Illuminate\Validation\ValidationException $e) {
