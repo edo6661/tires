@@ -53,7 +53,7 @@ class AnnouncementRepository implements AnnouncementRepositoryInterface
     {
         return $this->model->withTranslations()
             ->orderBy('published_at', 'desc')
-            ->paginate($perPage, ['*'], 'cursor', $cursor);
+            ->cursorpaginate($perPage, ['*'], 'cursor', $cursor);
     }
 
     public function findById(int $id): ?Announcement

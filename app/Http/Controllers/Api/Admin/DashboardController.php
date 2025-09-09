@@ -7,11 +7,17 @@ use App\Services\AnnouncementServiceInterface;
 use App\Services\ReservationServiceInterface;
 use App\Services\ContactServiceInterface;
 use App\Http\Traits\ApiResponseTrait;
+use App\Http\Resources\AnnouncementResource;
+use App\Http\Resources\ReservationResource;
+use App\Http\Resources\ContactResource;
 use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Auth;
 
+/**
+ * @tags Admin
+ */
 class DashboardController extends Controller
 {
     use ApiResponseTrait;
@@ -24,7 +30,9 @@ class DashboardController extends Controller
     }
 
     /**
-     * Get admin dashboard data
+     * Get admin dashboard data with locale-filtered translations
+     *
+     * @return JsonResponse Dashboard data with announcements, reservations, contacts, and statistics
      */
     public function index(): JsonResponse
     {
@@ -63,11 +71,11 @@ class DashboardController extends Controller
             $lastLogin = Auth::user()->last_login_at ?? Carbon::now();
 
             $dashboardData = [
-                'announcements' => $announcements,
-                'today_reservations' => $todayReservations,
+                'announcements' => AnnouncementResource::collection($announcements),
+                'today_reservations' => ReservationResource::collection($todayReservations),
                 'pending_contacts_count' => $pendingContactsCount,
-                'pending_contacts' => $pendingContacts,
-                'monthly_reservations' => $monthlyReservations,
+                'pending_contacts' => ContactResource::collection($pendingContacts),
+                'monthly_reservations' => ReservationResource::collection($monthlyReservations),
                 'statistics' => [
                     'new_customers_this_month' => $newCustomersThisMonth,
                     'online_reservations_this_month' => $onlineReservationsThisMonth,
@@ -87,6 +95,8 @@ class DashboardController extends Controller
 
     /**
      * Get dashboard statistics only
+     *
+     * @return JsonResponse Dashboard statistics without detailed data
      */
     public function getStatistics(): JsonResponse
     {
