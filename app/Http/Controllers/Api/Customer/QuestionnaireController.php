@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers\Api;
+namespace App\Http\Controllers\Api\Customer;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\QuestionnaireRequest;
@@ -12,6 +12,9 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Pagination\CursorPaginator;
 
+/**
+ * @tags Customer
+ */
 class QuestionnaireController extends Controller
 {
     use ApiResponseTrait;

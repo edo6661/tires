@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers\Api;
+namespace App\Http\Controllers\Api\Admin;
 
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
@@ -11,6 +11,9 @@ use App\Http\Traits\ApiResponseTrait;
 use App\Services\UserServiceInterface;
 use Illuminate\Contracts\Pagination\CursorPaginator;
 
+/**
+ * @tags Admin
+ */
 class UserController extends Controller
 {
     use ApiResponseTrait;

@@ -8,6 +8,9 @@ use App\Http\Traits\ApiResponseTrait;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 
+/**
+ * @tags Admin
+ */
 class ContactController extends Controller
 {
     use ApiResponseTrait;

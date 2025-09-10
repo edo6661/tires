@@ -21,21 +21,37 @@ class ScrambleServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        // Configure Scramble to include all API routes
-        Scramble::routes(function (Route $route) {
-            // Include all routes that start with 'api/v1/'
-            return str_starts_with($route->uri(), 'api/v1/');
-        });
+        // Configure Scramble to include all API routes and add authentication/tags
+        Scramble::configure()
+            ->routes(function (Route $route) {
+                // Include all routes that start with 'api/v1/'
+                return str_starts_with($route->uri(), 'api/v1/');
+            })
+            ->withDocumentTransformers(function (\Dedoc\Scramble\Support\Generator\OpenApi $openApi) {
+                // Add Bearer token authentication
+                $openApi->secure(
+                    \Dedoc\Scramble\Support\Generator\SecurityScheme::http('bearer', 'sanctum')
+                );
 
-        // Add API authentication info and tags
-        Scramble::extendOpenApi(function (\Dedoc\Scramble\Support\Generator\OpenApi $openApi) {
-            // Add Bearer token authentication
-            $openApi->secure(
-                \Dedoc\Scramble\Support\Generator\SecurityScheme::http('bearer', 'sanctum')
-            );
-
-            // Add tags for better organization - using direct modification
-            // $openApi->tags method doesn't exist, so we'll rely on @tags annotations in controllers
-        });
+                // Add tags for better organization
+                $openApi->tags = [
+                    [
+                        'name' => 'Public',
+                        'description' => 'Public endpoints that do not require authentication'
+                    ],
+                    [
+                        'name' => 'Authentication',
+                        'description' => 'User authentication and authorization endpoints'
+                    ],
+                    [
+                        'name' => 'Customer',
+                        'description' => 'Customer-specific endpoints (requires user authentication)'
+                    ],
+                    [
+                        'name' => 'Admin',
+                        'description' => 'Administrative endpoints (requires admin authentication)'
+                    ]
+                ];
+            });
     }
 }

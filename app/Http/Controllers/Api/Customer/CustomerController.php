@@ -1125,6 +1125,153 @@ class CustomerController extends Controller
     }
 
     /**
+     * Check availability for specific datetime
+     */
+    public function checkAvailability(Request $request): JsonResponse
+    {
+        try {
+            $validator = Validator::make($request->all(), [
+                'menu_id' => 'required|integer|exists:menus,id',
+                'reservation_datetime' => 'required|date',
+                'exclude_reservation_id' => 'nullable|integer|exists:reservations,id'
+            ]);
+
+            if ($validator->fails()) {
+                return $this->validationErrorResponse($validator->errors()->toArray());
+            }
+
+            $available = $this->reservationService->checkAvailability(
+                $request->menu_id,
+                $request->reservation_datetime,
+                $request->exclude_reservation_id
+            );
+
+            return $this->successResponse([
+                'available' => $available,
+                'message' => $available ? 'Time slot is available' : 'Time slot is not available'
+            ], 'Availability check completed');
+        } catch (\Exception $e) {
+            return $this->errorResponse(
+                'Failed to check availability: ' . $e->getMessage(),
+                500
+            );
+        }
+    }
+
+    /**
+     * Get availability data for date range
+     */
+    public function getAvailability(Request $request): JsonResponse
+    {
+        try {
+            $validator = Validator::make($request->all(), [
+                'menu_id' => 'nullable|integer|exists:menus,id',
+                'start_date' => 'required|date_format:Y-m-d',
+                'end_date' => 'required|date_format:Y-m-d|after_or_equal:start_date',
+                'exclude_reservation_id' => 'nullable|integer|exists:reservations,id'
+            ]);
+
+            if ($validator->fails()) {
+                return response()->json([
+                    'status' => 'error',
+                    'message' => 'Validation failed',
+                    'errors' => $validator->errors()
+                ], 422);
+            }
+
+            $menuId = $request->menu_id;
+            $startDate = $request->start_date;
+            $endDate = $request->end_date;
+            $excludeReservationId = $request->exclude_reservation_id;
+
+            $availabilityData = [];
+            $start = Carbon::parse($startDate);
+            $end = Carbon::parse($endDate);
+
+            // Get blocked periods
+            $blockedPeriods = $this->blockedPeriodService->getByDateRange($startDate, $endDate);
+
+            // Get existing reservations
+            $existingReservations = [];
+            if ($menuId) {
+                $existingReservations = $this->reservationService->getReservationsByDateRangeAndMenu(
+                    $startDate,
+                    $endDate,
+                    $menuId,
+                    $excludeReservationId
+                );
+            }
+
+            $current = $start->copy();
+            while ($current <= $end) {
+                $dateStr = $current->format('Y-m-d');
+                $availableHours = [];
+
+                // Check hours from 8 AM to 8 PM
+                for ($hour = 8; $hour <= 20; $hour++) {
+                    $hourStr = str_pad($hour, 2, '0', STR_PAD_LEFT) . ':00';
+                    $isHourAvailable = true;
+                    $blockedBy = null;
+
+                    // Check against blocked periods
+                    foreach ($blockedPeriods as $period) {
+                        if ($period->all_menus || ($menuId && $period->menu_id == $menuId)) {
+                            $periodStart = Carbon::parse($period->start_datetime);
+                            $periodEnd = Carbon::parse($period->end_datetime);
+                            $checkTime = Carbon::parse($dateStr . ' ' . $hourStr);
+
+                            if ($checkTime->between($periodStart, $periodEnd)) {
+                                $isHourAvailable = false;
+                                $blockedBy = 'blocked_period';
+                                break;
+                            }
+                        }
+                    }
+
+                    // Check against existing reservations
+                    if ($isHourAvailable && $menuId) {
+                        foreach ($existingReservations as $reservation) {
+                            $reservationTime = Carbon::parse($reservation->reservation_datetime);
+                            $checkTime = Carbon::parse($dateStr . ' ' . $hourStr);
+
+                            if ($reservationTime->format('Y-m-d H:i') === $checkTime->format('Y-m-d H:i')) {
+                                $isHourAvailable = false;
+                                $blockedBy = 'existing_reservation';
+                                break;
+                            }
+                        }
+                    }
+
+                    $availableHours[] = [
+                        'hour' => $hourStr,
+                        'available' => $isHourAvailable,
+                        'blocked_by' => $blockedBy
+                    ];
+                }
+
+                $availabilityData[] = [
+                    'date' => $dateStr,
+                    'available_hours' => $availableHours,
+                    'has_available_slots' => collect($availableHours)->where('available', true)->count() > 0
+                ];
+
+                $current->addDay();
+            }
+
+            return response()->json([
+                'status' => 'success',
+                'data' => $availabilityData,
+                'message' => 'Availability data retrieved successfully'
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Failed to get availability: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
      * Get customer dashboard summary
      */
     public function dashboard(): JsonResponse

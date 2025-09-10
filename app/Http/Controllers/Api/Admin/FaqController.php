@@ -9,6 +9,9 @@ use App\Http\Requests\FaqRequest;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 
+/**
+ * @tags Admin
+ */
 class FaqController extends Controller
 {
     use ApiResponseTrait;

@@ -13,6 +13,7 @@ use Illuminate\Support\Facades\App;
 
 /**
  * @mixin \Illuminate\Http\Request
+ * @tags Admin
  */
 class AnnouncementController extends Controller
 {

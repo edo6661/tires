@@ -10,6 +10,9 @@ use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Storage;
 
+/**
+ * @tags Admin
+ */
 class BusinessSettingController extends Controller
 {
     use ApiResponseTrait;

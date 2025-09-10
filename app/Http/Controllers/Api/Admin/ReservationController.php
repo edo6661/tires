@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers\Api;
+namespace App\Http\Controllers\Api\Admin;
 
 use App\Events\BookingCompleted;
 use Carbon\Carbon;
@@ -17,6 +17,9 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Validator;
 use App\Http\Traits\ApiResponseTrait;
 
+/**
+ * @tags Admin
+ */
 class ReservationController extends Controller
 {
     use ApiResponseTrait;

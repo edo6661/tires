@@ -9,6 +9,9 @@ use App\Http\Requests\PaymentRequest;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 
+/**
+ * @tags Admin
+ */
 class PaymentController extends Controller
 {
     use ApiResponseTrait;

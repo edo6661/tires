@@ -2,18 +2,19 @@
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
+// Public Controllers
 use App\Http\Controllers\Api\MenuController;
-use App\Http\Controllers\Api\UserController;
-use App\Http\Controllers\Api\Customer\CustomerController;
-
-use App\Http\Controllers\Api\ProfileController;
-use App\Http\Controllers\Api\ReservationController;
-use App\Http\Controllers\Api\QuestionnaireController;
-use App\Http\Controllers\Api\Admin\TireStorageController;
-use App\Http\Controllers\Api\Admin\AnnouncementController;
+// Customer Controllers
 use App\Http\Controllers\Api\AuthController as AuthApiController;
+use App\Http\Controllers\Api\Customer\CustomerController;
+use App\Http\Controllers\Api\Customer\ProfileController;
+use App\Http\Controllers\Api\Customer\QuestionnaireController;
 
 // Admin Controllers
+use App\Http\Controllers\Api\Admin\UserController;
+use App\Http\Controllers\Api\Admin\AnnouncementController;
+use App\Http\Controllers\Api\Admin\TireStorageController;
+use App\Http\Controllers\Api\Admin\ReservationController;
 use App\Http\Controllers\Api\Admin\ContactController as ApiAdminContactController;
 use App\Http\Controllers\Api\Admin\CustomerController as ApiAdminCustomerController;
 use App\Http\Controllers\Api\Admin\DashboardController as ApiAdminDashboardController;
@@ -83,16 +84,12 @@ Route::prefix('v1')
                 Route::get('/reservations/pending', [CustomerController::class, 'pendingReservations']);
                 Route::get('/reservations/completed', [CustomerController::class, 'completedReservations']);
                 Route::get('/reservations/status/{status}', [CustomerController::class, 'reservationsByStatus']);
-                // Route::get('/reservations/calendar', [ReservationController::class, 'getCalendarData']);
-                Route::get('/reservations/availability', [ReservationController::class, 'getAvailability']);
-                // Route::get('/reservations/available-hours', [ReservationController::class, 'getAvailableHours']);
-                Route::post('/reservations/check-availability', [ReservationController::class, 'checkAvailability']);
-                // Route::post('/reservations', [ReservationController::class, 'store']); // Create reservation
-                Route::get('/reservations/{id}', [CustomerController::class, 'reservation']); // MUST be last
+                Route::get('/reservations/availability', [CustomerController::class, 'getAvailability']);
+                Route::post('/reservations/check-availability', [CustomerController::class, 'checkAvailability']);
+                Route::get('/reservations/{id}', [CustomerController::class, 'reservation']);
 
                 // Customer inquiry and contact
                 Route::post('/inquiry', [CustomerController::class, 'submitInquiry']);
-                // Route::post('/contact', [CustomerController::class, 'submitContact']);
                 Route::get('/inquiry-history', [CustomerController::class, 'getInquiryHistory']);
 
                 // Customer tire storage

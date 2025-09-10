@@ -9,6 +9,9 @@ use App\Http\Requests\QuestionnaireRequest;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 
+/**
+ * @tags Admin
+ */
 class QuestionnaireController extends Controller
 {
     use ApiResponseTrait;

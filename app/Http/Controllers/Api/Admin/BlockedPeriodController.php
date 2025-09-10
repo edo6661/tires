@@ -11,6 +11,9 @@ use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 use Carbon\Carbon;
 
+/**
+ * @tags Admin
+ */
 class BlockedPeriodController extends Controller
 {
     use ApiResponseTrait;
