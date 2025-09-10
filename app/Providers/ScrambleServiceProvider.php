@@ -3,6 +3,7 @@
 namespace App\Providers;
 
 use Dedoc\Scramble\Scramble;
+use Dedoc\Scramble\Support\Generator\Tag;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Routing\Route;
 
@@ -35,22 +36,10 @@ class ScrambleServiceProvider extends ServiceProvider
 
                 // Add tags for better organization
                 $openApi->tags = [
-                    [
-                        'name' => 'Public',
-                        'description' => 'Public endpoints that do not require authentication'
-                    ],
-                    [
-                        'name' => 'Authentication',
-                        'description' => 'User authentication and authorization endpoints'
-                    ],
-                    [
-                        'name' => 'Customer',
-                        'description' => 'Customer-specific endpoints (requires user authentication)'
-                    ],
-                    [
-                        'name' => 'Admin',
-                        'description' => 'Administrative endpoints (requires admin authentication)'
-                    ]
+                    new Tag('Public', 'Public endpoints that do not require authentication'),
+                    new Tag('Authentication', 'User authentication and authorization endpoints'),
+                    new Tag('Customer', 'Customer-specific endpoints (requires user authentication)'),
+                    new Tag('Admin', 'Administrative endpoints (requires admin authentication)')
                 ];
             });
     }
