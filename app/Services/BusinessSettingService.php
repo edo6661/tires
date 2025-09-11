@@ -61,7 +61,7 @@ class BusinessSettingService implements BusinessSettingServiceInterface
         $displayHours = [];
         $days = [
             'monday' => 'Monday',
-            'tuesday' => 'Tuesday', 
+            'tuesday' => 'Tuesday',
             'wednesday' => 'Wednesday',
             'thursday' => 'Thursday',
             'friday' => 'Friday',

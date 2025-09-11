@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api\Admin;
 use App\Http\Controllers\Controller;
 use App\Services\BusinessSettingServiceInterface;
 use App\Http\Traits\ApiResponseTrait;
+use App\Http\Resources\BusinessSettingResource;
 use App\Http\Requests\BusinessSettingRequest;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
@@ -29,7 +30,14 @@ class BusinessSettingController extends Controller
         try {
             $businessSettings = $this->businessSettingService->getBusinessSettings();
 
-            return $this->successResponse($businessSettings, 'Business settings retrieved successfully');
+            if (!$businessSettings) {
+                return $this->successResponse(null, 'No business settings found');
+            }
+
+            return $this->successResponse(
+                new BusinessSettingResource($businessSettings),
+                'Business settings retrieved successfully'
+            );
         } catch (\Exception $e) {
             return $this->errorResponse('Failed to retrieve business settings: ' . $e->getMessage(), 500);
         }
@@ -43,7 +51,14 @@ class BusinessSettingController extends Controller
         try {
             $businessSettings = $this->businessSettingService->getBusinessSettings();
 
-            return $this->successResponse($businessSettings, 'Business settings retrieved for editing');
+            if (!$businessSettings) {
+                return $this->successResponse(null, 'No business settings found for editing');
+            }
+
+            return $this->successResponse(
+                new BusinessSettingResource($businessSettings),
+                'Business settings retrieved for editing'
+            );
         } catch (\Exception $e) {
             return $this->errorResponse('Failed to retrieve business settings: ' . $e->getMessage(), 500);
         }
@@ -78,7 +93,10 @@ class BusinessSettingController extends Controller
 
             $updatedSettings = $this->businessSettingService->updateBusinessSettings($data);
 
-            return $this->successResponse($updatedSettings, 'Business settings updated successfully');
+            return $this->successResponse(
+                new BusinessSettingResource($updatedSettings),
+                'Business settings updated successfully'
+            );
         } catch (\Illuminate\Validation\ValidationException $e) {
             return $this->validationErrorResponse($e->errors());
         } catch (\Exception $e) {
@@ -119,7 +137,10 @@ class BusinessSettingController extends Controller
 
             $updatedSettings = $this->businessSettingService->updateBusinessSettings($data);
 
-            return $this->successResponse($updatedSettings, 'Business hours updated successfully');
+            return $this->successResponse(
+                new BusinessSettingResource($updatedSettings),
+                'Business hours updated successfully'
+            );
         } catch (\Illuminate\Validation\ValidationException $e) {
             return $this->validationErrorResponse($e->errors());
         } catch (\Exception $e) {

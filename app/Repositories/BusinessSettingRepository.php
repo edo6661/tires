@@ -12,6 +12,7 @@ class BusinessSettingRepository implements BusinessSettingRepositoryInterface
     {
         return $this->model->withTranslations()->first();
     }
+
     public function updateSettings(array $data): BusinessSetting
     {
         $settings = $this->getSettings();
@@ -19,7 +20,7 @@ class BusinessSettingRepository implements BusinessSettingRepositoryInterface
             $translations = $data['translations'] ?? [];
             unset($data['translations']);
             $settings->update($data);
-            $settings->setTranslations($translations); 
+            $settings->setTranslations($translations);
             return $settings->fresh(['translations']);
         }
         return $this->createSettings($data);
@@ -29,7 +30,7 @@ class BusinessSettingRepository implements BusinessSettingRepositoryInterface
         $translations = $data['translations'] ?? [];
         unset($data['translations']);
         $settings = $this->model->create($data);
-        $settings->setTranslations($translations); 
+        $settings->setTranslations($translations);
         return $settings->fresh(['translations']);
     }
 }
