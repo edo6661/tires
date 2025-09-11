@@ -24,36 +24,78 @@ class AnnouncementController extends Controller
     ) {}
 
     /**
-     * List semua pengumuman (paginate / non-paginate)
+     * List semua pengumuman (paginate / non-paginate) with filtering and search
      */
     public function index(Request $request): JsonResponse
     {
         try {
+            // Validate query parameters
+            $request->validate([
+                'per_page' => 'nullable|integer|min:1|max:100',
+                'paginate' => 'nullable|string',
+                'cursor' => 'nullable|string',
+                'status' => 'nullable|in:active,inactive',
+                'published_at' => 'nullable|in:asc,desc',
+                'search' => 'nullable|string|max:255'
+            ]);
+
             $perPage = min($request->get('per_page', 15), 100);
             $locale = App::getLocale();
 
+            // Get filters from request
+            $filters = [
+                'status' => $request->get('status'),
+                'published_at' => $request->get('published_at'),
+                'search' => $request->get('search')
+            ];
+
+            // Remove empty filters
+            $filters = array_filter($filters);
+
             if ($request->has('paginate') && $request->get('paginate') !== 'false') {
-                // Paginated response with cursor
-                $announcements = $this->announcementService->getPaginatedAnnouncementsWithCursor($perPage);
+                // Paginated response with cursor and filters
+                $cursor = $request->get('cursor');
+                $announcements = $this->announcementService->getPaginatedAnnouncementsWithCursor($perPage, $cursor, $filters);
                 $collection = AnnouncementResource::collection($announcements);
 
-                $cursor = $this->generateCursor($announcements);
+                $cursorInfo = $this->generateCursor($announcements);
 
                 return $this->successResponseWithCursor(
                     $collection->resolve(),
-                    $cursor,
+                    $cursorInfo,
                     'Announcements retrieved successfully'
                 );
             } else {
-                // Simple response without pagination
-                $announcements = $this->announcementService->getActiveAnnouncements();
+                // Simple response without pagination but with filters
+                if (!empty($filters)) {
+                    $announcements = $this->announcementService->getFilteredAnnouncements($filters, $perPage);
+                } else {
+                    $announcements = $this->announcementService->getActiveAnnouncements()->take($perPage);
+                }
                 $collection = AnnouncementResource::collection($announcements);
 
                 return $this->successResponse(
-                    $collection->resolve(),
+                    [
+                        $collection->resolve(),
+                        'filters_applied' => $filters,
+                        'total_filtered' => $announcements->count()
+                    ],
                     'Announcements retrieved successfully'
                 );
             }
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            return $this->errorResponse(
+                'Validation failed',
+                422,
+                collect($e->errors())->map(function ($messages, $field) {
+                    return [
+                        'field' => $field,
+                        'tag' => 'validation_error',
+                        'value' => request($field),
+                        'message' => $messages[0]
+                    ];
+                })->values()->toArray()
+            );
         } catch (\Exception $e) {
             return $this->errorResponse(
                 'Failed to retrieve announcements',
@@ -184,6 +226,32 @@ class AnnouncementController extends Controller
         } catch (\Exception $e) {
             return $this->errorResponse(
                 'Failed to delete announcement',
+                500,
+                [[
+                    'field' => 'general',
+                    'tag' => 'server_error',
+                    'value' => $e->getMessage(),
+                    'message' => 'An unexpected error occurred'
+                ]]
+            );
+        }
+    }
+
+    /**
+     * Get announcement statistics
+     */
+    public function statistics(): JsonResponse
+    {
+        try {
+            $stats = $this->announcementService->getAnnouncementStatistics();
+
+            return $this->successResponse(
+                $stats,
+                'Announcement statistics retrieved successfully'
+            );
+        } catch (\Exception $e) {
+            return $this->errorResponse(
+                'Failed to retrieve announcement statistics',
                 500,
                 [[
                     'field' => 'general',

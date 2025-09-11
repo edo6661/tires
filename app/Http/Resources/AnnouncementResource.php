@@ -19,18 +19,19 @@ class AnnouncementResource extends JsonResource
             'start_date' => $this->start_date,
             'end_date' => $this->end_date,
             'is_active' => $this->is_active,
+            'published_at' => $this->published_at,
+            'created_at' => $this->created_at,
+            'updated_at' => $this->updated_at,
 
-            // Semua terjemahan (opsional jika ?include_translations di query)
-            'translations' => $this->when($request->has('include_translations'), function () {
-                return $this->translations->mapWithKeys(function ($translation) {
-                    return [
-                        $translation->locale => [
-                            'title' => $translation->title,
-                            'content' => $translation->content,
-                        ]
-                    ];
-                });
-            }),
+            // Always include all translations
+            'translations' => $this->translations ? $this->translations->mapWithKeys(function ($translation) {
+                return [
+                    $translation->locale => [
+                        'title' => $translation->title,
+                        'content' => $translation->content,
+                    ]
+                ];
+            }) : (object)[],
 
             'meta' => [
                 'locale' => $locale,

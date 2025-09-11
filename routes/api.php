@@ -157,6 +157,7 @@ Route::prefix('v1')
                 Route::patch('reservations/bulk/status', [ReservationController::class, 'bulkUpdateStatus']);
 
                 // Announcement
+                Route::get('announcements/statistics', [AnnouncementController::class, 'statistics']);
                 Route::apiResource('announcements', AnnouncementController::class);
                 Route::patch('announcements/{id}/toggle-status', [AnnouncementController::class, 'toggleStatus']);
                 Route::patch('announcements/bulk-toggle-status', [AnnouncementController::class, 'bulkToggleStatus']);
@@ -176,7 +177,7 @@ Route::prefix('v1')
                 });
 
                 // Admin Questionnaire Management
-                Route::prefix('admin-questionnaires')->group(function () {
+                Route::prefix('questionnaires')->group(function () {
                     Route::get('/', [ApiAdminQuestionnaireController::class, 'index']);
                     Route::post('/', [ApiAdminQuestionnaireController::class, 'store']);
                     Route::get('/{id}', [ApiAdminQuestionnaireController::class, 'show']);
@@ -217,7 +218,7 @@ Route::prefix('v1')
                     Route::get('/business-hours', [ApiAdminBusinessSettingController::class, 'getBusinessHours']);
                     Route::get('/top-image', [ApiAdminBusinessSettingController::class, 'getTopImage']);
                     Route::patch('/business-hours', [ApiAdminBusinessSettingController::class, 'updateBusinessHours']);
-                    Route::get('/{id}/edit', [ApiAdminBusinessSettingController::class, 'edit']);
+                    // Route::get('/{id}/edit', [ApiAdminBusinessSettingController::class, 'edit']);
                     Route::patch('/update', [ApiAdminBusinessSettingController::class, 'update']);
                 });
 
@@ -234,20 +235,20 @@ Route::prefix('v1')
                 });
 
                 // Payment Management
-                Route::prefix('payments')->group(function () {
-                    Route::get('/', [ApiAdminPaymentController::class, 'index']);
-                    Route::post('/', [ApiAdminPaymentController::class, 'store']);
-                    Route::get('/revenue/total', [ApiAdminPaymentController::class, 'getTotalRevenue']);
-                    Route::get('/statistics', [ApiAdminPaymentController::class, 'getStatistics']);
-                    Route::post('/bulk-update-status', [ApiAdminPaymentController::class, 'bulkUpdateStatus']);
-                    Route::get('/status/{status}', [ApiAdminPaymentController::class, 'getByStatus']);
-                    Route::get('/user/{user_id}', [ApiAdminPaymentController::class, 'getByUser']);
-                    Route::get('/reservation/{reservation_id}', [ApiAdminPaymentController::class, 'getByReservation']);
-                    Route::get('/{id}', [ApiAdminPaymentController::class, 'show']);
-                    Route::patch('/{id}', [ApiAdminPaymentController::class, 'update']);
-                    Route::delete('/{id}', [ApiAdminPaymentController::class, 'destroy']);
-                    Route::post('/{id}/process', [ApiAdminPaymentController::class, 'processPayment']);
-                });
+                // Route::prefix('payments')->group(function () {
+                //     Route::get('/', [ApiAdminPaymentController::class, 'index']);
+                //     Route::post('/', [ApiAdminPaymentController::class, 'store']);
+                //     Route::get('/revenue/total', [ApiAdminPaymentController::class, 'getTotalRevenue']);
+                //     Route::get('/statistics', [ApiAdminPaymentController::class, 'getStatistics']);
+                //     Route::post('/bulk-update-status', [ApiAdminPaymentController::class, 'bulkUpdateStatus']);
+                //     Route::get('/status/{status}', [ApiAdminPaymentController::class, 'getByStatus']);
+                //     Route::get('/user/{user_id}', [ApiAdminPaymentController::class, 'getByUser']);
+                //     Route::get('/reservation/{reservation_id}', [ApiAdminPaymentController::class, 'getByReservation']);
+                //     Route::get('/{id}', [ApiAdminPaymentController::class, 'show']);
+                //     Route::patch('/{id}', [ApiAdminPaymentController::class, 'update']);
+                //     Route::delete('/{id}', [ApiAdminPaymentController::class, 'destroy']);
+                //     Route::post('/{id}/process', [ApiAdminPaymentController::class, 'processPayment']);
+                // });
 
                 // Blocked Period Management
                 Route::prefix('blocked-periods')->group(function () {

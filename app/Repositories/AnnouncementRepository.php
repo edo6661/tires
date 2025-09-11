@@ -19,7 +19,7 @@ class AnnouncementRepository implements AnnouncementRepositoryInterface
 
     public function getAll(): Collection
     {
-        return $this->model->withTranslations()
+        return $this->model->with('translations')
             ->orderBy('published_at', 'desc')
             ->get();
     }
@@ -27,7 +27,7 @@ class AnnouncementRepository implements AnnouncementRepositoryInterface
     public function getActive(): Collection
     {
         return $this->model->active()
-            ->withTranslations()
+            ->with('translations')
             ->orderBy('published_at', 'desc')
             ->get();
     }
@@ -43,22 +43,46 @@ class AnnouncementRepository implements AnnouncementRepositoryInterface
 
     public function getPaginated(int $perPage = 15): LengthAwarePaginator
     {
-        return $this->model->withTranslations()
+        return $this->model->with('translations')
             ->orderBy('published_at', 'desc')
             ->paginate($perPage);
     }
 
     // getPaginatedWithCursor
-    public function getPaginatedWithCursor(int $perPage = 15, ?string $cursor = null): CursorPaginator
+    public function getPaginatedWithCursor(int $perPage = 15, ?string $cursor = null, array $filters = []): CursorPaginator
     {
-        return $this->model->withTranslations()
-            ->orderBy('published_at', 'desc')
+        $query = $this->model->with('translations');
+
+        // Apply filters
+        if (!empty($filters['status'])) {
+            if ($filters['status'] === 'active') {
+                $query->where('is_active', true);
+            } elseif ($filters['status'] === 'inactive') {
+                $query->where('is_active', false);
+            }
+        }
+
+        if (!empty($filters['published_at'])) {
+            $query->whereDate('published_at', '<=', $filters['end_date']);
+        }
+
+        if (!empty($filters['search'])) {
+            $search = $filters['search'];
+            $query->where(function ($q) use ($search) {
+                $q->whereHas('translations', function ($subQ) use ($search) {
+                    $subQ->where('title', 'ILIKE', "%{$search}%")
+                        ->orWhere('content', 'ILIKE', "%{$search}%");
+                });
+            });
+        }
+
+        return $query->orderBy('published_at', 'desc')
             ->cursorpaginate($perPage, ['*'], 'cursor', $cursor);
     }
 
     public function findById(int $id): ?Announcement
     {
-        return $this->model->withTranslations()
+        return $this->model->with('translations')
             ->find($id);
     }
 
@@ -144,6 +168,80 @@ class AnnouncementRepository implements AnnouncementRepositoryInterface
         return $this->model->whereTranslation('title', 'ILIKE', "%{$search}%", $locale)
             ->withTranslations($locale)
             ->orderBy('published_at', 'desc')
+            ->get();
+    }
+
+    public function count(): int
+    {
+        return $this->model->count();
+    }
+
+    public function countByStatus(string $status): int
+    {
+        if ($status === 'active') {
+            return $this->model->where('is_active', true)->count();
+        } elseif ($status === 'inactive') {
+            return $this->model->where('is_active', false)->count();
+        }
+        return 0;
+    }
+
+    public function countTodayAnnouncements(): int
+    {
+        return $this->model->whereDate('created_at', today())->count();
+    }
+
+    public function getFiltered(array $filters, int $perPage = null): Collection
+    {
+        $query = $this->model->with('translations');
+
+        // Apply filters
+        if (!empty($filters['status'])) {
+            if ($filters['status'] === 'active') {
+                $query->where('is_active', true);
+            } elseif ($filters['status'] === 'inactive') {
+                $query->where('is_active', false);
+            }
+        }
+
+        if (!empty($filters['start_date'])) {
+            $query->whereDate('published_at', '>=', $filters['start_date']);
+        }
+
+        if (!empty($filters['end_date'])) {
+            $query->whereDate('published_at', '<=', $filters['end_date']);
+        }
+
+        if (!empty($filters['search'])) {
+            $search = $filters['search'];
+            $query->where(function ($q) use ($search) {
+                $q->whereHas('translations', function ($subQ) use ($search) {
+                    $subQ->where('title', 'ILIKE', "%{$search}%")
+                        ->orWhere('content', 'ILIKE', "%{$search}%");
+                });
+            });
+        }
+
+        $query->orderBy('published_at', 'desc');
+
+        if ($perPage) {
+            return $query->take($perPage)->get();
+        }
+
+        return $query->get();
+    }
+
+    public function search(string $query, int $perPage = 15): Collection
+    {
+        return $this->model->where(function ($q) use ($query) {
+            $q->whereHas('translations', function ($subQ) use ($query) {
+                $subQ->where('title', 'ILIKE', "%{$query}%")
+                    ->orWhere('content', 'ILIKE', "%{$query}%");
+            });
+        })
+            ->with('translations')
+            ->orderBy('published_at', 'desc')
+            ->take($perPage)
             ->get();
     }
 }

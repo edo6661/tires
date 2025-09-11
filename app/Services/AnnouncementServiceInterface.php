@@ -18,6 +18,9 @@ interface AnnouncementServiceInterface
     public function deleteAnnouncement(int $id): bool;
     public function toggleAnnouncementStatus(int $id): bool;
     public function bulkDeleteAnnouncements(array $ids): bool;
-    public function getPaginatedAnnouncementsWithCursor(int $perPage = 15, ?string $cursor = null): CursorPaginator;
+    public function getPaginatedAnnouncementsWithCursor(int $perPage = 15, ?string $cursor = null, array $filters = []): CursorPaginator;
     public function searchAnnouncementsByTitle(string $search, ?string $locale = null): Collection;
+    public function getAnnouncementStatistics(): array;
+    public function getFilteredAnnouncements(array $filters, int $perPage = null): Collection;
+    public function searchAnnouncements(string $query, int $perPage = 15): Collection;
 }

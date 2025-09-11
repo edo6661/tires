@@ -73,7 +73,7 @@ class BlockedPeriodController extends Controller
     /**
      * Display the specified blocked period
      */
-    public function show(int $id): JsonResponse
+    public function show($id): JsonResponse
     {
         try {
             $blockedPeriod = $this->blockedPeriodService->findBlockedPeriod($id);

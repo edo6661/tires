@@ -38,9 +38,9 @@ class AnnouncementService implements AnnouncementServiceInterface
     }
 
     // getPaginatedWithCursor
-    public function getPaginatedAnnouncementsWithCursor(int $perPage = 15, ?string $cursor = null): CursorPaginator
+    public function getPaginatedAnnouncementsWithCursor(int $perPage = 15, ?string $cursor = null, array $filters = []): CursorPaginator
     {
-        return $this->announcementRepository->getPaginatedWithCursor($perPage, $cursor);
+        return $this->announcementRepository->getPaginatedWithCursor($perPage, $cursor, $filters);
     }
 
     public function findAnnouncement(int $id): ?Announcement
@@ -116,5 +116,30 @@ class AnnouncementService implements AnnouncementServiceInterface
     public function searchAnnouncementsByTitle(string $search, ?string $locale = null): Collection
     {
         return $this->announcementRepository->searchByTitle($search, $locale);
+    }
+
+    public function getAnnouncementStatistics(): array
+    {
+        $total = $this->announcementRepository->count();
+        $active = $this->announcementRepository->countByStatus('active');
+        $inactive = $this->announcementRepository->countByStatus('inactive');
+        $today = $this->announcementRepository->countTodayAnnouncements();
+
+        return [
+            'total_announcements' => $total,
+            'active' => $active,
+            'inactive' => $inactive,
+            'today' => $today
+        ];
+    }
+
+    public function getFilteredAnnouncements(array $filters, int $perPage = null): Collection
+    {
+        return $this->announcementRepository->getFiltered($filters, $perPage);
+    }
+
+    public function searchAnnouncements(string $query, int $perPage = 15): Collection
+    {
+        return $this->announcementRepository->search($query, $perPage);
     }
 }

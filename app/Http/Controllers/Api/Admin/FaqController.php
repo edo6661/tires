@@ -52,7 +52,7 @@ class FaqController extends Controller
     /**
      * Display the specified FAQ
      */
-    public function show(int $id): JsonResponse
+    public function show($id): JsonResponse
     {
         try {
             $faq = $this->faqService->findFaq($id);
@@ -106,7 +106,7 @@ class FaqController extends Controller
     /**
      * Toggle FAQ status
      */
-    public function toggleStatus(int $id): JsonResponse
+    public function toggleStatus($id): JsonResponse
     {
         try {
             $toggled = $this->faqService->toggleFaqStatus($id);
