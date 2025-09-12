@@ -16,7 +16,7 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Auth;
 
 /**
- * @tags Admin
+ * @tags Admin - Dashboard
  */
 class DashboardController extends Controller
 {

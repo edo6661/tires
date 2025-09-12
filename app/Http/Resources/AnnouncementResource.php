@@ -16,8 +16,6 @@ class AnnouncementResource extends JsonResource
             'id' => $this->id,
             'title' => $this->getTranslatedAttribute('title', $locale),
             'content' => $this->getTranslatedAttribute('content', $locale),
-            'start_date' => $this->start_date,
-            'end_date' => $this->end_date,
             'is_active' => $this->is_active,
             'published_at' => $this->published_at,
             'created_at' => $this->created_at,

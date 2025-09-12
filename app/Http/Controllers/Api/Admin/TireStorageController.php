@@ -11,7 +11,7 @@ use App\Services\TireStorageServiceInterface;
 use App\Http\Traits\ApiResponseTrait;
 
 /**
- * @tags Admin
+ * @tags Admin - Tire Storage Management
  */
 class TireStorageController extends Controller
 {

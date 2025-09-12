@@ -12,7 +12,7 @@ use App\Services\UserServiceInterface;
 use Illuminate\Contracts\Pagination\CursorPaginator;
 
 /**
- * @tags Admin
+ * @tags Admin - Customer Management
  */
 class UserController extends Controller
 {
@@ -282,7 +282,7 @@ class UserController extends Controller
     }
 
     /**
-     * Get users by role - UPDATED
+     * Get users by role
      */
     public function byRole(Request $request, string $role): JsonResponse
     {

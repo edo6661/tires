@@ -12,7 +12,7 @@ use Illuminate\Http\JsonResponse;
 use Carbon\Carbon;
 
 /**
- * @tags Admin
+ * @tags Admin - Blocked Period Management
  */
 class BlockedPeriodController extends Controller
 {

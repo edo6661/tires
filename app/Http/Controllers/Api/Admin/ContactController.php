@@ -9,7 +9,7 @@ use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 
 /**
- * @tags Admin
+ * @tags Admin - Contact Management
  */
 class ContactController extends Controller
 {

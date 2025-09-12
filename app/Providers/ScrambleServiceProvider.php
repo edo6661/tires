@@ -38,8 +38,28 @@ class ScrambleServiceProvider extends ServiceProvider
                 $openApi->tags = [
                     new Tag('Public', 'Public endpoints that do not require authentication'),
                     new Tag('Authentication', 'User authentication and authorization endpoints'),
-                    new Tag('Customer', 'Customer-specific endpoints (requires user authentication)'),
-                    new Tag('Admin', 'Administrative endpoints (requires admin authentication)')
+
+                    // Customer section with sub-groups
+                    new Tag('Customer - Dashboard', 'Customer dashboard and summary endpoints'),
+                    new Tag('Customer - Profile', 'Customer profile management endpoints'),
+                    new Tag('Customer - Booking', 'Customer booking and reservation endpoints'),
+                    new Tag('Customer - Reservation', 'Customer reservation endpoints'),
+                    new Tag('Customer - TireStorage', 'Customer Tire storage endpoints'),
+                    new Tag('Customer - Contact', 'Customer support and inquiry endpoints'),
+
+
+                    // Admin section with sub-groups
+                    new Tag('Admin - Dashboard', 'Administrative dashboard and statistics'),
+                    new Tag('Admin - Customer Management', 'Administrative customer management endpoints'),
+                    new Tag('Admin - Menu Management', 'Administrative menu management endpoints'),
+                    new Tag('Admin - Reservation Management', 'Administrative booking and reservation management'),
+                    new Tag('Admin - Tire Storage Management', 'Administrative tire storage endpoints'),
+                    new Tag('Admin - Announcement Management', 'Administrative menu management endpoints'),
+                    new Tag('Admin - Questionnaire Management', 'Administrative questionnaire management endpoints'),
+                    new Tag('Admin - Contact Management', 'Administrative contact management endpoints'),
+                    new Tag('Admin - Business Setting Management', 'Administrative business setting management endpoints'),
+                    new Tag('Admin - Blocked Period Management', 'Administrative blocked period menu management endpoints'),
+                    new Tag('Admin - FAQ Management', 'Administrative faq management'),
                 ];
             });
     }

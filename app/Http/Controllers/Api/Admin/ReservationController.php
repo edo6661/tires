@@ -18,7 +18,7 @@ use Illuminate\Support\Facades\Validator;
 use App\Http\Traits\ApiResponseTrait;
 
 /**
- * @tags Admin
+ * @tags Admin - Reservation Management
  */
 class ReservationController extends Controller
 {

@@ -13,7 +13,7 @@ use Illuminate\Support\Facades\App;
 
 /**
  * @mixin \Illuminate\Http\Request
- * @tags Admin
+ * @tags Admin - Announcement Management
  */
 class AnnouncementController extends Controller
 {
@@ -24,7 +24,7 @@ class AnnouncementController extends Controller
     ) {}
 
     /**
-     * List semua pengumuman (paginate / non-paginate) with filtering and search
+     * List All Announcement (paginate / non-paginate) with filtering and search
      */
     public function index(Request $request): JsonResponse
     {
@@ -113,7 +113,7 @@ class AnnouncementController extends Controller
     }
 
     /**
-     * Simpan pengumuman baru
+     * Create New Announcement
      */
     public function store(AnnouncementRequest $request): JsonResponse
     {
@@ -141,7 +141,7 @@ class AnnouncementController extends Controller
     }
 
     /**
-     * Detail pengumuman
+     * Get Announcement Detail
      */
     public function show(int $id): JsonResponse
     {
@@ -165,7 +165,7 @@ class AnnouncementController extends Controller
     }
 
     /**
-     * Update pengumuman
+     * Update Announcement
      */
     public function update(AnnouncementRequest $request, int $id): JsonResponse
     {
@@ -203,7 +203,7 @@ class AnnouncementController extends Controller
     }
 
     /**
-     * Hapus pengumuman
+     * Delete Announcement
      */
     public function destroy(int $id): JsonResponse
     {

@@ -4,13 +4,18 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 // Public Controllers
 use App\Http\Controllers\Api\MenuController;
-// Customer Controllers
+// Auth Controllers
 use App\Http\Controllers\Api\AuthController as AuthApiController;
+// Customer Controllers
+use App\Http\Controllers\Api\Customer\ProfileController as CustomerProfileController;
 use App\Http\Controllers\Api\Customer\CustomerController;
-use App\Http\Controllers\Api\Customer\ProfileController;
-use App\Http\Controllers\Api\Customer\QuestionnaireController;
+use App\Http\Controllers\Api\Customer\BookingController as CustomerBookingController;
+use App\Http\Controllers\Api\Customer\TireStorageController as CustomerTireStorageController;
+use App\Http\Controllers\Api\Customer\ReservationController as CustomerReservationController;
+use App\Http\Controllers\Api\Customer\ContactController as CustomerContactController;
 
 // Admin Controllers
+use App\Http\Controllers\Api\Admin\ProfileController as ApiAdminProfileController;
 use App\Http\Controllers\Api\Admin\UserController;
 use App\Http\Controllers\Api\Admin\AnnouncementController;
 use App\Http\Controllers\Api\Admin\TireStorageController;
@@ -61,44 +66,44 @@ Route::prefix('v1')
             ->middleware(['auth:sanctum'])
             ->group(function () {
                 // Customer profile management
-                Route::get('/profile', [CustomerController::class, 'profile']);
-                Route::patch('/profile', [CustomerController::class, 'updateProfile']);
-                Route::patch('/change-password', [CustomerController::class, 'changePassword']);
-                Route::delete('/account', [CustomerController::class, 'deleteAccount']);
+                Route::get('/profile', [CustomerProfileController::class, 'profile']);
+                Route::patch('/profile', [CustomerProfileController::class, 'updateProfile']);
+                Route::patch('/change-password', [CustomerProfileController::class, 'changePassword']);
+                Route::delete('/account', [CustomerProfileController::class, 'deleteAccount']);
 
                 // Customer dashboard
                 Route::get('/dashboard', [CustomerController::class, 'dashboard']);
 
                 // Customer booking functionality
                 Route::prefix('booking')->group(function () {
-                    Route::get('/first-step/{menuId}', [CustomerController::class, 'bookingFirstStep']);
-                    Route::get('/calendar-data', [CustomerController::class, 'getCalendarData']);
-                    Route::get('/available-hours', [CustomerController::class, 'getAvailableHours']);
-                    Route::get('/menu-details/{menuId}', [CustomerController::class, 'getMenuDetails']);
-                    Route::post('/create-reservation', [CustomerController::class, 'createReservation']);
+                    Route::get('/first-step/{menuId}', [CustomerBookingController::class, 'bookingFirstStep']);
+                    Route::get('/calendar-data', [CustomerBookingController::class, 'getCalendarData']);
+                    Route::get('/available-hours', [CustomerBookingController::class, 'getAvailableHours']);
+                    Route::get('/menu-details/{menuId}', [CustomerBookingController::class, 'getMenuDetails']);
+                    Route::post('/create-reservation', [CustomerBookingController::class, 'createReservation']);
                 });
 
-                // Customer reservations - specific routes MUST come before parameterized routes
-                Route::get('/reservations', [CustomerController::class, 'reservations']);
-                Route::get('/reservations/summary', [CustomerController::class, 'reservationsSummary']);
-                Route::get('/reservations/pending', [CustomerController::class, 'pendingReservations']);
-                Route::get('/reservations/completed', [CustomerController::class, 'completedReservations']);
-                Route::get('/reservations/status/{status}', [CustomerController::class, 'reservationsByStatus']);
-                Route::get('/reservations/availability', [CustomerController::class, 'getAvailability']);
-                Route::post('/reservations/check-availability', [CustomerController::class, 'checkAvailability']);
-                Route::get('/reservations/{id}', [CustomerController::class, 'reservation']);
+                // Customer reservations
+                Route::get('/reservations', [CustomerReservationController::class, 'reservations']);
+                Route::get('/reservations/availability', [CustomerReservationController::class, 'getAvailability']);
+                Route::post('/reservations/check-availability', [CustomerReservationController::class, 'checkAvailability']);
+                Route::get('/reservations/summary', [CustomerReservationController::class, 'reservationsSummary']);
+                Route::get('/reservations/pending', [CustomerReservationController::class, 'pendingReservations']);
+                Route::get('/reservations/completed', [CustomerReservationController::class, 'completedReservations']);
+                Route::get('/reservations/status/{status}', [CustomerReservationController::class, 'reservationsByStatus']);
+                Route::get('/reservations/{id}', [CustomerReservationController::class, 'reservation']);
 
                 // Customer inquiry and contact
-                Route::post('/inquiry', [CustomerController::class, 'submitInquiry']);
-                Route::get('/inquiry-history', [CustomerController::class, 'getInquiryHistory']);
+                Route::post('/inquiry', [CustomerContactController::class, 'submitInquiry']);
+                Route::get('/inquiry-history', [CustomerContactController::class, 'getInquiryHistory']);
 
                 // Customer tire storage
-                Route::get('/tire-storage', [CustomerController::class, 'tireStorage']);
-                Route::post('/tire-storage', [CustomerController::class, 'createTireStorage']);
-                Route::get('/tire-storage/summary', [CustomerController::class, 'getTireStorageSummary']);
-                Route::get('/tire-storage/{id}', [CustomerController::class, 'tireStorageItem']);
-                Route::patch('/tire-storage/{id}', [CustomerController::class, 'updateTireStorage']);
-                Route::post('/tire-storage/{id}/pickup', [CustomerController::class, 'requestTirePickup']);
+                Route::get('/tire-storage', [CustomerTireStorageController::class, 'tireStorage']);
+                Route::post('/tire-storage', [CustomerTireStorageController::class, 'createTireStorage']);
+                Route::get('/tire-storage/summary', [CustomerTireStorageController::class, 'getTireStorageSummary']);
+                Route::get('/tire-storage/{id}', [CustomerTireStorageController::class, 'tireStorageItem']);
+                Route::patch('/tire-storage/{id}', [CustomerTireStorageController::class, 'updateTireStorage']);
+                Route::post('/tire-storage/{id}/pickup', [CustomerTireStorageController::class, 'requestTirePickup']);
 
                 // Menu access for customers
                 Route::prefix('menus')->group(function () {
@@ -116,11 +121,10 @@ Route::prefix('v1')
             ->group(function () {
                 // Profile
                 Route::prefix('profile')->group(function () {
-                    Route::get('/', [ProfileController::class, 'show']);
-                    Route::patch('/', [ProfileController::class, 'update']);
-                    Route::patch('/password', [ProfileController::class, 'updatePassword']);
-                    Route::get('/reservations', [ProfileController::class, 'reservations']);
-                    Route::delete('/account', [ProfileController::class, 'deleteAccount']);
+                    Route::get('/', [ApiAdminProfileController::class, 'show']);
+                    Route::patch('/', [ApiAdminProfileController::class, 'update']);
+                    Route::patch('/password', [ApiAdminProfileController::class, 'updatePassword']);
+                    Route::delete('/account', [ApiAdminProfileController::class, 'deleteAccount']);
                 });
 
                 // User Management
@@ -163,28 +167,21 @@ Route::prefix('v1')
                 Route::patch('announcements/bulk-toggle-status', [AnnouncementController::class, 'bulkToggleStatus']);
                 Route::delete('announcements/bulk-delete', [AnnouncementController::class, 'bulkDelete']);
 
-                // Questionnaire
-                Route::prefix('questionnaires')->group(function () {
-                    Route::apiResource('/', QuestionnaireController::class);
-                    Route::post('/submit', [QuestionnaireController::class, 'submitAnswers']);
-                    Route::get('/search', [QuestionnaireController::class, 'search']);
-                    // Route::get('/filtered', [QuestionnaireController::class, 'filtered']);
-                    Route::get('/completion-stats', [QuestionnaireController::class, 'getCompletionStats']);
-                    Route::get('/status/{status}', [QuestionnaireController::class, 'byCompletionStatus']);
-                    // Route::get('/{id}/summary', [QuestionnaireController::class, 'getAnswerSummary']);
-                    Route::get('/reservation/{reservationId}', [QuestionnaireController::class, 'getByReservation']);
-                    Route::post('/validate-answers', [QuestionnaireController::class, 'validateAnswers']);
-                });
 
                 // Admin Questionnaire Management
                 Route::prefix('questionnaires')->group(function () {
-                    Route::get('/', [ApiAdminQuestionnaireController::class, 'index']);
-                    Route::post('/', [ApiAdminQuestionnaireController::class, 'store']);
-                    Route::get('/{id}', [ApiAdminQuestionnaireController::class, 'show']);
-                    Route::patch('/{id}', [ApiAdminQuestionnaireController::class, 'update']);
-                    Route::delete('/{id}', [ApiAdminQuestionnaireController::class, 'destroy']);
+                    Route::apiResource('', ApiAdminQuestionnaireController::class);
+                    // Route::get('/', [ApiAdminQuestionnaireController::class, 'index']);
+                    // Route::post('/', [ApiAdminQuestionnaireController::class, 'store']);
+                    Route::get('/search', [ApiAdminQuestionnaireController::class, 'search']);
+                    // Route::get('/{id}', [ApiAdminQuestionnaireController::class, 'show']);
+                    // Route::patch('/{id}', [ApiAdminQuestionnaireController::class, 'update']);
+                    // Route::delete('/{id}', [ApiAdminQuestionnaireController::class, 'destroy']);
                     Route::get('/reservation/{reservationId}', [ApiAdminQuestionnaireController::class, 'getByReservation']);
                     Route::post('/validate-answers', [ApiAdminQuestionnaireController::class, 'validateAnswers']);
+                    Route::get('/status/{status}', [ApiAdminQuestionnaireController::class, 'byCompletionStatus']);
+                    Route::get('/completion-stats', [ApiAdminQuestionnaireController::class, 'getCompletionStats']);
+                    Route::post('/submit', [ApiAdminQuestionnaireController::class, 'submitAnswers']);
                 });
 
                 // Contact Management

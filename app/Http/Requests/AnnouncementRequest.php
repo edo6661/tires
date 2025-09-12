@@ -1,6 +1,9 @@
 <?php
+
 namespace App\Http\Requests;
+
 use Illuminate\Foundation\Http\FormRequest;
+
 class AnnouncementRequest extends FormRequest
 {
     public function authorize(): bool
@@ -21,18 +24,18 @@ class AnnouncementRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'translations.en.title.required' => 'Judul dalam bahasa Inggris wajib diisi.',
-            'translations.en.title.string' => 'Judul dalam bahasa Inggris harus berupa teks.',
-            'translations.en.title.max' => 'Judul dalam bahasa Inggris maksimal 255 karakter.',
-            'translations.en.content.required' => 'Konten dalam bahasa Inggris wajib diisi.',
-            'translations.en.content.string' => 'Konten dalam bahasa Inggris harus berupa teks.',
-            'translations.ja.title.required' => 'Judul dalam bahasa Jepang wajib diisi.',
-            'translations.ja.title.string' => 'Judul dalam bahasa Jepang harus berupa teks.',
-            'translations.ja.title.max' => 'Judul dalam bahasa Jepang maksimal 255 karakter.',
-            'translations.ja.content.required' => 'Konten dalam bahasa Jepang wajib diisi.',
-            'translations.ja.content.string' => 'Konten dalam bahasa Jepang harus berupa teks.',
-            'is_active.boolean' => 'Status aktif harus berupa true atau false.',
-            'published_at.date' => 'Tanggal publikasi harus berupa tanggal yang valid.',
+            'translations.en.title.required' => 'The title in English must be filled in.',
+            'translations.en.title.string' => 'The title in English must be in text form.',
+            'translations.en.title.max' => 'The title in English must not exceed 255 characters.',
+            'translations.en.content.required' => 'The content in English must be filled in.',
+            'translations.en.content.string' => 'The content in English must be in text form.',
+            'translations.ja.title.required' => 'The title in Japanese must be filled in.',
+            'translations.ja.title.string' => 'The title in Japanese must be in text form.',
+            'translations.ja.title.max' => 'The title in Japanese must not exceed 255 characters.',
+            'translations.ja.content.required' => 'The content in Japanese must be filled in.',
+            'translations.ja.content.string' => 'The content in Japanese must be in text form.',
+            'is_active.boolean' => 'The active status must be either true or false.',
+            'published_at.date' => 'The publication date must be a valid date.',
         ];
     }
     /**
@@ -57,12 +60,12 @@ class AnnouncementRequest extends FormRequest
     public function attributes(): array
     {
         return [
-            'translations.en.title' => 'judul bahasa Inggris',
-            'translations.en.content' => 'konten bahasa Inggris',
-            'translations.ja.title' => 'judul bahasa Jepang',
-            'translations.ja.content' => 'konten bahasa Jepang',
-            'is_active' => 'status aktif',
-            'published_at' => 'tanggal publikasi',
+            'translations.en.title' => 'English title',
+            'translations.en.content' => 'English content',
+            'translations.ja.title' => 'Japanese title',
+            'translations.ja.content' => 'Japanese content',
+            'is_active' => 'Active Status',
+            'published_at' => 'Published Date',
         ];
     }
 }

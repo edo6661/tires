@@ -12,7 +12,7 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Storage;
 
 /**
- * @tags Admin
+ * @tags Admin - Business Setting Management
  */
 class BusinessSettingController extends Controller
 {
