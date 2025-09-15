@@ -10,7 +10,8 @@ class MenuResource extends JsonResource
 {
     public function toArray(Request $request): array
     {
-        $locale = App::getLocale();
+        // Check for X-Locale header first, then fall back to App::getLocale()
+        $locale = $request->header('X-Locale') ?? App::getLocale();
 
         return [
             'id' => $this->id,
@@ -30,16 +31,19 @@ class MenuResource extends JsonResource
                 'rgba_light' => $this->getColorWithOpacity(10),
                 'text_color' => $this->getTextColor()
             ],
-            'translations' => $this->when($request->has('include_translations'), function () {
-                return $this->translations->mapWithKeys(function ($translation) {
-                    return [
-                        $translation->locale => [
-                            'name' => $translation->name,
-                            'description' => $translation->description
-                        ]
-                    ];
-                });
-            }),
+            'created_at' => $this->created_at?->toISOString(),
+            'updated_at' => $this->updated_at?->toISOString(),
+
+            // Always include all translations
+            'translations' => $this->translations ? $this->translations->mapWithKeys(function ($translation) {
+                return [
+                    $translation->locale => [
+                        'name' => $translation->name,
+                        'description' => $translation->description
+                    ]
+                ];
+            }) : (object)[],
+
             'meta' => [
                 'locale' => $locale,
                 'fallback_used' => $this->isFallbackUsed($locale)

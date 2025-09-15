@@ -10,16 +10,17 @@ class AnnouncementResource extends JsonResource
 {
     public function toArray(Request $request): array
     {
-        $locale = App::getLocale();
+        // Check for X-Locale header first, then fall back to App::getLocale()
+        $locale = $request->header('X-Locale') ?? App::getLocale();
 
         return [
             'id' => $this->id,
             'title' => $this->getTranslatedAttribute('title', $locale),
             'content' => $this->getTranslatedAttribute('content', $locale),
             'is_active' => $this->is_active,
-            'published_at' => $this->published_at,
-            'created_at' => $this->created_at,
-            'updated_at' => $this->updated_at,
+            'published_at' => $this->published_at?->toISOString(),
+            'created_at' => $this->created_at?->toISOString(),
+            'updated_at' => $this->updated_at?->toISOString(),
 
             // Always include all translations
             'translations' => $this->translations ? $this->translations->mapWithKeys(function ($translation) {

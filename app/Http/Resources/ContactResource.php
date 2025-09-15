@@ -10,6 +10,9 @@ class ContactResource extends JsonResource
 {
     public function toArray(Request $request): array
     {
+        // Check for X-Locale header first, then fall back to App::getLocale()
+        $locale = $request->header('X-Locale') ?? App::getLocale();
+
         return [
             'id' => $this->id,
             'full_name' => $this->getFullName(),
@@ -32,6 +35,10 @@ class ContactResource extends JsonResource
                     'phone_number' => $this->user->phone_number,
                 ];
             }),
+
+            'meta' => [
+                'locale' => $locale
+            ]
         ];
     }
 }

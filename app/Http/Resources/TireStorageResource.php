@@ -4,6 +4,7 @@ namespace App\Http\Resources;
 
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
+use Illuminate\Support\Facades\App;
 
 class TireStorageResource extends JsonResource
 {
@@ -14,6 +15,9 @@ class TireStorageResource extends JsonResource
      */
     public function toArray(Request $request): array
     {
+        // Check for X-Locale header first, then fall back to App::getLocale()
+        $locale = $request->header('X-Locale') ?? App::getLocale();
+
         return [
             'id' => $this->id,
             'user' => [
@@ -28,8 +32,12 @@ class TireStorageResource extends JsonResource
             'storage_fee' => $this->storage_fee,
             'status' => $this->status->value, // enum cast ke string/value
             'notes' => $this->notes,
-            'created_at' => $this->created_at?->toDateTimeString(),
-            'updated_at' => $this->updated_at?->toDateTimeString(),
+            'created_at' => $this->created_at?->toISOString(),
+            'updated_at' => $this->updated_at?->toISOString(),
+
+            'meta' => [
+                'locale' => $locale
+            ]
         ];
     }
 }

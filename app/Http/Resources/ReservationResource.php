@@ -6,6 +6,7 @@ namespace App\Http\Resources;
 use App\Http\Resources\QuestionResource;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
+use Illuminate\Support\Facades\App;
 
 
 class ReservationResource extends JsonResource
@@ -17,6 +18,9 @@ class ReservationResource extends JsonResource
      */
    public function toArray(Request $request): array
     {
+        // Check for X-Locale header first, then fall back to App::getLocale()
+        $locale = $request->header('X-Locale') ?? App::getLocale();
+
         return [
             'id' => $this->id,
             'reservation_number' => $this->reservation_number,
@@ -62,6 +66,10 @@ class ReservationResource extends JsonResource
             // Timestamps
             'created_at' => $this->created_at?->toISOString(),
             'updated_at' => $this->updated_at?->toISOString(),
+
+            'meta' => [
+                'locale' => $locale
+            ]
         ];
     }
 }

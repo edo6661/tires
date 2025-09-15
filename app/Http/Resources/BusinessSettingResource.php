@@ -10,7 +10,8 @@ class BusinessSettingResource extends JsonResource
 {
     public function toArray(Request $request): array
     {
-        $locale = App::getLocale();
+        // Check for X-Locale header first, then fall back to App::getLocale()
+        $locale = $request->header('X-Locale') ?? App::getLocale();
 
         return [
             'id' => $this->id,
@@ -29,8 +30,39 @@ class BusinessSettingResource extends JsonResource
             'site_public' => $this->site_public,
             'reply_email' => $this->reply_email,
             'google_analytics_id' => $this->google_analytics_id,
-            'created_at' => $this->created_at,
-            'updated_at' => $this->updated_at
+            'created_at' => $this->created_at?->toISOString(),
+            'updated_at' => $this->updated_at?->toISOString(),
+
+            // Always include all translations
+            'translations' => $this->translations ? $this->translations->mapWithKeys(function ($translation) {
+                return [
+                    $translation->locale => [
+                        'shop_name' => $translation->shop_name,
+                        'site_name' => $translation->site_name,
+                        'shop_description' => $translation->shop_description,
+                        'access_information' => $translation->access_information,
+                        'terms_of_use' => $translation->terms_of_use,
+                        'privacy_policy' => $translation->privacy_policy,
+                        'address' => $translation->address,
+                    ]
+                ];
+            }) : (object)[],
+
+            'meta' => [
+                'locale' => $locale,
+                'fallback_used' => $this->isFallbackUsed($locale)
+            ]
         ];
-}
+    }
+
+    protected function isFallbackUsed(string $locale): bool
+    {
+        $translation = $this->translation($locale);
+
+        if (!$translation || empty($translation->shop_name)) {
+            return true;
+        }
+
+        return false;
+    }
 }

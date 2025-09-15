@@ -4,11 +4,20 @@ namespace App\Http\Resources;
 
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
+use Illuminate\Support\Facades\App;
 
 class UserResource extends JsonResource
 {
+    /**
+     * Transform the resource into an array.
+     *
+     * @return array<string, mixed>
+     */
     public function toArray(Request $request): array
     {
+        // Check for X-Locale header first, then fall back to App::getLocale()
+        $locale = $request->header('X-Locale') ?? App::getLocale();
+
         return [
             'id' => $this->id,
             'email' => $this->email,
@@ -19,7 +28,7 @@ class UserResource extends JsonResource
             'department' => $this->department,
             'company_address' => $this->company_address,
             'home_address' => $this->home_address,
-            'date_of_birth' => $this->date_of_birth?->toJSONString(),
+            'date_of_birth' => $this->date_of_birth?->toISOString(),
             'gender' => $this->gender,
             'role' => $this->role ?? 'customer',
             'is_admin' => $this->isAdmin(),
@@ -31,6 +40,10 @@ class UserResource extends JsonResource
             // Conditional data
             'reservations_count' => $this->whenCounted('reservations'),
             'tire_storage_count' => $this->whenCounted('tireStorage'),
+
+            'meta' => [
+                'locale' => $locale
+            ]
         ];
     }
 }
