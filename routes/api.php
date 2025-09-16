@@ -4,6 +4,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 // Public Controllers
 use App\Http\Controllers\Api\MenuController;
+use App\Http\Controllers\Api\BusinessSettingController;
 // Auth Controllers
 use App\Http\Controllers\Api\AuthController as AuthApiController;
 // Customer Controllers
@@ -15,6 +16,7 @@ use App\Http\Controllers\Api\Customer\ReservationController as CustomerReservati
 use App\Http\Controllers\Api\Customer\ContactController as CustomerContactController;
 
 // Admin Controllers
+use App\Http\Controllers\Api\Admin\MenuController as AdminMenuController;
 use App\Http\Controllers\Api\Admin\ProfileController as ApiAdminProfileController;
 use App\Http\Controllers\Api\Admin\UserController;
 use App\Http\Controllers\Api\Admin\AnnouncementController;
@@ -43,6 +45,14 @@ Route::prefix('v1')
             // Public menu access
             Route::get('/menus', [MenuController::class, 'index']);
             Route::get('/menus/{id}', [MenuController::class, 'show']);
+
+            // Public business settings access
+            Route::prefix('business-settings')->group(function () {
+                Route::get('/', [BusinessSettingController::class, 'index']);
+                Route::get('/business-hours', [BusinessSettingController::class, 'getBusinessHours']);
+                Route::get('/company-info', [BusinessSettingController::class, 'getCompanyInfo']);
+                Route::get('/terms-and-policies', [BusinessSettingController::class, 'getTermsAndPolicies']);
+            });
 
             // Contact and inquiry endpoints
             // Route::post('/contact', [\App\Http\Controllers\Api\ContactController::class, 'submitContact']);
@@ -137,14 +147,14 @@ Route::prefix('v1')
                 // Route::patch('users/{id}/change-password', [UserController::class, 'changePassword']);
 
                 //  Menu Management
-                Route::apiResource('menus', MenuController::class);
-                Route::patch('menus/{id}/toggle-status', [MenuController::class, 'toggleStatus']);
-                Route::delete('menus/bulk-delete', [MenuController::class, 'bulkDelete']);
-                Route::patch('menus/bulk-update-status', [MenuController::class, 'bulkUpdateStatus']);
-                Route::get('menus/search', [MenuController::class, 'search']);
-                Route::post('menus/calculate-end-time', [MenuController::class, 'calculateEndTime']);
-                Route::get('menus/{id}/available-slots', [MenuController::class, 'getAvailableSlots']);
-                Route::post('menus/reorder', [MenuController::class, 'reorder']);
+                Route::apiResource('menus', AdminMenuController::class);
+                Route::patch('menus/{id}/toggle-status', [AdminMenuController::class, 'toggleStatus']);
+                Route::delete('menus/bulk-delete', [AdminMenuController::class, 'bulkDelete']);
+                Route::patch('menus/bulk-update-status', [AdminMenuController::class, 'bulkUpdateStatus']);
+                Route::get('menus/search', [AdminMenuController::class, 'search']);
+                Route::post('menus/calculate-end-time', [AdminMenuController::class, 'calculateEndTime']);
+                Route::get('menus/{id}/available-slots', [AdminMenuController::class, 'getAvailableSlots']);
+                Route::post('menus/reorder', [AdminMenuController::class, 'reorder']);
 
                 // Tire Storage Management
                 Route::apiResource('storages', TireStorageController::class);
