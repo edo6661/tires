@@ -26,6 +26,117 @@ class MenuController extends Controller
         protected MenuServiceInterface $menuService
     ) {}
 
+    /**
+     * Get menu statistics overview
+     *
+     * Returns counts for total, active, inactive menus and average price
+     *
+     * @return JsonResponse
+     */
+    public function getStatistics(): JsonResponse
+    {
+        try {
+            $statistics = $this->menuService->getMenuStatistics();
+
+            return $this->successResponse([
+                'statistics' => $statistics
+            ], 'Menu statistics retrieved successfully');
+        } catch (\Exception $e) {
+            return $this->errorResponse(
+                'Failed to retrieve menu statistics',
+                500,
+                [
+                    [
+                        'field' => 'general',
+                        'tag' => 'statistics_error',
+                        'value' => $e->getMessage(),
+                        'message' => 'Statistics retrieval failed'
+                    ]
+                ]
+            );
+        }
+    }
+
+    /**
+     * Search menus with enhanced filtering
+     *
+     * @param Request $request
+     * @return JsonResponse
+     */
+    public function search(Request $request): JsonResponse
+    {
+        try {
+            $validated = $request->validate([
+                'search' => 'nullable|string|max:255',
+                'status' => 'nullable|string|in:active,inactive,all',
+                'min_price' => 'nullable|numeric|min:0',
+                'max_price' => 'nullable|numeric|min:0',
+                'per_page' => 'nullable|integer|min:1|max:100',
+                'page' => 'nullable|integer|min:1'
+            ]);
+
+            $filters = [];
+
+            if ($request->filled('search')) {
+                $filters['search'] = $validated['search'];
+            }
+
+            if ($request->filled('status') && $validated['status'] !== 'all') {
+                $filters['status'] = $validated['status'] === 'active';
+            }
+
+            if ($request->filled('min_price')) {
+                $filters['min_price'] = $validated['min_price'];
+            }
+
+            if ($request->filled('max_price')) {
+                $filters['max_price'] = $validated['max_price'];
+            }
+
+            $perPage = $validated['per_page'] ?? 15;
+            $menus = $this->menuService->searchMenusWithFilters($filters, $perPage);
+
+            return $this->successResponse([
+                'menus' => MenuResource::collection($menus),
+                'filters' => $filters,
+                'search_term' => $validated['search'] ?? null,
+                'results_count' => $menus->total(),
+                'pagination_info' => [
+                    'current_page' => $menus->currentPage(),
+                    'per_page' => $menus->perPage(),
+                    'total' => $menus->total(),
+                    'last_page' => $menus->lastPage()
+                ]
+            ], 'Menu search completed successfully');
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            return $this->errorResponse(
+                'Validation failed',
+                422,
+                collect($e->errors())->map(function ($messages, $field) {
+                    return [
+                        'field' => $field,
+                        'tag' => 'validation_error',
+                        'value' => request($field),
+                        'message' => $messages[0]
+                    ];
+                })->values()->toArray()
+            );
+        } catch (\Exception $e) {
+            return $this->errorResponse(
+                'Menu search failed',
+                500,
+                [
+                    [
+                        'field' => 'general',
+                        'tag' => 'search_error',
+                        'value' => $e->getMessage(),
+                        'message' => 'Search operation failed'
+                    ]
+                ]
+            );
+        }
+    }
+
     public function index(MenuIndexRequest $request): JsonResponse
     {
         try {

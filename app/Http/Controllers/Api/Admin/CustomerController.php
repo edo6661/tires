@@ -20,18 +20,34 @@ class CustomerController extends Controller
     }
 
     /**
-     * Display a listing of customers
+     * Display a listing of customers with search and filter support
+     *
+     * @param Request $request
+     * @return JsonResponse
+     *
+     * Query Parameters:
+     * - search: string (search by name, email, or phone)
+     * - customer_type: string (first_time|repeat|dormant|all)
+     * - per_page: int (pagination limit, default: 15)
+     * - page: int (current page, default: 1)
      */
     public function index(Request $request): JsonResponse
     {
         try {
+            $request->validate([
+                'search' => 'nullable|string|max:255',
+                'customer_type' => 'nullable|string|in:first_time,repeat,dormant,all',
+                'per_page' => 'nullable|integer|min:1|max:100',
+                'page' => 'nullable|integer|min:1'
+            ]);
+
             $filters = [];
 
             if ($request->filled('search')) {
                 $filters['search'] = $request->input('search');
             }
 
-            if ($request->filled('customer_type')) {
+            if ($request->filled('customer_type') && $request->input('customer_type') !== 'all') {
                 $filters['customer_type'] = $request->input('customer_type');
             }
 
@@ -42,8 +58,16 @@ class CustomerController extends Controller
             return $this->successResponse([
                 'customers' => $customers,
                 'customer_type_counts' => $customerTypeCounts,
-                'filters' => $filters
+                'filters' => $filters,
+                'pagination_info' => [
+                    'current_page' => $customers->currentPage(),
+                    'per_page' => $customers->perPage(),
+                    'total' => $customers->total(),
+                    'last_page' => $customers->lastPage()
+                ]
             ], 'Customers retrieved successfully');
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            return $this->validationErrorResponse($e->errors());
         } catch (\Exception $e) {
             return $this->errorResponse('Failed to retrieve customers: ' . $e->getMessage(), 500);
         }
@@ -110,22 +134,65 @@ class CustomerController extends Controller
     }
 
     /**
-     * Search customers
+     * Search customers by name, email, or phone number
+     *
+     * @param Request $request
+     * @return JsonResponse
      */
     public function search(Request $request): JsonResponse
     {
         try {
             $request->validate([
-                'search' => 'required|string|min:1'
+                'search' => 'required|string|min:1|max:255',
+                'customer_type' => 'nullable|string|in:first_time,repeat,dormant,all',
+                'per_page' => 'nullable|integer|min:1|max:100'
             ]);
 
-            $customers = $this->customerService->searchCustomers($request->input('search'));
+            $searchTerm = $request->input('search');
+            $customerType = $request->input('customer_type');
+            $perPage = $request->get('per_page', 15);
 
-            return $this->successResponse($customers, 'Customer search completed successfully');
+            $filters = [
+                'search' => $searchTerm
+            ];
+
+            if ($customerType && $customerType !== 'all') {
+                $filters['customer_type'] = $customerType;
+            }
+
+            $customers = $this->customerService->getCustomers($filters, $perPage);
+
+            return $this->successResponse([
+                'customers' => $customers,
+                'search_term' => $searchTerm,
+                'customer_type' => $customerType,
+                'results_count' => $customers->total()
+            ], 'Customer search completed successfully');
         } catch (\Illuminate\Validation\ValidationException $e) {
             return $this->validationErrorResponse($e->errors());
         } catch (\Exception $e) {
             return $this->errorResponse('Customer search failed: ' . $e->getMessage(), 500);
+        }
+    }
+
+    /**
+     * Get customer statistics overview
+     *
+     * Returns counts for different customer types matching the web interface
+     *
+     * @return JsonResponse
+     */
+    public function getStatistics(): JsonResponse
+    {
+        try {
+            $statistics = $this->customerService->getCustomerTypeCounts();
+
+            return $this->successResponse([
+                'statistics' => $statistics,
+                'total_customers' => array_sum($statistics)
+            ], 'Customer statistics retrieved successfully');
+        } catch (\Exception $e) {
+            return $this->errorResponse('Failed to retrieve customer statistics: ' . $e->getMessage(), 500);
         }
     }
 

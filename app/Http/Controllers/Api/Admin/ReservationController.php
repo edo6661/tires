@@ -31,7 +31,7 @@ class ReservationController extends Controller
     ) {}
 
     /**
-     * Get all reservations with cursor pagination (like MenuController)
+     * Get all reservations with cursor pagination
      */
     public function index(Request $request): JsonResponse
     {
@@ -427,6 +427,536 @@ class ReservationController extends Controller
                 'message' => 'Failed to get available hours: ' . $e->getMessage()
             ], 500);
         }
+    }
+
+    /**
+     * Get reservations for calendar view
+     */
+    public function getCalendarReservations(Request $request): JsonResponse
+    {
+        try {
+            $validator = Validator::make($request->all(), [
+                'month' => 'nullable|date_format:Y-m',
+                'view' => 'nullable|in:month,week,day',
+                'menu_id' => 'nullable|integer|exists:menus,id',
+                'status' => 'nullable|in:pending,confirmed,completed,cancelled'
+            ]);
+
+            if ($validator->fails()) {
+                return $this->validationErrorResponse($validator->errors()->toArray());
+            }
+
+            $month = $request->get('month', Carbon::now()->format('Y-m'));
+            $view = $request->get('view', 'month');
+            $menuId = $request->get('menu_id');
+            $status = $request->get('status');
+
+            $currentMonth = Carbon::createFromFormat('Y-m', $month);
+
+            // Determine date range based on view
+            switch ($view) {
+                case 'week':
+                    $startDate = $currentMonth->copy()->startOfWeek();
+                    $endDate = $currentMonth->copy()->endOfWeek();
+                    break;
+                case 'day':
+                    $startDate = $currentMonth->copy()->startOfDay();
+                    $endDate = $currentMonth->copy()->endOfDay();
+                    break;
+                default: // month
+                    $startDate = $currentMonth->copy()->startOfMonth();
+                    $endDate = $currentMonth->copy()->endOfMonth();
+                    break;
+            }
+
+            // Get reservations for the date range
+            $reservations = $this->reservationService->getReservationsByDateRange(
+                $startDate->format('Y-m-d H:i:s'),
+                $endDate->format('Y-m-d H:i:s')
+            );
+
+            // Apply additional filters
+            if ($menuId) {
+                $reservations = $reservations->where('menu_id', $menuId);
+            }
+            if ($status) {
+                $reservations = $reservations->where('status', $status);
+            }
+
+            // Group reservations by date for calendar display
+            $calendarData = [];
+            $current = $startDate->copy();
+
+            while ($current <= $endDate) {
+                $dateStr = $current->format('Y-m-d');
+                $dayReservations = $reservations->filter(function ($reservation) use ($dateStr) {
+                    return $reservation->reservation_datetime->format('Y-m-d') === $dateStr;
+                });
+
+                $calendarData[] = [
+                    'date' => $dateStr,
+                    'day' => $current->day,
+                    'is_current_month' => $current->month === $currentMonth->month,
+                    'is_today' => $current->isToday(),
+                    'day_name' => $current->format('l'),
+                    'reservations' => $dayReservations->map(function ($reservation) {
+                        return [
+                            'id' => $reservation->id,
+                            'reservation_number' => $reservation->reservation_number,
+                            'customer_name' => $reservation->user ? $reservation->user->full_name : $reservation->full_name,
+                            'time' => $reservation->reservation_datetime->format('H:i'),
+                            'end_time' => $reservation->reservation_datetime->copy()->addMinutes($reservation->menu->required_time ?? 60)->format('H:i'),
+                            'menu_name' => $reservation->menu->name ?? 'Unknown Menu',
+                            'menu_color' => $reservation->menu->color ?? '#3B82F6',
+                            'status' => $reservation->status,
+                            'people_count' => $reservation->number_of_people,
+                            'amount' => $reservation->amount
+                        ];
+                    })->values(),
+                    'total_reservations' => $dayReservations->count()
+                ];
+
+                $current->addDay();
+            }
+
+            return $this->successResponse([
+                'view' => $view,
+                'current_period' => [
+                    'month' => $currentMonth->format('F Y'),
+                    'start_date' => $startDate->format('Y-m-d'),
+                    'end_date' => $endDate->format('Y-m-d')
+                ],
+                'navigation' => [
+                    'previous_month' => $currentMonth->copy()->subMonth()->format('Y-m'),
+                    'next_month' => $currentMonth->copy()->addMonth()->format('Y-m'),
+                    'current_month' => $currentMonth->format('Y-m')
+                ],
+                'calendar_data' => $calendarData,
+                'statistics' => [
+                    'total_reservations' => $reservations->count(),
+                    'pending' => $reservations->where('status', 'pending')->count(),
+                    'confirmed' => $reservations->where('status', 'confirmed')->count(),
+                    'completed' => $reservations->where('status', 'completed')->count(),
+                    'cancelled' => $reservations->where('status', 'cancelled')->count()
+                ]
+            ], 'Calendar reservations retrieved successfully');
+        } catch (\Exception $e) {
+            return $this->errorResponse(
+                'Failed to retrieve calendar reservations: ' . $e->getMessage(),
+                500
+            );
+        }
+    }
+
+    /**
+     * Get reservations for list view with filtering and pagination
+     */
+    public function getListReservations(Request $request): JsonResponse
+    {
+        try {
+            $validator = Validator::make($request->all(), [
+                'search' => 'nullable|string|max:255',
+                'menu_id' => 'nullable|integer|exists:menus,id',
+                'status' => 'nullable|in:pending,confirmed,completed,cancelled',
+                'date_from' => 'nullable|date_format:Y-m-d',
+                'date_to' => 'nullable|date_format:Y-m-d|after_or_equal:date_from',
+                'per_page' => 'nullable|integer|min:5|max:100',
+                'page' => 'nullable|integer|min:1',
+                'sort_by' => 'nullable|in:reservation_datetime,created_at,customer_name,status',
+                'sort_order' => 'nullable|in:asc,desc'
+            ]);
+
+            if ($validator->fails()) {
+                return $this->validationErrorResponse($validator->errors()->toArray());
+            }
+
+            $search = $request->get('search');
+            $menuId = $request->get('menu_id');
+            $status = $request->get('status');
+            $dateFrom = $request->get('date_from');
+            $dateTo = $request->get('date_to');
+            $perPage = min($request->get('per_page', 15), 100);
+            $sortBy = $request->get('sort_by', 'reservation_datetime');
+            $sortOrder = $request->get('sort_order', 'desc');
+
+            // Build query with filters
+            $query = \App\Models\Reservation::with(['user', 'menu'])
+                ->when($search, function ($q) use ($search) {
+                    $q->where(function ($subQuery) use ($search) {
+                        $subQuery->where('reservation_number', 'like', "%{$search}%")
+                            ->orWhere('full_name', 'like', "%{$search}%")
+                            ->orWhere('email', 'like', "%{$search}%")
+                            ->orWhere('phone_number', 'like', "%{$search}%")
+                            ->orWhereHas('user', function ($userQuery) use ($search) {
+                                $userQuery->where('full_name', 'like', "%{$search}%")
+                                    ->orWhere('email', 'like', "%{$search}%")
+                                    ->orWhere('phone_number', 'like', "%{$search}%");
+                            });
+                    });
+                })
+                ->when($menuId, function ($q) use ($menuId) {
+                    $q->where('menu_id', $menuId);
+                })
+                ->when($status, function ($q) use ($status) {
+                    $q->where('status', $status);
+                })
+                ->when($dateFrom, function ($q) use ($dateFrom) {
+                    $q->whereDate('reservation_datetime', '>=', $dateFrom);
+                })
+                ->when($dateTo, function ($q) use ($dateTo) {
+                    $q->whereDate('reservation_datetime', '<=', $dateTo);
+                });
+
+            // Apply sorting
+            if ($sortBy === 'customer_name') {
+                $query->orderByRaw('COALESCE(full_name, (SELECT full_name FROM users WHERE users.id = reservations.user_id)) ' . $sortOrder);
+            } else {
+                $query->orderBy($sortBy, $sortOrder);
+            }
+
+            $reservations = $query->paginate($perPage);
+
+            // Transform data for list view
+            $transformedData = $reservations->getCollection()->map(function ($reservation) {
+                return [
+                    'id' => $reservation->id,
+                    'reservation_number' => $reservation->reservation_number,
+                    'customer' => [
+                        'name' => $reservation->user ? $reservation->user->full_name : $reservation->full_name,
+                        'email' => $reservation->user ? $reservation->user->email : $reservation->email,
+                        'phone' => $reservation->user ? $reservation->user->phone_number : $reservation->phone_number,
+                        'type' => $reservation->user ? 'registered' : 'guest'
+                    ],
+                    'date_time' => [
+                        'date' => $reservation->reservation_datetime->format('M d, Y'),
+                        'time' => $reservation->reservation_datetime->format('H:i'),
+                        'datetime' => $reservation->reservation_datetime->format('Y-m-d H:i:s'),
+                        'day_name' => $reservation->reservation_datetime->format('l')
+                    ],
+                    'menu' => [
+                        'id' => $reservation->menu_id,
+                        'name' => $reservation->menu->name ?? 'Unknown Menu',
+                        'required_time' => $reservation->menu->required_time ?? 60,
+                        'color' => $reservation->menu->color ?? '#3B82F6'
+                    ],
+                    'people_count' => $reservation->number_of_people,
+                    'amount' => $reservation->amount,
+                    'status' => $reservation->status,
+                    'notes' => $reservation->notes,
+                    'created_at' => $reservation->created_at->format('Y-m-d H:i:s'),
+                    'updated_at' => $reservation->updated_at->format('Y-m-d H:i:s')
+                ];
+            });
+
+            // Get filter options
+            $filterOptions = [
+                'menus' => $this->menuService->getActiveMenus()->map(function ($menu) {
+                    return [
+                        'id' => $menu->id,
+                        'name' => $menu->name
+                    ];
+                }),
+                'statuses' => [
+                    ['value' => 'pending', 'label' => 'Pending'],
+                    ['value' => 'confirmed', 'label' => 'Confirmed'],
+                    ['value' => 'completed', 'label' => 'Completed'],
+                    ['value' => 'cancelled', 'label' => 'Cancelled']
+                ]
+            ];
+
+            return $this->successResponse([
+                'reservations' => $transformedData,
+                'pagination' => [
+                    'current_page' => $reservations->currentPage(),
+                    'per_page' => $reservations->perPage(),
+                    'total' => $reservations->total(),
+                    'last_page' => $reservations->lastPage(),
+                    'from' => $reservations->firstItem(),
+                    'to' => $reservations->lastItem(),
+                    'has_more_pages' => $reservations->hasMorePages()
+                ],
+                'filters' => [
+                    'current' => [
+                        'search' => $search,
+                        'menu_id' => $menuId,
+                        'status' => $status,
+                        'date_from' => $dateFrom,
+                        'date_to' => $dateTo,
+                        'sort_by' => $sortBy,
+                        'sort_order' => $sortOrder
+                    ],
+                    'options' => $filterOptions
+                ],
+                'statistics' => [
+                    'total_results' => $reservations->total(),
+                    'showing' => $reservations->count(),
+                    'from' => $reservations->firstItem() ?? 0,
+                    'to' => $reservations->lastItem() ?? 0
+                ]
+            ], 'List reservations retrieved successfully');
+        } catch (\Exception $e) {
+            return $this->errorResponse(
+                'Failed to retrieve list reservations: ' . $e->getMessage(),
+                500
+            );
+        }
+    }
+
+    /**
+     * Get comprehensive availability check for admin interface
+     */
+    public function getAvailabilityCheck(Request $request): JsonResponse
+    {
+        try {
+            $validator = Validator::make($request->all(), [
+                'date' => 'required|date_format:Y-m-d',
+                'menu_id' => 'nullable|integer|exists:menus,id'
+            ]);
+
+            if ($validator->fails()) {
+                return $this->validationErrorResponse($validator->errors()->toArray());
+            }
+
+            $date = $request->get('date');
+            $menuId = $request->get('menu_id');
+            $selectedDate = Carbon::parse($date);
+            $now = Carbon::now();
+
+            // Get all menus if no specific menu selected
+            if (!$menuId) {
+                $menus = $this->menuService->getAllMenus();
+                return $this->successResponse([
+                    'date' => $date,
+                    'date_formatted' => $selectedDate->format('F j, Y'),
+                    'day_name' => $selectedDate->format('l'),
+                    'current_time' => $now->format('H:i'),
+                    'menu_required' => true,
+                    'available_menus' => $menus->where('is_active', true)->values()
+                ], 'Please select a menu to check availability');
+            }
+
+            // Get menu details
+            $menu = $this->menuService->findMenu($menuId);
+            if (!$menu || !$menu->is_active) {
+                return $this->errorResponse('Menu not found or not active', 404);
+            }
+
+            // Generate time slots for the selected date
+            $timeSlots = $this->generateTimeAvailabilitySlots($selectedDate, $menuId, $now);
+            $availableCount = collect($timeSlots)->where('status', 'available')->count();
+
+            return $this->successResponse([
+                'date' => $date,
+                'date_formatted' => $selectedDate->format('F j, Y'),
+                'day_name' => $selectedDate->format('l'),
+                'current_time' => $now->format('H:i'),
+                'menu' => [
+                    'id' => $menu->id,
+                    'name' => $menu->name,
+                    'required_time' => $menu->required_time,
+                    'description' => $menu->description
+                ],
+                'available_slots' => $availableCount,
+                'time_slots' => $timeSlots,
+                'statistics' => [
+                    'total_slots' => count($timeSlots),
+                    'available_slots' => $availableCount,
+                    'reserved_slots' => collect($timeSlots)->where('status', 'reserved')->count(),
+                    'blocked_slots' => collect($timeSlots)->where('status', 'blocked')->count()
+                ]
+            ], 'Availability check completed successfully');
+        } catch (\Exception $e) {
+            return $this->errorResponse(
+                'Failed to check availability: ' . $e->getMessage(),
+                500
+            );
+        }
+    }
+
+    /**
+     * Get reservation statistics for dashboard
+     */
+    public function getReservationStatistics(Request $request): JsonResponse
+    {
+        try {
+            $validator = Validator::make($request->all(), [
+                'period' => 'nullable|in:today,week,month,year',
+                'date_from' => 'nullable|date_format:Y-m-d',
+                'date_to' => 'nullable|date_format:Y-m-d|after_or_equal:date_from'
+            ]);
+
+            if ($validator->fails()) {
+                return $this->validationErrorResponse($validator->errors()->toArray());
+            }
+
+            $period = $request->get('period', 'month');
+            $dateFrom = $request->get('date_from');
+            $dateTo = $request->get('date_to');
+
+            // Determine date range
+            if ($dateFrom && $dateTo) {
+                $startDate = Carbon::parse($dateFrom)->startOfDay();
+                $endDate = Carbon::parse($dateTo)->endOfDay();
+            } else {
+                switch ($period) {
+                    case 'today':
+                        $startDate = Carbon::today();
+                        $endDate = Carbon::today()->endOfDay();
+                        break;
+                    case 'week':
+                        $startDate = Carbon::now()->startOfWeek();
+                        $endDate = Carbon::now()->endOfWeek();
+                        break;
+                    case 'year':
+                        $startDate = Carbon::now()->startOfYear();
+                        $endDate = Carbon::now()->endOfYear();
+                        break;
+                    default: // month
+                        $startDate = Carbon::now()->startOfMonth();
+                        $endDate = Carbon::now()->endOfMonth();
+                        break;
+                }
+            }
+
+            $reservations = $this->reservationService->getReservationsByDateRange(
+                $startDate->format('Y-m-d H:i:s'),
+                $endDate->format('Y-m-d H:i:s')
+            );
+
+            $statistics = [
+                'total_reservations' => $reservations->count(),
+                'by_status' => [
+                    'pending' => $reservations->where('status', 'pending')->count(),
+                    'confirmed' => $reservations->where('status', 'confirmed')->count(),
+                    'completed' => $reservations->where('status', 'completed')->count(),
+                    'cancelled' => $reservations->where('status', 'cancelled')->count()
+                ],
+                'total_revenue' => $reservations->where('status', '!=', 'cancelled')->sum('amount'),
+                'average_amount' => $reservations->where('status', '!=', 'cancelled')->avg('amount') ?? 0,
+                'total_customers' => $reservations->count('user_id') + $reservations->whereNull('user_id')->count(),
+                'period' => [
+                    'start_date' => $startDate->format('Y-m-d'),
+                    'end_date' => $endDate->format('Y-m-d'),
+                    'period_type' => $period
+                ]
+            ];
+
+            return $this->successResponse($statistics, 'Reservation statistics retrieved successfully');
+        } catch (\Exception $e) {
+            return $this->errorResponse(
+                'Failed to retrieve reservation statistics: ' . $e->getMessage(),
+                500
+            );
+        }
+    }
+
+    /**
+     * Generate detailed time availability slots
+     */
+    private function generateTimeAvailabilitySlots(Carbon $selectedDate, int $menuId, Carbon $now): array
+    {
+        $dateString = $selectedDate->format('Y-m-d');
+        $timeSlots = [];
+        $operatingHours = $this->getOperatingHours();
+
+        // Get menu details for required time
+        $menu = $this->menuService->findMenu($menuId);
+        $requiredTime = $menu->required_time;
+
+        // Get blocked periods for this date and menu
+        $blockedPeriods = $this->blockedPeriodService->getByDateRange($dateString, $dateString);
+        $blockedHours = $this->getBlockedHoursForDate($blockedPeriods, $menuId, $selectedDate);
+
+        // Get existing reservations for this date and menu
+        $reservations = $this->reservationService->getReservationsByDateRangeAndMenu(
+            $dateString . ' 00:00:00',
+            $dateString . ' 23:59:59',
+            $menuId
+        );
+
+        $reservationTimes = $reservations->pluck('reservation_datetime')
+            ->map(fn($dt) => $dt->format('H:i'))
+            ->toArray();
+
+        $closingTime = Carbon::parse($dateString . ' 21:00:00');
+
+        foreach ($operatingHours as $hour) {
+            $dateTime = Carbon::parse($dateString . ' ' . $hour);
+            $endTime = $dateTime->copy()->addMinutes($requiredTime);
+
+            // Determine slot status
+            $status = 'available';
+            $reason = null;
+
+            // Check if in the past
+            if ($dateTime->isBefore($now)) {
+                $status = 'past';
+                $reason = 'Past time';
+            }
+            // Check if service would finish after closing
+            elseif ($endTime->gt($closingTime)) {
+                $status = 'blocked';
+                $reason = 'Service would finish after closing time';
+            }
+            // Check blocked periods
+            elseif (in_array($hour, $blockedHours)) {
+                $status = 'blocked';
+                $reason = 'Time blocked by administrator';
+            }
+            // Check existing reservations
+            elseif (in_array($hour, $reservationTimes)) {
+                $status = 'reserved';
+                $reason = 'Already has reservation';
+            }
+
+            $timeSlots[] = [
+                'time' => $hour,
+                'datetime' => $dateTime->format('Y-m-d H:i:s'),
+                'status' => $status,
+                'available' => $status === 'available',
+                'reason' => $reason,
+                'service_end_time' => $endTime->format('H:i')
+            ];
+        }
+
+        return $timeSlots;
+    }
+
+    /**
+     * Get blocked hours for specific date and menu
+     */
+    private function getBlockedHoursForDate($blockedPeriods, int $menuId, Carbon $date): array
+    {
+        $blockedHours = [];
+        $dateString = $date->format('Y-m-d');
+
+        foreach ($blockedPeriods as $period) {
+            // Skip if this blocked period doesn't apply to our menu
+            if (!$period->all_menus && $period->menu_id != $menuId) {
+                continue;
+            }
+
+            $periodStart = Carbon::parse($period->start_datetime);
+            $periodEnd = Carbon::parse($period->end_datetime);
+
+            // Check if the period affects this date
+            $dayStart = max($periodStart, $date->copy()->setTime(8, 0, 0));
+            $dayEnd = min($periodEnd, $date->copy()->setTime(20, 59, 59));
+
+            if ($dayStart <= $dayEnd) {
+                $hourStart = $dayStart->hour;
+                $hourEnd = $dayEnd->hour;
+
+                for ($h = $hourStart; $h <= $hourEnd; $h++) {
+                    $hourStr = sprintf('%02d:00', $h);
+                    if (!in_array($hourStr, $blockedHours)) {
+                        $blockedHours[] = $hourStr;
+                    }
+                }
+            }
+        }
+
+        return $blockedHours;
     }
 
     /**

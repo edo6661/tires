@@ -42,13 +42,63 @@ Authorization: Bearer {your-sanctum-token}
 
 | Method | Endpoint | Description |
 |--------|----------|-------------|
-| GET | `/` | List all customers |
+| GET | `/` | List all customers with search and filter support |
+| GET | `/statistics` | Get customer statistics (first-time, repeat, dormant counts) |
+| GET | `/search` | Search customers by name, email, or phone |
+| GET | `/type-counts` | Get customer type counts |
 | GET | `/first-time` | Get first-time customers |
 | GET | `/repeat-customers` | Get repeat customers |
 | GET | `/dormant-customers` | Get dormant customers |
-| GET | `/search` | Search customers |
-| GET | `/type-counts` | Get customer type counts |
-| GET | `/{id}` | Show specific customer |
+| GET | `/{id}` | Show specific customer details |
+
+### List Customers with Filtering
+**GET** `/api/v1/admin/customers`
+
+**Query Parameters:**
+- `search` (optional): Search by name, email, or phone number
+- `customer_type` (optional): Filter by type (`first_time`, `repeat`, `dormant`, `all`)
+- `per_page` (optional): Number of items per page (default: 15, max: 100)
+- `page` (optional): Current page number (default: 1)
+
+**Response includes:**
+- Paginated customer list
+- Customer type counts
+- Applied filters
+- Pagination information
+
+### Customer Statistics
+**GET** `/api/v1/admin/customers/statistics`
+
+Returns overview statistics matching the web interface:
+
+**Response Example:**
+```json
+{
+    "success": true,
+    "message": "Customer statistics retrieved successfully",
+    "data": {
+        "statistics": {
+            "first_time": 24,
+            "repeat": 4,
+            "dormant": 0
+        },
+        "total_customers": 28
+    }
+}
+```
+
+### Search Customers
+**GET** `/api/v1/admin/customers/search`
+
+**Query Parameters:**
+- `search` (required): Search term for name, email, or phone
+- `customer_type` (optional): Filter by customer type
+- `per_page` (optional): Pagination limit
+
+**Response includes:**
+- Filtered customer results
+- Search term used
+- Results count
 
 ## Dashboard
 **Base Path:** `/api/v1/admin`

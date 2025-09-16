@@ -30,6 +30,8 @@ interface MenuServiceInterface
     public function searchMenus(string $query, string $locale = 'en', bool $activeOnly = true, int $perPage = 15): LengthAwarePaginator;
     public function getAvailableTimeSlots(int $menuId, string $date): array;
     public function getPopularMenus(int $limit = 10, string $period = 'month'): Collection;
+    public function getMenuStatistics(): array;
+    public function searchMenusWithFilters(array $filters, int $perPage = 15): \Illuminate\Pagination\LengthAwarePaginator;
 
     // Cursor pagination methods - DIUBAH
     // public function getCursorPaginatedMenus(int $limit = 15, ?string $cursor = null): array;

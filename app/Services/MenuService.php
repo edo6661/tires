@@ -230,4 +230,38 @@ class MenuService implements MenuServiceInterface
         }
         return $this->menuRepository->bulkDelete($ids);
     }
+
+    /**
+     * Get menu statistics including counts and average price
+     */
+    public function getMenuStatistics(): array
+    {
+        $menus = $this->menuRepository->getAll();
+
+        $totalMenus = $menus->count();
+        $activeMenus = $menus->where('is_active', true)->count();
+        $inactiveMenus = $totalMenus - $activeMenus;
+        $averagePrice = $menus->where('price', '>', 0)->avg('price') ?? 0;
+
+        return [
+            'total_menus' => $totalMenus,
+            'active_menus' => $activeMenus,
+            'inactive_menus' => $inactiveMenus,
+            'average_price' => round($averagePrice, 2)
+        ];
+    }
+
+    /**
+     * Search menus with enhanced filtering capabilities
+     */
+    public function searchMenusWithFilters(array $filters, int $perPage = 15): \Illuminate\Pagination\LengthAwarePaginator
+    {
+        // If only search term is provided, use existing search method
+        if (isset($filters['search']) && count($filters) === 1) {
+            return $this->menuRepository->search($filters['search'], 'en', true, $perPage);
+        }
+
+        // For complex filtering, build custom query through repository
+        return $this->menuRepository->searchWithAdvancedFilters($filters, $perPage);
+    }
 }

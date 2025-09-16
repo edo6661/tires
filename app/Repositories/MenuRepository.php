@@ -343,6 +343,40 @@ class MenuRepository implements MenuRepositoryInterface
     }
 
     /**
+     * Search menus with advanced filtering options
+     */
+    public function searchWithAdvancedFilters(array $filters, int $perPage = 15): LengthAwarePaginator
+    {
+        $locale = App::getLocale();
+        $query = $this->model->withTranslations($locale);
+
+        // Search term filter
+        if (!empty($filters['search'])) {
+            $searchTerm = $filters['search'];
+            $query->where(function ($q) use ($searchTerm, $locale) {
+                $q->whereTranslation('name', 'ILIKE', "%{$searchTerm}%", $locale)
+                  ->orWhereTranslation('description', 'ILIKE', "%{$searchTerm}%", $locale);
+            });
+        }
+
+        // Status filter
+        if (isset($filters['status'])) {
+            $query->where('is_active', $filters['status']);
+        }
+
+        // Price range filters
+        if (!empty($filters['min_price'])) {
+            $query->where('price', '>=', $filters['min_price']);
+        }
+
+        if (!empty($filters['max_price'])) {
+            $query->where('price', '<=', $filters['max_price']);
+        }
+
+        return $query->ordered()->paginate($perPage);
+    }
+
+    /**
      * Bulk update status for multiple menus
      */
     public function bulkUpdateStatus(array $ids, bool $status): bool

@@ -20,27 +20,174 @@ class ContactController extends Controller
     }
 
     /**
+     * Get contact statistics overview
+     *
+     * Returns counts for total, pending, replied contacts and today's count
+     *
+     * @return JsonResponse
+     */
+    public function getStatistics(): JsonResponse
+    {
+        try {
+            $statistics = $this->contactService->getContactStats();
+
+            return $this->successResponse([
+                'statistics' => $statistics
+            ], 'Contact statistics retrieved successfully');
+        } catch (\Exception $e) {
+            return $this->errorResponse(
+                'Failed to retrieve contact statistics',
+                500,
+                [
+                    [
+                        'field' => 'general',
+                        'tag' => 'statistics_error',
+                        'value' => $e->getMessage(),
+                        'message' => 'Statistics retrieval failed'
+                    ]
+                ]
+            );
+        }
+    }
+
+    /**
+     * Search contacts with enhanced filtering
+     *
+     * @param Request $request
+     * @return JsonResponse
+     */
+    public function search(Request $request): JsonResponse
+    {
+        try {
+            $validated = $request->validate([
+                'search' => 'nullable|string|max:255',
+                'status' => 'nullable|string|in:pending,replied,all',
+                'start_date' => 'nullable|date_format:Y-m-d',
+                'end_date' => 'nullable|date_format:Y-m-d|after_or_equal:start_date',
+                'per_page' => 'nullable|integer|min:1|max:100',
+                'page' => 'nullable|integer|min:1'
+            ]);
+
+            $filters = [];
+
+            if ($request->filled('search')) {
+                $filters['search'] = $validated['search'];
+            }
+
+            if ($request->filled('status') && $validated['status'] !== 'all') {
+                $filters['status'] = $validated['status'];
+            }
+
+            if ($request->filled('start_date')) {
+                $filters['start_date'] = $validated['start_date'];
+            }
+
+            if ($request->filled('end_date')) {
+                $filters['end_date'] = $validated['end_date'];
+            }
+
+            $filters['per_page'] = $validated['per_page'] ?? 15;
+            $contacts = $this->contactService->getFilteredContacts($filters);
+            $stats = $this->contactService->getContactStats();
+
+            return $this->successResponse([
+                'contacts' => $contacts,
+                'statistics' => $stats,
+                'filters' => $filters,
+                'search_term' => $validated['search'] ?? null,
+                'results_count' => $contacts->total(),
+                'pagination_info' => [
+                    'current_page' => $contacts->currentPage(),
+                    'per_page' => $contacts->perPage(),
+                    'total' => $contacts->total(),
+                    'last_page' => $contacts->lastPage()
+                ]
+            ], 'Contact search completed successfully');
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            return $this->errorResponse(
+                'Validation failed',
+                422,
+                collect($e->errors())->map(function ($messages, $field) {
+                    return [
+                        'field' => $field,
+                        'tag' => 'validation_error',
+                        'value' => request($field),
+                        'message' => $messages[0]
+                    ];
+                })->values()->toArray()
+            );
+        } catch (\Exception $e) {
+            return $this->errorResponse(
+                'Contact search failed',
+                500,
+                [
+                    [
+                        'field' => 'general',
+                        'tag' => 'search_error',
+                        'value' => $e->getMessage(),
+                        'message' => 'Search operation failed'
+                    ]
+                ]
+            );
+        }
+    }
+
+    /**
      * Display a listing of contacts
      */
     public function index(Request $request): JsonResponse
     {
         try {
-            $filters = $request->only(['status', 'start_date', 'end_date', 'search']);
+            $validated = $request->validate([
+                'status' => 'nullable|string|in:pending,replied,all',
+                'start_date' => 'nullable|date_format:Y-m-d',
+                'end_date' => 'nullable|date_format:Y-m-d|after_or_equal:start_date',
+                'search' => 'nullable|string|max:255',
+                'per_page' => 'nullable|integer|min:1|max:100'
+            ]);
 
-            if (array_filter($filters)) {
-                $filters['per_page'] = $request->get('per_page', 15);
+            $filters = array_filter($validated, function($value) {
+                return $value !== null && $value !== '';
+            });
+
+            // Remove 'all' status as it means no filter
+            if (isset($filters['status']) && $filters['status'] === 'all') {
+                unset($filters['status']);
+            }
+
+            if (!empty($filters)) {
+                $filters['per_page'] = $validated['per_page'] ?? 15;
                 $contacts = $this->contactService->getFilteredContacts($filters);
             } else {
-                $contacts = $this->contactService->getPaginatedContacts($request->get('per_page', 15));
+                $contacts = $this->contactService->getPaginatedContacts($validated['per_page'] ?? 15);
             }
 
             $stats = $this->contactService->getContactStats();
 
             return $this->successResponse([
                 'contacts' => $contacts,
-                'stats' => $stats,
-                'filters' => $filters
+                'statistics' => $stats,
+                'filters' => $filters,
+                'pagination_info' => [
+                    'current_page' => $contacts->currentPage(),
+                    'per_page' => $contacts->perPage(),
+                    'total' => $contacts->total(),
+                    'last_page' => $contacts->lastPage()
+                ]
             ], 'Contacts retrieved successfully');
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            return $this->errorResponse(
+                'Validation failed',
+                422,
+                collect($e->errors())->map(function ($messages, $field) {
+                    return [
+                        'field' => $field,
+                        'tag' => 'validation_error',
+                        'value' => request($field),
+                        'message' => $messages[0]
+                    ];
+                })->values()->toArray()
+            );
         } catch (\Exception $e) {
             return $this->errorResponse('Failed to retrieve contacts: ' . $e->getMessage(), 500);
         }

@@ -12,7 +12,7 @@ use App\Services\UserServiceInterface;
 use Illuminate\Contracts\Pagination\CursorPaginator;
 
 /**
- * @tags Admin - Customer Management
+ * 
  */
 class UserController extends Controller
 {
@@ -23,7 +23,7 @@ class UserController extends Controller
     ) {}
 
     /**
-     * Get all users with cursor pagination - UPDATED
+     * Get all users with cursor pagination
      */
     public function index(Request $request): JsonResponse
     {

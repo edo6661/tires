@@ -18,7 +18,7 @@ use App\Http\Controllers\Api\Customer\ContactController as CustomerContactContro
 // Admin Controllers
 use App\Http\Controllers\Api\Admin\MenuController as AdminMenuController;
 use App\Http\Controllers\Api\Admin\ProfileController as ApiAdminProfileController;
-use App\Http\Controllers\Api\Admin\UserController;
+// use App\Http\Controllers\Api\Admin\UserController;
 use App\Http\Controllers\Api\Admin\AnnouncementController;
 use App\Http\Controllers\Api\Admin\TireStorageController;
 use App\Http\Controllers\Api\Admin\ReservationController;
@@ -138,15 +138,16 @@ Route::prefix('v1')
                 });
 
                 // User Management
-                Route::get('users/search', [UserController::class, 'search']);
-                Route::apiResource('users', UserController::class);
-                Route::get('users/customers', [UserController::class, 'customers']);
-                Route::get('users/admins', [UserController::class, 'admins']);
-                Route::get('users/role/{role}', [UserController::class, 'byRole']);
-                Route::patch('users/{id}/reset-password', [UserController::class, 'resetPassword']);
+                // Route::get('users/search', [UserController::class, 'search']);
+                // Route::apiResource('users', UserController::class);
+                // Route::get('users/customers', [UserController::class, 'customers']);
+                // Route::get('users/admins', [UserController::class, 'admins']);
+                // Route::get('users/role/{role}', [UserController::class, 'byRole']);
+                // Route::patch('users/{id}/reset-password', [UserController::class, 'resetPassword']);
                 // Route::patch('users/{id}/change-password', [UserController::class, 'changePassword']);
 
                 //  Menu Management
+                Route::get('menus/statistics', [AdminMenuController::class, 'getStatistics']);
                 Route::apiResource('menus', AdminMenuController::class);
                 Route::patch('menus/{id}/toggle-status', [AdminMenuController::class, 'toggleStatus']);
                 Route::delete('menus/bulk-delete', [AdminMenuController::class, 'bulkDelete']);
@@ -163,12 +164,20 @@ Route::prefix('v1')
                 Route::patch('/storages/bulk-end', [TireStorageController::class, 'bulkEnd']);
 
 
-                // Reservation Management
-                Route::apiResource('reservations', ReservationController::class);
+                // Reservation Management - Specific routes first before resource routes
+                Route::get('reservations/calendar', [ReservationController::class, 'getCalendarReservations']);
+                Route::get('reservations/list', [ReservationController::class, 'getListReservations']);
+                Route::get('reservations/statistics', [ReservationController::class, 'getReservationStatistics']);
+                Route::get('reservations/availability-check', [ReservationController::class, 'getAvailabilityCheck']);
+                Route::get('reservations/availability', [ReservationController::class, 'getAvailability']);
+                Route::get('reservations/calendar-data', [ReservationController::class, 'getCalendarData']);
+                Route::get('reservations/available-hours', [ReservationController::class, 'getAvailableHours']);
+                Route::post('reservations/check-availability', [ReservationController::class, 'checkAvailability']);
+                Route::patch('reservations/bulk/status', [ReservationController::class, 'bulkUpdateStatus']);
                 Route::patch('reservations/{id}/confirm', [ReservationController::class, 'confirm']);
                 Route::patch('reservations/{id}/cancel', [ReservationController::class, 'cancel']);
                 Route::patch('reservations/{id}/complete', [ReservationController::class, 'complete']);
-                Route::patch('reservations/bulk/status', [ReservationController::class, 'bulkUpdateStatus']);
+                Route::apiResource('reservations', ReservationController::class);
 
                 // Announcement
                 Route::get('announcements/statistics', [AnnouncementController::class, 'statistics']);
@@ -196,6 +205,8 @@ Route::prefix('v1')
 
                 // Contact Management
                 Route::prefix('contacts')->group(function () {
+                    Route::get('/statistics', [ApiAdminContactController::class, 'getStatistics']);
+                    Route::get('/search', [ApiAdminContactController::class, 'search']);
                     Route::get('/', [ApiAdminContactController::class, 'index']);
                     Route::get('/{id}', [ApiAdminContactController::class, 'show']);
                     Route::patch('/{id}', [ApiAdminContactController::class, 'update']);
@@ -208,11 +219,12 @@ Route::prefix('v1')
                 // Customer Management
                 Route::prefix('customers')->group(function () {
                     Route::get('/', [ApiAdminCustomerController::class, 'index']);
+                    Route::get('/statistics', [ApiAdminCustomerController::class, 'getStatistics']);
+                    Route::get('/search', [ApiAdminCustomerController::class, 'search']);
+                    Route::get('/type-counts', [ApiAdminCustomerController::class, 'getCustomerTypeCounts']);
                     Route::get('/first-time', [ApiAdminCustomerController::class, 'getFirstTimeCustomers']);
                     Route::get('/repeat-customers', [ApiAdminCustomerController::class, 'getRepeatCustomers']);
                     Route::get('/dormant-customers', [ApiAdminCustomerController::class, 'getDormantCustomers']);
-                    Route::get('/search', [ApiAdminCustomerController::class, 'search']);
-                    Route::get('/type-counts', [ApiAdminCustomerController::class, 'getCustomerTypeCounts']);
                     Route::get('/{id}', [ApiAdminCustomerController::class, 'show']);
                 });
 
@@ -259,6 +271,8 @@ Route::prefix('v1')
 
                 // Blocked Period Management
                 Route::prefix('blocked-periods')->group(function () {
+                    Route::get('/statistics', [ApiAdminBlockedPeriodController::class, 'getStatistics']);
+                    Route::get('/search', [ApiAdminBlockedPeriodController::class, 'search']);
                     Route::get('/', [ApiAdminBlockedPeriodController::class, 'index']);
                     Route::post('/', [ApiAdminBlockedPeriodController::class, 'store']);
                     Route::post('/check-conflict', [ApiAdminBlockedPeriodController::class, 'checkConflict']);

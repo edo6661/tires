@@ -31,6 +31,7 @@ interface MenuRepositoryInterface
     public function countActive(): int;
     public function findBySlug(string $slug): ?Menu;
     public function searchByName(string $search, string $locale = null): Collection;
+    public function searchWithAdvancedFilters(array $filters, int $perPage = 15): LengthAwarePaginator;
 
     // Cursor pagination methods - PERBAIKI SIGNATURE
     // public function getCursorPaginated(int $limit = 15, ?string $cursor = null): array;
