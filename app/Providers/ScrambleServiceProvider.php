@@ -34,32 +34,61 @@ class ScrambleServiceProvider extends ServiceProvider
                     \Dedoc\Scramble\Support\Generator\SecurityScheme::http('bearer', 'sanctum')
                 );
 
-                // Add tags for better organization
+                // Configure API documentation tags with clear names and detailed descriptions
+                // Organized by access level: Public → Customer → Admin with logical sub-grouping
                 $openApi->tags = [
-                    new Tag('Public', 'Public endpoints that do not require authentication'),
-                    new Tag('Authentication', 'User authentication and authorization endpoints'),
+                    // ==========================================
+                    // PUBLIC API SECTION
+                    // No authentication required - open access
+                    // ==========================================
+                    new Tag('Public', 'Endpoints accessible without authentication - includes menu listings, announcements, and general information'),
+                    new Tag('Authentication', 'User login, registration, password reset, and token management endpoints'),
 
-                    // Customer section with sub-groups
-                    new Tag('Customer - Dashboard', 'Customer dashboard and summary endpoints'),
-                    new Tag('Customer - Profile', 'Customer profile management endpoints'),
-                    new Tag('Customer - Booking', 'Customer booking and reservation endpoints'),
-                    new Tag('Customer - Reservation', 'Customer reservation endpoints'),
-                    new Tag('Customer - TireStorage', 'Customer Tire storage endpoints'),
-                    new Tag('Customer - Contact', 'Customer support and inquiry endpoints'),
+                    // ==========================================
+                    // CUSTOMER API SECTION
+                    // Requires customer authentication (Sanctum)
+                    // Organized by functional areas
+                    // ==========================================
+                    new Tag('Customer - Dashboard', 'Customer home dashboard with summary statistics, recent activities, and quick access features'),
+                    new Tag('Customer - Profile', 'Personal profile management including contact information, preferences, and account settings'),
+                    new Tag('Customer - Booking', 'New reservation creation, availability checking, menu selection, and booking confirmation'),
+                    new Tag('Customer - Reservation', 'Manage existing reservations - view, modify, cancel, and track reservation history'),
+                    new Tag('Customer - TireStorage', 'Tire storage service management - register, track, and manage stored tire inventory'),
+                    new Tag('Customer - Contact', 'Customer support communication - submit inquiries, view responses, and support ticket management'),
 
+                    // ==========================================
+                    // ADMIN API SECTION
+                    // Requires admin authentication and permissions
+                    // Comprehensive management and analytics tools
+                    // ==========================================
 
-                    // Admin section with sub-groups
-                    new Tag('Admin - Dashboard', 'Administrative dashboard and statistics'),
-                    new Tag('Admin - Customer Management', 'Administrative customer management endpoints'),
-                    new Tag('Admin - Menu Management', 'Administrative menu management endpoints'),
-                    new Tag('Admin - Reservation Management', 'Administrative booking and reservation management'),
-                    new Tag('Admin - Tire Storage Management', 'Administrative tire storage endpoints'),
-                    new Tag('Admin - Announcement Management', 'Administrative menu management endpoints'),
-                    new Tag('Admin - Questionnaire Management', 'Administrative questionnaire management endpoints'),
-                    new Tag('Admin - Contact Management', 'Administrative contact management endpoints'),
-                    new Tag('Admin - Business Setting Management', 'Administrative business setting management endpoints'),
-                    new Tag('Admin - Blocked Period Management', 'Administrative blocked period menu management endpoints'),
-                    new Tag('Admin - FAQ Management', 'Administrative faq management'),
+                    // Core Admin Dashboard & Analytics
+                    new Tag('Admin - Dashboard', 'Administrative overview dashboard with key metrics, charts, recent activities, and system health monitoring'),
+
+                    // Customer & User Management
+                    new Tag('Admin - Customer Management', 'Customer database management with analytics, segmentation (first-time/repeat/dormant), and customer insights'),
+                    new Tag('Admin - User Management', 'System user account management including admins and customers, roles, permissions, and authentication control'),
+                    new Tag('Admin - Profile Settings', 'Administrator profile management and personal account settings for logged-in admin users'),
+
+                    // Service & Menu Management
+                    new Tag('Admin - Menu Management', 'Service menu administration - create, edit, pricing, scheduling, availability, and multilingual content management'),
+
+                    // Booking & Reservation Management
+                    new Tag('Admin - Reservation Management', 'Comprehensive booking system administration with calendar views, availability management, and reservation analytics'),
+                    new Tag('Admin - Blocked Period Management', 'Time slot blocking system for maintenance, holidays, or special events with conflict detection and calendar integration'),
+
+                    // Storage & Service Management
+                    new Tag('Admin - Tire Storage Management', 'Tire storage service administration including inventory tracking, customer storage records, and service lifecycle management'),
+
+                    // Content & Communication Management
+                    new Tag('Admin - Announcement Management', 'System-wide announcements and notifications with scheduling, targeting, and multilingual support'),
+                    new Tag('Admin - Contact Management', 'Customer inquiry management system with response tracking, categorization, and communication history'),
+                    new Tag('Admin - Faq Management', 'FAQ content management with categorization, ordering, and multilingual support for customer self-service'),
+                    new Tag('Admin - Questionnaire Management', 'Customer feedback and survey system with response analytics and questionnaire template management'),
+
+                    // System Configuration
+                    new Tag('Admin - Business Setting Management', 'Core business configuration including operating hours, company information, and system-wide settings'),
+                    new Tag('Admin - Payment Settings', 'Payment system administration including transaction monitoring, payment method configuration, and financial reporting'),
                 ];
             });
     }

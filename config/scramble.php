@@ -29,7 +29,7 @@ return [
         /*
          * Description rendered on the home page of the API documentation (`/docs/api`).
          */
-        'description' => 'Tire Storage Management System API Documentation. This API provides endpoints for customer management, tire storage, reservations, and administrative functions.',
+        'description' => 'Comprehensive Tire Storage Management System API Documentation. This API provides endpoints for customer management, tire storage services, reservations, administrative functions, and system configuration. Features include real-time availability checking, payment processing, customer analytics, and multilingual support.',
     ],
 
     /*
@@ -39,12 +39,12 @@ return [
         /*
          * Define the title of the documentation's website. App name is used when this config is `null`.
          */
-        'title' => 'Tire Storage API Documentation',
+        'title' => 'Tire Storage Management API Documentation',
 
         /*
          * Define the theme of the documentation. Available options are `light`, `dark`, and `system`.
          */
-        'theme' => 'dark',
+        'theme' => 'system',
 
         /*
          * Hide the `Try It` feature. Enabled by default.

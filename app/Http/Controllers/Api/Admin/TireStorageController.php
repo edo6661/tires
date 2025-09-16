@@ -23,9 +23,7 @@ class TireStorageController extends Controller
 
     }
 
-    /**
-     * List semua penyimpanan ban dengan filter & pagination
-     */
+
     public function index(Request $request): JsonResponse
     {
         try {
@@ -67,9 +65,7 @@ class TireStorageController extends Controller
         }
     }
 
-    /**
-     * Buat penyimpanan ban
-     */
+
     public function store(TireStorageRequest $request): JsonResponse
     {
         try {
@@ -89,9 +85,7 @@ class TireStorageController extends Controller
         }
     }
 
-    /**
-     * Detail penyimpanan ban
-     */
+
     public function show(int $id): JsonResponse
     {
         $tireStorage = $this->tireStorageService->findTireStorage($id);
@@ -105,9 +99,7 @@ class TireStorageController extends Controller
         return $this->successResponse(new TireStorageResource($tireStorage));
     }
 
-    /**
-     * Update penyimpanan ban
-     */
+
     public function update(TireStorageRequest $request, int $id): JsonResponse
     {
         try {
@@ -132,9 +124,7 @@ class TireStorageController extends Controller
         }
     }
 
-    /**
-     * Hapus penyimpanan ban
-     */
+
     public function destroy(int $id): JsonResponse
     {
         try {
@@ -154,9 +144,7 @@ class TireStorageController extends Controller
         }
     }
 
-    /**
-     * Akhiri penyimpanan ban
-     */
+
     public function end(int $id): JsonResponse
     {
         try {
@@ -176,9 +164,7 @@ class TireStorageController extends Controller
         }
     }
 
-    /**
-     * Bulk hapus penyimpanan ban
-     */
+
     public function bulkDelete(Request $request): JsonResponse
     {
         $ids = $request->input('ids', []);
@@ -212,9 +198,7 @@ class TireStorageController extends Controller
         );
     }
 
-    /**
-     * Bulk akhiri penyimpanan ban
-     */
+    
     public function bulkEnd(Request $request): JsonResponse
     {
         $ids = $request->input('ids', []);
