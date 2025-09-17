@@ -40,6 +40,10 @@
         ->middleware(['apiSetLocale'])
         ->group(function () {
 
+            Route::get('test',function () {
+                return response()->json(['message' => 'Test endpoint']);
+            });
+            
             // Public endpoints (no authentication required)
             Route::prefix('public')->group(function () {
                 // Public menu access
