@@ -13,10 +13,20 @@ return Application::configure(basePath: dirname(__DIR__))
     ->withProviders([
         ScrambleServiceProvider::class,
     ])
+    // bootstrap/app.php
     ->withRouting(
-        web: __DIR__.'/../routes/web.php',
-        api: __DIR__.'/../routes/api.php',
-        commands: __DIR__.'/../routes/console.php',
+        using: function (Illuminate\Routing\Router $router) {
+            // Rute API diberi prioritas utama
+            $router->middleware('api')
+                ->prefix('api')
+                ->name('api.')
+                ->group(base_path('routes/api.php'));
+
+            // Rute Web dimuat setelahnya
+            $router->middleware('web')
+                ->group(base_path('routes/web.php'));
+        },
+        commands: __DIR__ . '/../routes/console.php',
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware): void {
@@ -30,7 +40,6 @@ return Application::configure(basePath: dirname(__DIR__))
             $locale = app()->getLocale() ?? config('app.fallback_locale', 'en');
             return route('login', ['locale' => $locale]);
         });
-
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         $exceptions->render(function (NotFoundHttpException $e, $request) {
