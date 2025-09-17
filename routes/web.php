@@ -6,37 +6,14 @@ use App\Http\Middleware\SetLocale;
 use Illuminate\Support\Facades\Route;
 
 
-Route::fallback(function () {
-
-    if (request()->is('api/*')) {
-        return;
-    }
-
-    
-    $path = request()->path();
-    $defaultLocale = config('app.fallback_locale', 'en');
-    $defaultRoutePrefix = SetLocale::getRoutePrefix($defaultLocale);
-    $supportedPrefixes = SetLocale::getSupportedRoutePrefixes();
-
-    if (in_array($path, $supportedPrefixes)) {
-        return redirect('/' . $path . '/', 301);
-    }
-
-    if (preg_match('/^(' . implode('|', $supportedPrefixes) . ')\//', $path)) {
-        abort(404);
-    }
-
-    return redirect('/' . $defaultRoutePrefix . '/' . $path, 301);
-});
-
 Route::get('/', function () {
     $defaultLocale = config('app.fallback_locale', 'en');
     $userLocale = request()->getPreferredLanguage(['en', 'ja']) ?? $defaultLocale;
 
     // Convert locale to route prefix
     $routePrefix = SetLocale::getRoutePrefix($userLocale);
-
-    return redirect()->route('home', ['locale' => $routePrefix]);
+    return redirect('/' . $routePrefix);
+    // return redirect()->route('home', ['locale' => $routePrefix]);
 });
 
 Route::prefix('{locale}')
@@ -92,24 +69,46 @@ Route::prefix('{locale}')
             });
         });
     });
-
 Route::fallback(function () {
+
+    if (request()->is('api/*')) {
+        return;
+    }
+
+
     $path = request()->path();
     $defaultLocale = config('app.fallback_locale', 'en');
     $defaultRoutePrefix = SetLocale::getRoutePrefix($defaultLocale);
     $supportedPrefixes = SetLocale::getSupportedRoutePrefixes();
 
-    // Check if path is just a supported locale prefix (e.g., 'jp' or 'en')
     if (in_array($path, $supportedPrefixes)) {
         return redirect('/' . $path . '/', 301);
     }
 
-    // Check if path starts with supported locale prefix followed by slash
     if (preg_match('/^(' . implode('|', $supportedPrefixes) . ')\//', $path)) {
-        // Path already has valid locale prefix, this is a real 404
         abort(404);
     }
 
-    // Path doesn't have locale prefix, add default one
     return redirect('/' . $defaultRoutePrefix . '/' . $path, 301);
 });
+
+// Route::fallback(function () {
+//     $path = request()->path();
+//     $defaultLocale = config('app.fallback_locale', 'en');
+//     $defaultRoutePrefix = SetLocale::getRoutePrefix($defaultLocale);
+//     $supportedPrefixes = SetLocale::getSupportedRoutePrefixes();
+
+//     // Check if path is just a supported locale prefix (e.g., 'jp' or 'en')
+//     if (in_array($path, $supportedPrefixes)) {
+//         return redirect('/' . $path . '/', 301);
+//     }
+
+//     // Check if path starts with supported locale prefix followed by slash
+//     if (preg_match('/^(' . implode('|', $supportedPrefixes) . ')\//', $path)) {
+//         // Path already has valid locale prefix, this is a real 404
+//         abort(404);
+//     }
+
+//     // Path doesn't have locale prefix, add default one
+//     return redirect('/' . $defaultRoutePrefix . '/' . $path, 301);
+// });
