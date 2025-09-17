@@ -5,6 +5,30 @@ use App\Http\Controllers\HomeController;
 use App\Http\Middleware\SetLocale;
 use Illuminate\Support\Facades\Route;
 
+
+Route::fallback(function () {
+
+    if (request()->is('api/*')) {
+        return;
+    }
+
+    
+    $path = request()->path();
+    $defaultLocale = config('app.fallback_locale', 'en');
+    $defaultRoutePrefix = SetLocale::getRoutePrefix($defaultLocale);
+    $supportedPrefixes = SetLocale::getSupportedRoutePrefixes();
+
+    if (in_array($path, $supportedPrefixes)) {
+        return redirect('/' . $path . '/', 301);
+    }
+
+    if (preg_match('/^(' . implode('|', $supportedPrefixes) . ')\//', $path)) {
+        abort(404);
+    }
+
+    return redirect('/' . $defaultRoutePrefix . '/' . $path, 301);
+});
+
 Route::get('/', function () {
     $defaultLocale = config('app.fallback_locale', 'en');
     $userLocale = request()->getPreferredLanguage(['en', 'ja']) ?? $defaultLocale;
