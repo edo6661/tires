@@ -8,7 +8,9 @@
             <aside class="sm:sticky top-8 self-start text-main-text md:border-r md:border-disabled/50 md:pr-6 space-y-8">
                 <div>
                     <p class="text-heading-md font-semibold mb-2 text-brand">{{ __('home.location') }}</p>
-                    <p class="text-body-md">{{ $businessSettings->address }}</p>
+                    @if ($businessSettings && $businessSettings->address)
+                        <p class="text-body-md">{{ $businessSettings->address }}</p>
+                    @endif
                 </div>
                 <div>
                     <p class="text-heading-md font-semibold mb-2 text-brand">{{ __('home.business_hours') }}</p>

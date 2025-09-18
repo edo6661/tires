@@ -77,6 +77,27 @@ Route::fallback(function () {
 
 
     $path = request()->path();
+
+    // Bypass static assets in public directory so they are not redirected to locale prefixes
+    if (
+        preg_match('#^(build/|images/|css/|js/)#', $path)
+        || in_array($path, [
+            'favicon.ico',
+            'robots.txt',
+            'manifest.json',
+            'favicon-16x16.png',
+            'favicon-32x32.png',
+            'favicon-96x96.png',
+            'apple-icon.png',
+            'apple-icon-precomposed.png',
+        ])
+    ) {
+        $publicFile = public_path($path);
+        if (file_exists($publicFile)) {
+            return response()->file($publicFile);
+        }
+        abort(404);
+    }
     $defaultLocale = config('app.fallback_locale', 'en');
     $defaultRoutePrefix = SetLocale::getRoutePrefix($defaultLocale);
     $supportedPrefixes = SetLocale::getSupportedRoutePrefixes();
