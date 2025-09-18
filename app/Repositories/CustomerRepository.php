@@ -8,85 +8,46 @@ use App\Models\TireStorage;
 use App\Repositories\CustomerRepositoryInterface;
 use Illuminate\Support\Collection;
 use Illuminate\Pagination\LengthAwarePaginator;
+use Illuminate\Contracts\Pagination\CursorPaginator;
 use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
 
 class CustomerRepository implements CustomerRepositoryInterface
 {
-    protected $userModel;
     protected $reservationModel;
+    protected $userModel;
     protected $tireStorageModel;
 
-    public function __construct(User $userModel, Reservation $reservationModel, TireStorage $tireStorageModel)
+    public function __construct(Reservation $reservationModel, User $userModel, TireStorage $tireStorageModel)
     {
-        $this->userModel = $userModel;
         $this->reservationModel = $reservationModel;
+        $this->userModel = $userModel;
         $this->tireStorageModel = $tireStorageModel;
     }
 
     public function getPaginated(array $filters = [], int $perPage = 15): LengthAwarePaginator
     {
-        $query = DB::table('reservations as r')
-            ->select([
-                DB::raw('COALESCE(r.user_id::text, CONCAT(\'guest_\', MIN(r.id)::text)) as customer_id'),
-                DB::raw('COALESCE(u.full_name, r.full_name) as full_name'),
-                DB::raw('COALESCE(u.full_name_kana, r.full_name_kana) as full_name_kana'),
-                DB::raw('COALESCE(u.email, r.email) as email'),
-                DB::raw('COALESCE(u.phone_number, r.phone_number) as phone_number'),
-                DB::raw('CASE WHEN r.user_id IS NOT NULL THEN 1 ELSE 0 END as is_registered'),
-                'r.user_id',
-                DB::raw('COUNT(r.id) as reservation_count'),
-                DB::raw('MAX(r.reservation_datetime) as latest_reservation'),
-                DB::raw('COALESCE(SUM(r.amount), 0) as total_amount')
-            ])
-            ->leftJoin('users as u', 'r.user_id', '=', 'u.id')
-            ->groupBy([
-                'r.user_id', 
-                'r.full_name', 
-                'r.full_name_kana', 
-                'r.email', 
-                'r.phone_number', 
-                'u.full_name', 
-                'u.full_name_kana', 
-                'u.email', 
-                'u.phone_number'
-            ]);
-
-        if (!empty($filters['search'])) {
-            $search = '%' . $filters['search'] . '%';
-            $query->where(function($q) use ($search) {
-                $q->where('u.full_name', 'ILIKE', $search)
-                  ->orWhere('r.full_name', 'ILIKE', $search)
-                  ->orWhere('u.email', 'ILIKE', $search)
-                  ->orWhere('r.email', 'ILIKE', $search)
-                  ->orWhere('u.phone_number', 'ILIKE', $search)
-                  ->orWhere('r.phone_number', 'ILIKE', $search);
-            });
-        }
-
-        if (!empty($filters['customer_type'])) {
-            switch ($filters['customer_type']) {
-                case 'first_time':
-                    $query->having(DB::raw('COUNT(r.id)'), '=', 1);
-                    break;
-                case 'repeat':
-                    $query->having(DB::raw('COUNT(r.id)'), '>=', 3);
-                    break;
-                case 'dormant':
-                    $query->having(DB::raw('MAX(r.reservation_datetime)'), '<', Carbon::now()->subMonths(3));
-                    break;
-            }
-        }
-
+        $query = $this->buildCustomerQuery();
+        $this->applyFilters($query, $filters);
         return $query->paginate($perPage);
     }
 
-    public function findById(int $id): ?array
+    public function getPaginatedWithCursor(array $filters = [], int $perPage = 15, ?string $cursor = null): CursorPaginator
     {
-        // Cek apakah ini adalah user_id yang terdaftar atau guest reservation
-        $customer = DB::table('reservations as r')
+        $query = $this->buildCustomerQuery();
+        $this->applyFilters($query, $filters);
+        return $query->orderBy('latest_reservation', 'desc')
+            ->cursorPaginate($perPage, ['*'], 'cursor', $cursor);
+    }
+
+    private function buildCustomerQuery()
+    {
+        // base query dengan group by & aggregate
+        $base = DB::table('reservations as r')
             ->select([
-                DB::raw('COALESCE(r.user_id::text, CONCAT(\'guest_\', MIN(r.id)::text)) as customer_id'),
+                DB::raw("CASE WHEN r.user_id IS NOT NULL
+                        THEN CAST(r.user_id AS TEXT)
+                        ELSE CONCAT('guest_', CAST(r.id AS TEXT)) END as customer_id"),
                 DB::raw('COALESCE(u.full_name, r.full_name) as full_name'),
                 DB::raw('COALESCE(u.full_name_kana, r.full_name_kana) as full_name_kana'),
                 DB::raw('COALESCE(u.email, r.email) as email'),
@@ -104,27 +65,16 @@ class CustomerRepository implements CustomerRepositoryInterface
                 DB::raw('COALESCE(SUM(r.amount), 0) as total_amount')
             ])
             ->leftJoin('users as u', 'r.user_id', '=', 'u.id')
-            ->where(function($query) use ($id) {
-                // Jika ID adalah angka dan ada user dengan ID tersebut
-                $query->where('r.user_id', $id)
-                      // Atau jika ini adalah guest reservation dengan ID tertentu
-                      ->orWhere(function($q) use ($id) {
-                          // Untuk guest customer, gunakan reservation ID
-                          if (is_string($id) && strpos($id, 'guest_') === 0) {
-                              $reservationId = str_replace('guest_', '', $id);
-                              $q->where('r.id', $reservationId)->whereNull('r.user_id');
-                          }
-                      });
-            })
             ->groupBy([
-                'r.user_id', 
-                'r.full_name', 
-                'r.full_name_kana', 
-                'r.email', 
-                'r.phone_number', 
-                'u.full_name', 
-                'u.full_name_kana', 
-                'u.email', 
+                'r.user_id',
+                'r.id',
+                'r.full_name',
+                'r.full_name_kana',
+                'r.email',
+                'r.phone_number',
+                'u.full_name',
+                'u.full_name_kana',
+                'u.email',
                 'u.phone_number',
                 'u.company_name',
                 'u.department',
@@ -132,7 +82,51 @@ class CustomerRepository implements CustomerRepositoryInterface
                 'u.home_address',
                 'u.date_of_birth',
                 'u.gender'
-            ])
+            ]);
+
+        // jadikan subquery biar bisa pakai alias seperti latest_reservation di WHERE
+        return DB::query()->fromSub($base, 'customer_base');
+    }
+
+
+    private function applyFilters($query, array $filters)
+    {
+        if (!empty($filters['search'])) {
+            $search = '%' . $filters['search'] . '%';
+            $query->where(function ($q) use ($search) {
+                $q->where('full_name', 'LIKE', $search)
+                    ->orWhere('email', 'LIKE', $search)
+                    ->orWhere('phone_number', 'LIKE', $search);
+            });
+        }
+
+        if (!empty($filters['customer_type'])) {
+            switch ($filters['customer_type']) {
+                case 'first_time':
+                    $firstTimeUserIds = $this->getFirstTimeCustomerUserIds();
+                    $query->whereIn('user_id', $firstTimeUserIds);
+                    break;
+
+                case 'repeat':
+                    $repeatUserIds = $this->getRepeatCustomerUserIds();
+                    $query->whereIn('user_id', $repeatUserIds);
+                    break;
+
+                case 'dormant':
+                    $query->where('latest_reservation', '<', Carbon::now()->subMonths(3));
+                    break;
+            }
+        }
+    }
+
+
+    public function findById(int $id): ?array
+    {
+        $customer = $this->buildCustomerQuery()
+            ->where(function ($query) use ($id) {
+                $query->where('r.user_id', $id)
+                    ->orWhere('r.id', $id);
+            })
             ->first();
 
         return $customer ? (array) $customer : null;
@@ -140,83 +134,83 @@ class CustomerRepository implements CustomerRepositoryInterface
 
     public function getFirstTimeCustomers(): Collection
     {
-        return DB::table('reservations as r')
-            ->select([
-                DB::raw('COALESCE(r.user_id::text, CONCAT(\'guest_\', MIN(r.id)::text)) as customer_id'),
-                DB::raw('COALESCE(u.full_name, r.full_name) as full_name'),
-                DB::raw('COALESCE(u.email, r.email) as email'),
-                DB::raw('COUNT(r.id) as reservation_count')
-            ])
-            ->leftJoin('users as u', 'r.user_id', '=', 'u.id')
-            ->groupBy([
-                'r.user_id', 
-                'r.full_name', 
-                'r.email', 
-                'u.full_name', 
-                'u.email'
-            ])
-            ->having(DB::raw('COUNT(r.id)'), '=', 1)
+        $firstTimeUserIds = $this->getFirstTimeCustomerUserIds();
+        return $this->buildCustomerQuery()
+            ->whereIn('r.user_id', $firstTimeUserIds)
             ->get();
     }
 
     public function getRepeatCustomers(): Collection
     {
-        return DB::table('reservations as r')
-            ->select([
-                DB::raw('COALESCE(r.user_id::text, CONCAT(\'guest_\', MIN(r.id)::text)) as customer_id'),
-                DB::raw('COALESCE(u.full_name, r.full_name) as full_name'),
-                DB::raw('COALESCE(u.email, r.email) as email'),
-                DB::raw('COUNT(r.id) as reservation_count')
-            ])
-            ->leftJoin('users as u', 'r.user_id', '=', 'u.id')
-            ->groupBy([
-                'r.user_id', 
-                'r.full_name', 
-                'r.email', 
-                'u.full_name', 
-                'u.email'
-            ])
-            ->having(DB::raw('COUNT(r.id)'), '>=', 3)
+        $repeatUserIds = $this->getRepeatCustomerUserIds();
+        return $this->buildCustomerQuery()
+            ->whereIn('r.user_id', $repeatUserIds)
             ->get();
     }
 
     public function getDormantCustomers(): Collection
     {
-        return DB::table('reservations as r')
-            ->select([
-                DB::raw('COALESCE(r.user_id::text, CONCAT(\'guest_\', MIN(r.id)::text)) as customer_id'),
-                DB::raw('COALESCE(u.full_name, r.full_name) as full_name'),
-                DB::raw('COALESCE(u.email, r.email) as email'),
-                DB::raw('MAX(r.reservation_datetime) as latest_reservation')
-            ])
-            ->leftJoin('users as u', 'r.user_id', '=', 'u.id')
-            ->groupBy([
-                'r.user_id', 
-                'r.full_name', 
-                'r.email', 
-                'u.full_name', 
-                'u.email'
-            ])
-            ->having(DB::raw('MAX(r.reservation_datetime)'), '<', Carbon::now()->subMonths(3))
+        $dormantUserIds = $this->getDormantCustomerUserIds();
+        return $this->buildCustomerQuery()
+            ->whereIn('r.user_id', $dormantUserIds)
             ->get();
+    }
+
+    private function getFirstTimeCustomerUserIds(): Collection
+    {
+        return $this->reservationModel
+            ->selectRaw('user_id')
+            ->whereNotNull('user_id')
+            ->groupBy('user_id')
+            ->havingRaw('COUNT(*) = 1')
+            ->pluck('user_id');
+    }
+
+    private function getRepeatCustomerUserIds(): Collection
+    {
+        return $this->reservationModel
+            ->selectRaw('user_id')
+            ->whereNotNull('user_id')
+            ->groupBy('user_id')
+            ->havingRaw('COUNT(*) >= 3')
+            ->pluck('user_id');
+    }
+
+    private function getDormantCustomerUserIds(): Collection
+    {
+        return $this->reservationModel
+            ->selectRaw('user_id')
+            ->whereNotNull('user_id')
+            ->groupBy('user_id')
+            ->havingRaw('MAX(reservation_datetime) < ?', [Carbon::now()->subMonths(3)])
+            ->pluck('user_id');
+    }
+
+    public function getFirstTimeCustomersWithCursor(int $perPage = 15, ?string $cursor = null): CursorPaginator
+    {
+        return $this->getPaginatedWithCursor(['customer_type' => 'first_time'], $perPage, $cursor);
+    }
+
+    public function getRepeatCustomersWithCursor(int $perPage = 15, ?string $cursor = null): CursorPaginator
+    {
+        return $this->getPaginatedWithCursor(['customer_type' => 'repeat'], $perPage, $cursor);
+    }
+
+    public function getDormantCustomersWithCursor(int $perPage = 15, ?string $cursor = null): CursorPaginator
+    {
+        return $this->getPaginatedWithCursor(['customer_type' => 'dormant'], $perPage, $cursor);
     }
 
     public function getCustomerReservationHistory(int $customerId, ?int $userId = null): Collection
     {
         $query = $this->reservationModel->with(['menu']);
-        
+
         if ($userId) {
             $query->where('user_id', $userId);
         } else {
-            // Untuk guest customer, gunakan ID reservasi
-            if (is_string($customerId) && strpos($customerId, 'guest_') === 0) {
-                $reservationId = str_replace('guest_', '', $customerId);
-                $query->where('id', $reservationId);
-            } else {
-                $query->where('user_id', $customerId);
-            }
+            $query->where('id', $customerId);
         }
-        
+
         return $query->orderBy('reservation_datetime', 'desc')->get();
     }
 
@@ -225,7 +219,7 @@ class CustomerRepository implements CustomerRepositoryInterface
         if (!$userId) {
             return collect();
         }
-        
+
         return $this->tireStorageModel->where('user_id', $userId)
             ->orderBy('storage_start_date', 'desc')
             ->get();
@@ -233,28 +227,22 @@ class CustomerRepository implements CustomerRepositoryInterface
 
     public function getCustomerStats(int $customerId, ?int $userId = null): array
     {
-        $reservationQuery = $this->reservationModel->query();
-        
+        $query = $this->reservationModel->query();
+
         if ($userId) {
-            $reservationQuery->where('user_id', $userId);
+            $query->where('user_id', $userId);
         } else {
-            // Untuk guest customer
-            if (is_string($customerId) && strpos($customerId, 'guest_') === 0) {
-                $reservationId = str_replace('guest_', '', $customerId);
-                $reservationQuery->where('id', $reservationId);
-            } else {
-                $reservationQuery->where('user_id', $customerId);
-            }
+            $query->where('id', $customerId);
         }
-        
-        $reservationCount = $reservationQuery->count();
-        $totalAmount = $reservationQuery->sum('amount') ?? 0;
-        
+
+        $reservationCount = $query->count();
+        $totalAmount = $query->sum('amount') ?? 0;
+
         $tireStorageCount = 0;
         if ($userId) {
             $tireStorageCount = $this->tireStorageModel->where('user_id', $userId)->count();
         }
-        
+
         return [
             'reservation_count' => $reservationCount,
             'total_amount' => $totalAmount,
@@ -264,33 +252,74 @@ class CustomerRepository implements CustomerRepositoryInterface
 
     public function searchCustomers(string $search): Collection
     {
-        $searchTerm = '%' . $search . '%';
-        
-        return DB::table('reservations as r')
-            ->select([
-                DB::raw('COALESCE(r.user_id::text, CONCAT(\'guest_\', MIN(r.id)::text)) as customer_id'),
-                DB::raw('COALESCE(u.full_name, r.full_name) as full_name'),
-                DB::raw('COALESCE(u.email, r.email) as email'),
-                DB::raw('COALESCE(u.phone_number, r.phone_number) as phone_number')
-            ])
-            ->leftJoin('users as u', 'r.user_id', '=', 'u.id')
-            ->where(function($q) use ($searchTerm) {
-                $q->where('u.full_name', 'ILIKE', $searchTerm)
-                  ->orWhere('r.full_name', 'ILIKE', $searchTerm)
-                  ->orWhere('u.email', 'ILIKE', $searchTerm)
-                  ->orWhere('r.email', 'ILIKE', $searchTerm)
-                  ->orWhere('u.phone_number', 'ILIKE', $searchTerm)
-                  ->orWhere('r.phone_number', 'ILIKE', $searchTerm);
+        return $this->buildCustomerQuery()
+            ->where(function ($q) use ($search) {
+                $searchTerm = '%' . $search . '%';
+                $q->where('u.full_name', 'LIKE', $searchTerm)
+                    ->orWhere('r.full_name', 'LIKE', $searchTerm)
+                    ->orWhere('u.email', 'LIKE', $searchTerm)
+                    ->orWhere('r.email', 'LIKE', $searchTerm)
+                    ->orWhere('u.phone_number', 'LIKE', $searchTerm)
+                    ->orWhere('r.phone_number', 'LIKE', $searchTerm);
             })
-            ->groupBy([
-                'r.user_id', 
-                'r.full_name', 
-                'r.email', 
-                'r.phone_number', 
-                'u.full_name', 
-                'u.email', 
-                'u.phone_number'
-            ])
+            ->get();
+    }
+
+    public function count(): int
+    {
+        return $this->buildCustomerQuery()->count();
+    }
+
+    public function countByType(string $type): int
+    {
+        switch ($type) {
+            case 'first_time':
+                return $this->getFirstTimeCustomers()->count();
+            case 'repeat':
+                return $this->getRepeatCustomers()->count();
+            case 'dormant':
+                return $this->getDormantCustomers()->count();
+            default:
+                return 0;
+        }
+    }
+
+    public function countTodayCustomers(): int
+    {
+        return $this->reservationModel
+            ->whereDate('created_at', today())
+            ->distinct('user_id')
+            ->count('user_id');
+    }
+
+    public function getFiltered(array $filters, int $perPage = null): Collection
+    {
+        $query = $this->buildCustomerQuery();
+        $this->applyFilters($query, $filters);
+
+        $query->orderBy('latest_reservation', 'desc');
+
+        if ($perPage) {
+            return $query->take($perPage)->get();
+        }
+
+        return $query->get();
+    }
+
+    public function search(string $searchQuery, int $perPage = 15): Collection
+    {
+        return $this->buildCustomerQuery()
+            ->where(function ($q) use ($searchQuery) {
+                $search = '%' . $searchQuery . '%';
+                $q->where('u.full_name', 'LIKE', $search)
+                    ->orWhere('r.full_name', 'LIKE', $search)
+                    ->orWhere('u.email', 'LIKE', $search)
+                    ->orWhere('r.email', 'LIKE', $search)
+                    ->orWhere('u.phone_number', 'LIKE', $search)
+                    ->orWhere('r.phone_number', 'LIKE', $search);
+            })
+            ->orderBy('latest_reservation', 'desc')
+            ->take($perPage)
             ->get();
     }
 }

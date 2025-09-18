@@ -5,8 +5,10 @@ namespace App\Http\Controllers\Api\Admin;
 use App\Http\Controllers\Controller;
 use App\Services\CustomerServiceInterface;
 use App\Http\Traits\ApiResponseTrait;
+use App\Http\Resources\CustomerResource;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Support\Facades\App;
 
 /**
  * @tags Admin - Customer Management
@@ -21,55 +23,85 @@ class CustomerController extends Controller
 
     /**
      * Display a listing of customers with search and filter support
-     *
-     * @param Request $request
-     * @return JsonResponse
-     *
-     * Query Parameters:
-     * - search: string (search by name, email, or phone)
-     * - customer_type: string (first_time|repeat|dormant|all)
-     * - per_page: int (pagination limit, default: 15)
-     * - page: int (current page, default: 1)
      */
     public function index(Request $request): JsonResponse
     {
         try {
+            // Validate query parameters
             $request->validate([
-                'search' => 'nullable|string|max:255',
-                'customer_type' => 'nullable|string|in:first_time,repeat,dormant,all',
                 'per_page' => 'nullable|integer|min:1|max:100',
-                'page' => 'nullable|integer|min:1'
+                'paginate' => 'nullable|string',
+                'cursor' => 'nullable|string',
+                'customer_type' => 'nullable|in:first_time,repeat,dormant,all',
+                'search' => 'nullable|string|max:255'
             ]);
 
-            $filters = [];
+            $perPage = min($request->get('per_page', 15), 100);
+            $locale = App::getLocale();
 
-            if ($request->filled('search')) {
-                $filters['search'] = $request->input('search');
+            // Get filters from request
+            $filters = [
+                'customer_type' => $request->get('customer_type'),
+                'search' => $request->get('search')
+            ];
+
+            // Remove empty filters
+            $filters = array_filter($filters);
+
+            if ($request->has('paginate') && $request->get('paginate') !== 'false') {
+                // Paginated response with cursor and filters
+                $cursor = $request->get('cursor');
+                $customers = $this->customerService->getPaginatedCustomersWithCursor($perPage, $cursor, $filters);
+                $collection = CustomerResource::collection($customers);
+
+                $cursorInfo = $this->generateCursor($customers);
+
+                return $this->successResponseWithCursor(
+                    $collection->resolve(),
+                    $cursorInfo,
+                    'Customers retrieved successfully'
+                );
+            } else {
+                // Simple response without pagination but with filters
+                if (!empty($filters)) {
+                    $customers = $this->customerService->getCustomers($filters, $perPage);
+                } else {
+                    // Use the standard getPaginated method even without filters to ensure all fields are included
+                    $customers = $this->customerService->getCustomers([], $perPage);
+                }
+                $collection = CustomerResource::collection($customers);
+
+                return $this->successResponse(
+                    $collection->resolve(),
+                    'Customers retrieved successfully'
+                );
             }
-
-            if ($request->filled('customer_type') && $request->input('customer_type') !== 'all') {
-                $filters['customer_type'] = $request->input('customer_type');
-            }
-
-            $perPage = $request->get('per_page', 15);
-            $customers = $this->customerService->getCustomers($filters, $perPage);
-            $customerTypeCounts = $this->customerService->getCustomerTypeCounts();
-
-            return $this->successResponse([
-                'customers' => $customers,
-                'customer_type_counts' => $customerTypeCounts,
-                'filters' => $filters,
-                'pagination_info' => [
-                    'current_page' => $customers->currentPage(),
-                    'per_page' => $customers->perPage(),
-                    'total' => $customers->total(),
-                    'last_page' => $customers->lastPage()
-                ]
-            ], 'Customers retrieved successfully');
         } catch (\Illuminate\Validation\ValidationException $e) {
-            return $this->validationErrorResponse($e->errors());
+            return $this->errorResponse(
+                'Validation failed',
+                422,
+                collect($e->errors())->map(function ($messages, $field) {
+                    return [
+                        'field' => $field,
+                        'tag' => 'validation_error',
+                        'value' => request($field),
+                        'message' => $messages[0]
+                    ];
+                })->values()->toArray()
+            );
         } catch (\Exception $e) {
-            return $this->errorResponse('Failed to retrieve customers: ' . $e->getMessage(), 500);
+            return $this->errorResponse(
+                'Failed to retrieve customers',
+                500,
+                [
+                    [
+                        'field' => 'general',
+                        'tag' => 'server_error',
+                        'value' => $e->getMessage(),
+                        'message' => 'An unexpected error occurred'
+                    ]
+                ]
+            );
         }
     }
 
@@ -82,12 +114,31 @@ class CustomerController extends Controller
             $customerDetail = $this->customerService->getCustomerDetail($id);
 
             if (!$customerDetail) {
-                return $this->errorResponse('Customer not found', 404);
+                return $this->errorResponse('Customer not found', 404, [
+                    [
+                        'field' => 'general',
+                        'tag' => 'not_found',
+                        'value' => null,
+                        'message' => 'Customer not found'
+                    ]
+                ]);
             }
 
-            return $this->successResponse($customerDetail, 'Customer details retrieved successfully');
+            return $this->successResponse(
+                $customerDetail,
+                'Customer details retrieved successfully'
+            );
         } catch (\Exception $e) {
-            return $this->errorResponse('Failed to retrieve customer: ' . $e->getMessage(), 500);
+            return $this->errorResponse(
+                'Failed to retrieve customer',
+                500,
+                [[
+                    'field' => 'general',
+                    'tag' => 'server_error',
+                    'value' => $e->getMessage(),
+                    'message' => 'An unexpected error occurred'
+                ]]
+            );
         }
     }
 
@@ -98,10 +149,23 @@ class CustomerController extends Controller
     {
         try {
             $customers = $this->customerService->getFirstTimeCustomers();
+            $collection = CustomerResource::collection($customers);
 
-            return $this->successResponse($customers, 'First time customers retrieved successfully');
+            return $this->successResponse(
+                $collection->resolve(),
+                'First time customers retrieved successfully'
+            );
         } catch (\Exception $e) {
-            return $this->errorResponse('Failed to retrieve first time customers: ' . $e->getMessage(), 500);
+            return $this->errorResponse(
+                'Failed to retrieve first time customers',
+                500,
+                [[
+                    'field' => 'general',
+                    'tag' => 'server_error',
+                    'value' => $e->getMessage(),
+                    'message' => 'An unexpected error occurred'
+                ]]
+            );
         }
     }
 
@@ -112,10 +176,23 @@ class CustomerController extends Controller
     {
         try {
             $customers = $this->customerService->getRepeatCustomers();
+            $collection = CustomerResource::collection($customers);
 
-            return $this->successResponse($customers, 'Repeat customers retrieved successfully');
+            return $this->successResponse(
+                $collection->resolve(),
+                'Repeat customers retrieved successfully'
+            );
         } catch (\Exception $e) {
-            return $this->errorResponse('Failed to retrieve repeat customers: ' . $e->getMessage(), 500);
+            return $this->errorResponse(
+                'Failed to retrieve repeat customers',
+                500,
+                [[
+                    'field' => 'general',
+                    'tag' => 'server_error',
+                    'value' => $e->getMessage(),
+                    'message' => 'An unexpected error occurred'
+                ]]
+            );
         }
     }
 
@@ -126,18 +203,28 @@ class CustomerController extends Controller
     {
         try {
             $customers = $this->customerService->getDormantCustomers();
+            $collection = CustomerResource::collection($customers);
 
-            return $this->successResponse($customers, 'Dormant customers retrieved successfully');
+            return $this->successResponse(
+                $collection->resolve(),
+                'Dormant customers retrieved successfully'
+            );
         } catch (\Exception $e) {
-            return $this->errorResponse('Failed to retrieve dormant customers: ' . $e->getMessage(), 500);
+            return $this->errorResponse(
+                'Failed to retrieve dormant customers',
+                500,
+                [[
+                    'field' => 'general',
+                    'tag' => 'server_error',
+                    'value' => $e->getMessage(),
+                    'message' => 'An unexpected error occurred'
+                ]]
+            );
         }
     }
 
     /**
      * Search customers by name, email, or phone number
-     *
-     * @param Request $request
-     * @return JsonResponse
      */
     public function search(Request $request): JsonResponse
     {
@@ -161,17 +248,36 @@ class CustomerController extends Controller
             }
 
             $customers = $this->customerService->getCustomers($filters, $perPage);
+            $collection = CustomerResource::collection($customers);
 
-            return $this->successResponse([
-                'customers' => $customers,
-                'search_term' => $searchTerm,
-                'customer_type' => $customerType,
-                'results_count' => $customers->total()
-            ], 'Customer search completed successfully');
+            return $this->successResponse(
+                $collection->resolve(),
+                'Customer search completed successfully'
+            );
         } catch (\Illuminate\Validation\ValidationException $e) {
-            return $this->validationErrorResponse($e->errors());
+            return $this->errorResponse(
+                'Validation failed',
+                422,
+                collect($e->errors())->map(function ($messages, $field) {
+                    return [
+                        'field' => $field,
+                        'tag' => 'validation_error',
+                        'value' => request($field),
+                        'message' => $messages[0]
+                    ];
+                })->values()->toArray()
+            );
         } catch (\Exception $e) {
-            return $this->errorResponse('Customer search failed: ' . $e->getMessage(), 500);
+            return $this->errorResponse(
+                'Customer search failed',
+                500,
+                [[
+                    'field' => 'general',
+                    'tag' => 'server_error',
+                    'value' => $e->getMessage(),
+                    'message' => 'An unexpected error occurred'
+                ]]
+            );
         }
     }
 
@@ -187,12 +293,24 @@ class CustomerController extends Controller
         try {
             $statistics = $this->customerService->getCustomerTypeCounts();
 
-            return $this->successResponse([
-                'statistics' => $statistics,
-                'total_customers' => array_sum($statistics)
-            ], 'Customer statistics retrieved successfully');
+            return $this->successResponse(
+                [
+                    'statistics' => $statistics,
+                    'total_customers' => array_sum($statistics)
+                ],
+                'Customer statistics retrieved successfully'
+            );
         } catch (\Exception $e) {
-            return $this->errorResponse('Failed to retrieve customer statistics: ' . $e->getMessage(), 500);
+            return $this->errorResponse(
+                'Failed to retrieve customer statistics',
+                500,
+                [[
+                    'field' => 'general',
+                    'tag' => 'server_error',
+                    'value' => $e->getMessage(),
+                    'message' => 'An unexpected error occurred'
+                ]]
+            );
         }
     }
 
@@ -204,9 +322,21 @@ class CustomerController extends Controller
         try {
             $counts = $this->customerService->getCustomerTypeCounts();
 
-            return $this->successResponse($counts, 'Customer type counts retrieved successfully');
+            return $this->successResponse(
+                $counts,
+                'Customer type counts retrieved successfully'
+            );
         } catch (\Exception $e) {
-            return $this->errorResponse('Failed to retrieve customer type counts: ' . $e->getMessage(), 500);
+            return $this->errorResponse(
+                'Failed to retrieve customer type counts',
+                500,
+                [[
+                    'field' => 'general',
+                    'tag' => 'server_error',
+                    'value' => $e->getMessage(),
+                    'message' => 'An unexpected error occurred'
+                ]]
+            );
         }
     }
 }

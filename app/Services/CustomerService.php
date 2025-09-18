@@ -6,6 +6,7 @@ use App\Repositories\CustomerRepositoryInterface;
 use App\Services\CustomerServiceInterface;
 use Illuminate\Support\Collection;
 use Illuminate\Pagination\LengthAwarePaginator;
+use Illuminate\Contracts\Pagination\CursorPaginator;
 
 class CustomerService implements CustomerServiceInterface
 {
@@ -21,18 +22,23 @@ class CustomerService implements CustomerServiceInterface
         return $this->customerRepository->getPaginated($filters, $perPage);
     }
 
+    public function getPaginatedCustomersWithCursor(int $perPage = 15, ?string $cursor = null, array $filters = []): CursorPaginator
+    {
+        return $this->customerRepository->getPaginatedWithCursor($filters, $perPage, $cursor);
+    }
+
     public function getCustomerDetail(int $id): ?array
     {
         $customer = $this->customerRepository->findById($id);
-        
+
         if (!$customer) {
             return null;
         }
-        
+
         $reservationHistory = $this->getCustomerReservationHistory($id, $customer['user_id']);
         $tireStorage = $this->getCustomerTireStorage($id, $customer['user_id']);
         $stats = $this->getCustomerStats($id, $customer['user_id']);
-        
+
         return [
             'customer' => $customer,
             'reservation_history' => $reservationHistory,
@@ -56,6 +62,21 @@ class CustomerService implements CustomerServiceInterface
         return $this->customerRepository->getDormantCustomers();
     }
 
+    public function getFirstTimeCustomersWithCursor(int $perPage = 15, ?string $cursor = null): CursorPaginator
+    {
+        return $this->customerRepository->getFirstTimeCustomersWithCursor($perPage, $cursor);
+    }
+
+    public function getRepeatCustomersWithCursor(int $perPage = 15, ?string $cursor = null): CursorPaginator
+    {
+        return $this->customerRepository->getRepeatCustomersWithCursor($perPage, $cursor);
+    }
+
+    public function getDormantCustomersWithCursor(int $perPage = 15, ?string $cursor = null): CursorPaginator
+    {
+        return $this->customerRepository->getDormantCustomersWithCursor($perPage, $cursor);
+    }
+
     public function getCustomerReservationHistory(int $customerId, ?int $userId = null): Collection
     {
         return $this->customerRepository->getCustomerReservationHistory($customerId, $userId);
@@ -74,6 +95,12 @@ class CustomerService implements CustomerServiceInterface
     public function searchCustomers(string $search): Collection
     {
         return $this->customerRepository->searchCustomers($search);
+    }
+
+    public function searchCustomersWithCursor(string $search, int $perPage = 15, ?string $cursor = null, array $filters = []): CursorPaginator
+    {
+        $searchFilters = array_merge($filters, ['search' => $search]);
+        return $this->customerRepository->getPaginatedWithCursor($searchFilters, $perPage, $cursor);
     }
 
     public function getCustomerTypeCounts(): array
