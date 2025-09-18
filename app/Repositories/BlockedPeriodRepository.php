@@ -4,6 +4,7 @@ use App\Models\BlockedPeriod;
 use App\Repositories\BlockedPeriodRepositoryInterface;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Pagination\LengthAwarePaginator;
+use Illuminate\Contracts\Pagination\CursorPaginator;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\DB;
@@ -30,6 +31,15 @@ class BlockedPeriodRepository implements BlockedPeriodRepositoryInterface
         $query = $this->model->with('menu');
         $query = $this->applyFilters($query, $filters);
         return $query->orderBy('start_datetime', 'desc')->paginate($perPage);
+    }
+
+    public function getPaginatedWithCursor(int $perPage = 15, ?string $cursor = null, array $filters = []): CursorPaginator
+    {
+        $query = $this->model->with('menu');
+        $query = $this->applyFilters($query, $filters);
+        return $query->orderBy('start_datetime', 'desc')
+            ->orderBy('id', 'desc')
+            ->cursorPaginate($perPage, ['*'], 'cursor', $cursor);
     }
     public function getAllWithFilters(array $filters): Collection
     {
@@ -153,10 +163,10 @@ class BlockedPeriodRepository implements BlockedPeriodRepositoryInterface
             ->exists();
     }
     public function checkConflictWithExclusion(
-        ?int $menuId, 
-        string $startDatetime, 
-        string $endDatetime, 
-        bool $allMenus = false, 
+        ?int $menuId,
+        string $startDatetime,
+        string $endDatetime,
+        bool $allMenus = false,
         ?int $excludeId = null
     ): bool {
         $query = $this->model->newQuery();
@@ -191,10 +201,10 @@ class BlockedPeriodRepository implements BlockedPeriodRepositoryInterface
         return $query->exists();
     }
     public function getConflictDetails(
-        ?int $menuId, 
-        string $startDatetime, 
-        string $endDatetime, 
-        bool $allMenus = false, 
+        ?int $menuId,
+        string $startDatetime,
+        string $endDatetime,
+        bool $allMenus = false,
         ?int $excludeId = null
     ): array {
         $query = $this->model->with('menu');

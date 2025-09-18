@@ -2,16 +2,18 @@
 
 namespace App\Http\Controllers\Api\Admin;
 
-use App\Http\Controllers\Controller;
-use App\Services\BlockedPeriodServiceInterface;
-use App\Services\MenuServiceInterface;
-use App\Http\Traits\ApiResponseTrait;
-use App\Http\Requests\BlockedPeriodRequest;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
-use Carbon\Carbon;
+use Illuminate\Support\Facades\App;
+use App\Http\Controllers\Controller;
+use App\Http\Traits\ApiResponseTrait;
+use App\Http\Requests\BlockedPeriodRequest;
+use App\Http\Resources\BlockedPeriodResource;
+use App\Services\BlockedPeriodServiceInterface;
 
 /**
+ * @mixin \Illuminate\Http\Request
  * @tags Admin - Blocked Period Management
  */
 class BlockedPeriodController extends Controller
@@ -19,192 +21,73 @@ class BlockedPeriodController extends Controller
     use ApiResponseTrait;
 
     public function __construct(
-        protected BlockedPeriodServiceInterface $blockedPeriodService,
-        protected MenuServiceInterface $menuService
-    ) {
-    }
+        protected BlockedPeriodServiceInterface $blockedPeriodService
+    ) {}
 
     /**
-     * Get blocked period statistics overview
-     *
-     * Returns counts for total, active, upcoming, expired periods
-     *
-     * @return JsonResponse
-     */
-    public function getStatistics(Request $request): JsonResponse
-    {
-        try {
-            $filters = [
-                'menu_id' => $request->get('menu_id'),
-                'start_date' => $request->get('start_date'),
-                'end_date' => $request->get('end_date'),
-                'status' => $request->get('status'),
-                'all_menus' => $request->get('all_menus'),
-                'search' => $request->get('search')
-            ];
-
-            // Remove null values from filters
-            $filters = array_filter($filters, function($value) {
-                return $value !== null && $value !== '';
-            });
-
-            $statistics = $this->blockedPeriodService->getStatistics($filters);
-
-            return $this->successResponse([
-                'statistics' => $statistics
-            ], 'Blocked period statistics retrieved successfully');
-        } catch (\Exception $e) {
-            return $this->errorResponse(
-                'Failed to retrieve blocked period statistics',
-                500,
-                [
-                    [
-                        'field' => 'general',
-                        'tag' => 'statistics_error',
-                        'value' => $e->getMessage(),
-                        'message' => 'Statistics retrieval failed'
-                    ]
-                ]
-            );
-        }
-    }
-
-    /**
-     * Search blocked periods with enhanced filtering
-     *
-     * @param Request $request
-     * @return JsonResponse
-     */
-    public function search(Request $request): JsonResponse
-    {
-        try {
-            $validated = $request->validate([
-                'search' => 'nullable|string|max:255',
-                'menu_id' => 'nullable|integer|exists:menus,id',
-                'status' => 'nullable|string|in:active,upcoming,expired,all',
-                'start_date' => 'nullable|date_format:Y-m-d',
-                'end_date' => 'nullable|date_format:Y-m-d|after_or_equal:start_date',
-                'all_menus' => 'nullable|boolean',
-                'per_page' => 'nullable|integer|min:1|max:100',
-                'page' => 'nullable|integer|min:1'
-            ]);
-
-            $filters = [];
-
-            if ($request->filled('search')) {
-                $filters['search'] = $validated['search'];
-            }
-
-            if ($request->filled('menu_id')) {
-                $filters['menu_id'] = $validated['menu_id'];
-            }
-
-            if ($request->filled('status') && $validated['status'] !== 'all') {
-                $filters['status'] = $validated['status'];
-            }
-
-            if ($request->filled('start_date')) {
-                $filters['start_date'] = $validated['start_date'];
-            }
-
-            if ($request->filled('end_date')) {
-                $filters['end_date'] = $validated['end_date'];
-            }
-
-            if ($request->has('all_menus')) {
-                $filters['all_menus'] = $validated['all_menus'];
-            }
-
-            $perPage = $validated['per_page'] ?? 15;
-            $blockedPeriods = $this->blockedPeriodService->getPaginatedBlockedPeriodsWithFilters($filters, $perPage);
-            $statistics = $this->blockedPeriodService->getStatistics($filters);
-            $menus = $this->menuService->getActiveMenus();
-
-            return $this->successResponse([
-                'blocked_periods' => $blockedPeriods,
-                'statistics' => $statistics,
-                'menus' => $menus,
-                'filters' => $filters,
-                'search_term' => $validated['search'] ?? null,
-                'results_count' => $blockedPeriods->total(),
-                'pagination_info' => [
-                    'current_page' => $blockedPeriods->currentPage(),
-                    'per_page' => $blockedPeriods->perPage(),
-                    'total' => $blockedPeriods->total(),
-                    'last_page' => $blockedPeriods->lastPage()
-                ]
-            ], 'Blocked period search completed successfully');
-        } catch (\Illuminate\Validation\ValidationException $e) {
-            return $this->errorResponse(
-                'Validation failed',
-                422,
-                collect($e->errors())->map(function ($messages, $field) {
-                    return [
-                        'field' => $field,
-                        'tag' => 'validation_error',
-                        'value' => request($field),
-                        'message' => $messages[0]
-                    ];
-                })->values()->toArray()
-            );
-        } catch (\Exception $e) {
-            return $this->errorResponse(
-                'Blocked period search failed',
-                500,
-                [
-                    [
-                        'field' => 'general',
-                        'tag' => 'search_error',
-                        'value' => $e->getMessage(),
-                        'message' => 'Search operation failed'
-                    ]
-                ]
-            );
-        }
-    }
-
-    /**
-     * Display a listing of blocked periods
+     * List All Blocked Periods (paginate / non-paginate) with filtering and search
      */
     public function index(Request $request): JsonResponse
     {
         try {
-            $validated = $request->validate([
+            // Validate query parameters
+            $request->validate([
+                'per_page' => 'nullable|integer|min:1|max:100',
+                'paginate' => 'nullable|string',
+                'cursor' => 'nullable|string',
+                'status' => 'nullable|in:active,upcoming,expired,all',
                 'menu_id' => 'nullable|integer|exists:menus,id',
-                'status' => 'nullable|string|in:active,upcoming,expired,all',
                 'start_date' => 'nullable|date_format:Y-m-d',
                 'end_date' => 'nullable|date_format:Y-m-d|after_or_equal:start_date',
-                // 'all_menus' => 'nullable|boolean',
-                'search' => 'nullable|string|max:255',
-                'per_page' => 'nullable|integer|min:1|max:100'
+                'all_menus' => 'nullable|boolean',
+                'search' => 'nullable|string|max:255'
             ]);
 
-            $filters = array_filter($validated, function($value) {
-                return $value !== null && $value !== '';
+            $perPage = min($request->get('per_page', 15), 100);
+            $locale = App::getLocale();
+
+            // Get filters from request
+            $filters = [
+                'status' => $request->get('status'),
+                'menu_id' => $request->get('menu_id'),
+                'start_date' => $request->get('start_date'),
+                'end_date' => $request->get('end_date'),
+                'all_menus' => $request->get('all_menus'),
+                'search' => $request->get('search')
+            ];
+
+            // Remove empty filters
+            $filters = array_filter($filters, function ($value) {
+                return $value !== null && $value !== '' && $value !== 'all';
             });
 
-            // Remove 'all' status as it means no filter
-            if (isset($filters['status']) && $filters['status'] === 'all') {
-                unset($filters['status']);
+            if ($request->has('paginate') && $request->get('paginate') !== 'false') {
+                // Paginated response with cursor and filters
+                $cursor = $request->get('cursor');
+                $blockedPeriods = $this->blockedPeriodService->getPaginatedBlockedPeriodsWithCursor($perPage, $cursor, $filters);
+                $collection = BlockedPeriodResource::collection($blockedPeriods);
+
+                $cursorInfo = $this->generateCursor($blockedPeriods);
+
+                return $this->successResponseWithCursor(
+                    $collection->resolve(),
+                    $cursorInfo,
+                    'Blocked periods retrieved successfully'
+                );
+            } else {
+                // Simple response without pagination but with filters
+                if (!empty($filters)) {
+                    $blockedPeriods = $this->blockedPeriodService->getPaginatedBlockedPeriodsWithFilters($filters, $perPage);
+                } else {
+                    $blockedPeriods = $this->blockedPeriodService->getAllBlockedPeriods()->take($perPage);
+                }
+                $collection = BlockedPeriodResource::collection($blockedPeriods);
+
+                return $this->successResponse(
+                    $collection->resolve(),
+                    'Blocked periods retrieved successfully'
+                );
             }
-
-            $perPage = $validated['per_page'] ?? 15;
-            $blockedPeriods = $this->blockedPeriodService->getPaginatedBlockedPeriodsWithFilters($filters, $perPage);
-            $statistics = $this->blockedPeriodService->getStatistics($filters);
-            $menus = $this->menuService->getActiveMenus();
-
-            return $this->successResponse([
-                'blocked_periods' => $blockedPeriods,
-                'statistics' => $statistics,
-                'menus' => $menus,
-                'filters' => $filters,
-                'pagination_info' => [
-                    'current_page' => $blockedPeriods->currentPage(),
-                    'per_page' => $blockedPeriods->perPage(),
-                    'total' => $blockedPeriods->total(),
-                    'last_page' => $blockedPeriods->lastPage()
-                ]
-            ], 'Blocked periods retrieved successfully');
         } catch (\Illuminate\Validation\ValidationException $e) {
             return $this->errorResponse(
                 'Validation failed',
@@ -219,73 +102,113 @@ class BlockedPeriodController extends Controller
                 })->values()->toArray()
             );
         } catch (\Exception $e) {
-            return $this->errorResponse('Failed to retrieve blocked periods: ' . $e->getMessage(), 500);
+            return $this->errorResponse(
+                'Failed to retrieve blocked periods',
+                500,
+                [
+                    [
+                        'field' => 'general',
+                        'tag' => 'server_error',
+                        'value' => $e->getMessage(),
+                        'message' => 'An unexpected error occurred'
+                    ]
+                ]
+            );
         }
     }
 
     /**
-     * Store a newly created blocked period
+     * Create New Blocked Period
      */
     public function store(BlockedPeriodRequest $request): JsonResponse
     {
         try {
-            $validated = $request->validated();
-            $blockedPeriod = $this->blockedPeriodService->createBlockedPeriod($validated);
+            $data = $request->validated();
+            $blockedPeriod = $this->blockedPeriodService->createBlockedPeriod($data);
 
-            return $this->successResponse($blockedPeriod, 'Blocked period created successfully', 201);
-        } catch (\InvalidArgumentException $e) {
-            return $this->errorResponse($e->getMessage(), 422);
+            return $this->successResponse(
+                new BlockedPeriodResource($blockedPeriod),
+                'Blocked period created successfully',
+                201
+            );
         } catch (\Exception $e) {
-            return $this->errorResponse('Failed to create blocked period: ' . $e->getMessage(), 500);
+            return $this->errorResponse(
+                'Failed to create blocked period',
+                500,
+                [[
+                    'field' => 'general',
+                    'tag' => 'server_error',
+                    'value' => $e->getMessage(),
+                    'message' => 'An unexpected error occurred'
+                ]]
+            );
         }
     }
 
     /**
-     * Display the specified blocked period
+     * Get Blocked Period Detail
      */
-    public function show($id): JsonResponse
+    public function show(int $id): JsonResponse
     {
-        try {
-            $blockedPeriod = $this->blockedPeriodService->findBlockedPeriod($id);
+        $blockedPeriod = $this->blockedPeriodService->findBlockedPeriod($id);
 
-            if (!$blockedPeriod) {
-                return $this->errorResponse('Blocked period not found', 404);
-            }
-
-            return $this->successResponse($blockedPeriod, 'Blocked period retrieved successfully');
-        } catch (\Exception $e) {
-            return $this->errorResponse('Failed to retrieve blocked period: ' . $e->getMessage(), 500);
+        if (!$blockedPeriod) {
+            return $this->errorResponse('Blocked period not found', 404, [
+                [
+                    'field' => 'general',
+                    'tag' => 'not_found',
+                    'value' => null,
+                    'message' => 'Blocked period not found'
+                ]
+            ]);
         }
+
+        return $this->successResponse(
+            new BlockedPeriodResource($blockedPeriod),
+            'Blocked period retrieved successfully'
+        );
     }
 
     /**
-     * Update the specified blocked period
+     * Update Blocked Period
      */
     public function update(BlockedPeriodRequest $request, int $id): JsonResponse
     {
         try {
-            $validated = $request->validated();
-
-            if ($this->hasConflict($validated, $id)) {
-                return $this->errorResponse('Schedule conflict detected with existing blocked periods', 409);
-            }
-
-            $blockedPeriod = $this->blockedPeriodService->updateBlockedPeriod($id, $validated);
+            $data = $request->validated();
+            $blockedPeriod = $this->blockedPeriodService->updateBlockedPeriod($id, $data);
 
             if (!$blockedPeriod) {
-                return $this->errorResponse('Blocked period not found', 404);
+                return $this->errorResponse('Blocked period not found', 404, [
+                    [
+                        'field' => 'general',
+                        'tag' => 'not_found',
+                        'value' => null,
+                        'message' => 'Blocked period not found'
+                    ]
+                ]);
             }
 
-            return $this->successResponse($blockedPeriod, 'Blocked period updated successfully');
-        } catch (\InvalidArgumentException $e) {
-            return $this->errorResponse($e->getMessage(), 422);
+            return $this->successResponse(
+                new BlockedPeriodResource($blockedPeriod),
+                'Blocked period updated successfully'
+            );
         } catch (\Exception $e) {
-            return $this->errorResponse('Failed to update blocked period: ' . $e->getMessage(), 500);
+            return $this->errorResponse(
+                'Failed to update blocked period',
+                500,
+                [[
+                    'field' => 'general',
+                    'tag' => 'server_error',
+                    'value' => $e->getMessage(),
+                    'message' => 'An unexpected error occurred'
+                ]]
+            );
         }
     }
 
     /**
-     * Remove the specified blocked period
+     * Delete Blocked Period
      */
     public function destroy(int $id): JsonResponse
     {
@@ -293,12 +216,54 @@ class BlockedPeriodController extends Controller
             $deleted = $this->blockedPeriodService->deleteBlockedPeriod($id);
 
             if (!$deleted) {
-                return $this->errorResponse('Blocked period not found', 404);
+                return $this->errorResponse('Blocked period not found', 404, [
+                    [
+                        'field' => 'general',
+                        'tag' => 'not_found',
+                        'value' => null,
+                        'message' => 'Blocked period not found'
+                    ]
+                ]);
             }
 
             return $this->successResponse(null, 'Blocked period deleted successfully');
         } catch (\Exception $e) {
-            return $this->errorResponse('Failed to delete blocked period: ' . $e->getMessage(), 500);
+            return $this->errorResponse(
+                'Failed to delete blocked period',
+                500,
+                [[
+                    'field' => 'general',
+                    'tag' => 'server_error',
+                    'value' => $e->getMessage(),
+                    'message' => 'An unexpected error occurred'
+                ]]
+            );
+        }
+    }
+
+    /**
+     * Get blocked period statistics
+     */
+    public function statistics(): JsonResponse
+    {
+        try {
+            $stats = $this->blockedPeriodService->getBlockedPeriodStatistics();
+
+            return $this->successResponse(
+                $stats,
+                'Blocked period statistics retrieved successfully'
+            );
+        } catch (\Exception $e) {
+            return $this->errorResponse(
+                'Failed to retrieve blocked period statistics',
+                500,
+                [[
+                    'field' => 'general',
+                    'tag' => 'server_error',
+                    'value' => $e->getMessage(),
+                    'message' => 'An unexpected error occurred'
+                ]]
+            );
         }
     }
 

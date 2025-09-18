@@ -124,8 +124,8 @@ class CustomerRepository implements CustomerRepositoryInterface
     {
         $customer = $this->buildCustomerQuery()
             ->where(function ($query) use ($id) {
-                $query->where('r.user_id', $id)
-                    ->orWhere('r.id', $id);
+                $query->where('user_id', $id)
+                    ->orWhere('customer_id', 'guest_' . $id);
             })
             ->first();
 
@@ -136,7 +136,7 @@ class CustomerRepository implements CustomerRepositoryInterface
     {
         $firstTimeUserIds = $this->getFirstTimeCustomerUserIds();
         return $this->buildCustomerQuery()
-            ->whereIn('r.user_id', $firstTimeUserIds)
+            ->whereIn('user_id', $firstTimeUserIds)
             ->get();
     }
 
@@ -144,7 +144,7 @@ class CustomerRepository implements CustomerRepositoryInterface
     {
         $repeatUserIds = $this->getRepeatCustomerUserIds();
         return $this->buildCustomerQuery()
-            ->whereIn('r.user_id', $repeatUserIds)
+            ->whereIn('user_id', $repeatUserIds)
             ->get();
     }
 
@@ -152,7 +152,7 @@ class CustomerRepository implements CustomerRepositoryInterface
     {
         $dormantUserIds = $this->getDormantCustomerUserIds();
         return $this->buildCustomerQuery()
-            ->whereIn('r.user_id', $dormantUserIds)
+            ->whereIn('user_id', $dormantUserIds)
             ->get();
     }
 
@@ -255,12 +255,9 @@ class CustomerRepository implements CustomerRepositoryInterface
         return $this->buildCustomerQuery()
             ->where(function ($q) use ($search) {
                 $searchTerm = '%' . $search . '%';
-                $q->where('u.full_name', 'LIKE', $searchTerm)
-                    ->orWhere('r.full_name', 'LIKE', $searchTerm)
-                    ->orWhere('u.email', 'LIKE', $searchTerm)
-                    ->orWhere('r.email', 'LIKE', $searchTerm)
-                    ->orWhere('u.phone_number', 'LIKE', $searchTerm)
-                    ->orWhere('r.phone_number', 'LIKE', $searchTerm);
+                $q->where('full_name', 'LIKE', $searchTerm)
+                    ->orWhere('email', 'LIKE', $searchTerm)
+                    ->orWhere('phone_number', 'LIKE', $searchTerm);
             })
             ->get();
     }
@@ -311,12 +308,9 @@ class CustomerRepository implements CustomerRepositoryInterface
         return $this->buildCustomerQuery()
             ->where(function ($q) use ($searchQuery) {
                 $search = '%' . $searchQuery . '%';
-                $q->where('u.full_name', 'LIKE', $search)
-                    ->orWhere('r.full_name', 'LIKE', $search)
-                    ->orWhere('u.email', 'LIKE', $search)
-                    ->orWhere('r.email', 'LIKE', $search)
-                    ->orWhere('u.phone_number', 'LIKE', $search)
-                    ->orWhere('r.phone_number', 'LIKE', $search);
+                $q->where('full_name', 'LIKE', $search)
+                    ->orWhere('email', 'LIKE', $search)
+                    ->orWhere('phone_number', 'LIKE', $search);
             })
             ->orderBy('latest_reservation', 'desc')
             ->take($perPage)

@@ -20,7 +20,7 @@ class MenuRepository implements MenuRepositoryInterface
 
     public function getAll(): Collection
     {
-        return $this->model->withTranslations()
+        return $this->model->with('translations')
             ->ordered()
             ->get();
     }
@@ -28,21 +28,21 @@ class MenuRepository implements MenuRepositoryInterface
     public function getActive(): Collection
     {
         return $this->model->active()
-            ->withTranslations()
+            ->with('translations')
             ->ordered()
             ->get();
     }
 
     public function getPaginated(int $perPage = 15): LengthAwarePaginator
     {
-        return $this->model->withTranslations()
+        return $this->model->with('translations')
             ->ordered()
             ->paginate($perPage);
     }
 
     public function getPaginatedWithCursor(int $perPage = 15, ?string $cursor = null): CursorPaginator
     {
-        return $this->model->withTranslations()
+        return $this->model->with('translations')
             ->ordered()
             // ->cursorPaginate($perPage);
             ->cursorPaginate($perPage, ['*'], 'cursor', $cursor);
@@ -53,7 +53,7 @@ class MenuRepository implements MenuRepositoryInterface
      */
     public function getCursorPaginated(int $limit = 15, ?string $cursor = null): array
     {
-        $query = $this->model->withTranslations()->orderBy('created_at', 'desc')->orderBy('id', 'desc');
+        $query = $this->model->with('translations')->orderBy('created_at', 'desc')->orderBy('id', 'desc');
 
         if ($cursor) {
             $cursorData = $this->parseCursor($cursor);
@@ -97,7 +97,7 @@ class MenuRepository implements MenuRepositoryInterface
      */
     public function getCursorPaginatedActive(int $limit = 15, ?string $cursor = null): array
     {
-        $query = $this->model->active()->withTranslations()->orderBy('created_at', 'desc')->orderBy('id', 'desc');
+        $query = $this->model->active()->with('translations')->orderBy('created_at', 'desc')->orderBy('id', 'desc');
 
         if ($cursor) {
             $cursorData = $this->parseCursor($cursor);
@@ -142,7 +142,7 @@ class MenuRepository implements MenuRepositoryInterface
     {
         $queryBuilder = $this->model->whereTranslation('name', 'ILIKE', "%{$query}%", $locale)
             ->orWhereTranslation('description', 'ILIKE', "%{$query}%", $locale)
-            ->withTranslations($locale)
+            ->with('translations')
             ->orderBy('created_at', 'desc')
             ->orderBy('id', 'desc');
 
@@ -230,20 +230,20 @@ class MenuRepository implements MenuRepositoryInterface
     public function getPaginatedActive(int $perPage = 15): LengthAwarePaginator
     {
         return $this->model->active()
-            ->withTranslations()
+            ->with('translations')
             ->ordered()
             ->paginate($perPage);
     }
 
     public function findById(int $id): ?Menu
     {
-        return $this->model->withTranslations()
+        return $this->model->with('translations')
             ->find($id);
     }
 
     public function findByIdWithLocale(int $id, string $locale = null): ?Menu
     {
-        return $this->model->withTranslations($locale)
+        return $this->model->with('translations')
             ->find($id);
     }
 
@@ -317,7 +317,7 @@ class MenuRepository implements MenuRepositoryInterface
     public function getByDisplayOrder(): Collection
     {
         return $this->model->active()
-            ->withTranslations()
+            ->with('translations')
             ->ordered()
             ->get();
     }
@@ -337,7 +337,7 @@ class MenuRepository implements MenuRepositoryInterface
         $locale = $locale ?: App::getLocale();
 
         return $this->model->whereTranslation('name', 'ILIKE', "%{$search}%", $locale)
-            ->withTranslations($locale)
+            ->with('translations')
             ->ordered()
             ->get();
     }
@@ -348,7 +348,7 @@ class MenuRepository implements MenuRepositoryInterface
     public function searchWithAdvancedFilters(array $filters, int $perPage = 15): LengthAwarePaginator
     {
         $locale = App::getLocale();
-        $query = $this->model->withTranslations($locale);
+        $query = $this->model->with('translations');
 
         // Search term filter
         if (!empty($filters['search'])) {
@@ -397,7 +397,7 @@ class MenuRepository implements MenuRepositoryInterface
     {
         $queryBuilder = $this->model->whereTranslation('name', 'ILIKE', "%{$query}%", $locale)
             ->orWhereTranslation('description', 'ILIKE', "%{$query}%", $locale)
-            ->withTranslations($locale);
+            ->with('translations');
 
         if ($activeOnly) {
             $queryBuilder->active();
@@ -411,7 +411,7 @@ class MenuRepository implements MenuRepositoryInterface
      */
     public function getPopular(int $limit = 10, string $period = 'month'): Collection
     {
-        $query = $this->model->withTranslations()
+        $query = $this->model->with('translations')
             ->withCount(['reservations' => function ($query) use ($period) {
                 $startDate = match ($period) {
                     'week' => now()->subWeek(),
@@ -450,7 +450,7 @@ class MenuRepository implements MenuRepositoryInterface
      */
     public function findBySlug(string $slug): ?Menu
     {
-        return $this->model->withTranslations()
+        return $this->model->with('translations')
             ->where('slug', $slug)
             ->first();
     }

@@ -4,6 +4,7 @@ use App\Models\BlockedPeriod;
 use App\Repositories\BlockedPeriodRepositoryInterface;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Pagination\LengthAwarePaginator;
+use Illuminate\Contracts\Pagination\CursorPaginator;
 use Carbon\Carbon;
 use App\Exports\BlockedPeriodsExport;
 class BlockedPeriodService implements BlockedPeriodServiceInterface
@@ -25,6 +26,11 @@ class BlockedPeriodService implements BlockedPeriodServiceInterface
     {
         return $this->blockedPeriodRepository->getPaginatedWithFilters($filters, $perPage);
     }
+
+    public function getPaginatedBlockedPeriodsWithCursor(int $perPage = 15, ?string $cursor = null, array $filters = []): CursorPaginator
+    {
+        return $this->blockedPeriodRepository->getPaginatedWithCursor($perPage, $cursor, $filters);
+    }
     public function findBlockedPeriod(int $id): ?BlockedPeriod
     {
         return $this->blockedPeriodRepository->findById($id);
@@ -35,9 +41,9 @@ class BlockedPeriodService implements BlockedPeriodServiceInterface
             throw new \InvalidArgumentException('Waktu mulai harus sebelum waktu selesai');
         }
         if ($this->checkScheduleConflictWithExclusion(
-            $data['menu_id'] ?? null, 
-            $data['start_datetime'], 
-            $data['end_datetime'], 
+            $data['menu_id'] ?? null,
+            $data['start_datetime'],
+            $data['end_datetime'],
             $data['all_menus'] ?? false
         )) {
             throw new \InvalidArgumentException('Terjadi konflik waktu dengan periode blokir yang sudah ada');
@@ -49,14 +55,14 @@ class BlockedPeriodService implements BlockedPeriodServiceInterface
     }
     public function updateBlockedPeriod(int $id, array $data): ?BlockedPeriod
     {
-        if (isset($data['start_datetime']) && isset($data['end_datetime']) && 
+        if (isset($data['start_datetime']) && isset($data['end_datetime']) &&
             $data['start_datetime'] >= $data['end_datetime']) {
             throw new \InvalidArgumentException('Waktu mulai harus sebelum waktu selesai');
         }
         if ($this->checkScheduleConflictWithExclusion(
-            $data['menu_id'] ?? null, 
-            $data['start_datetime'], 
-            $data['end_datetime'], 
+            $data['menu_id'] ?? null,
+            $data['start_datetime'],
+            $data['end_datetime'],
             $data['all_menus'] ?? false,
             $id
         )) {
@@ -88,37 +94,37 @@ class BlockedPeriodService implements BlockedPeriodServiceInterface
         return $this->blockedPeriodRepository->checkConflict($menuId, $startDatetime, $endDatetime);
     }
     public function checkScheduleConflictWithExclusion(
-        ?int $menuId, 
-        string $startDatetime, 
-        string $endDatetime, 
-        bool $allMenus = false, 
+        ?int $menuId,
+        string $startDatetime,
+        string $endDatetime,
+        bool $allMenus = false,
         ?int $excludeId = null
     ): bool {
         return $this->blockedPeriodRepository->checkConflictWithExclusion(
-            $menuId, 
-            $startDatetime, 
-            $endDatetime, 
-            $allMenus, 
+            $menuId,
+            $startDatetime,
+            $endDatetime,
+            $allMenus,
             $excludeId
         );
     }
     public function getConflictDetails(
-        ?int $menuId, 
-        string $startDatetime, 
-        string $endDatetime, 
-        bool $allMenus = false, 
+        ?int $menuId,
+        string $startDatetime,
+        string $endDatetime,
+        bool $allMenus = false,
         ?int $excludeId = null
     ): array {
         return $this->blockedPeriodRepository->getConflictDetails(
-            $menuId, 
-            $startDatetime, 
-            $endDatetime, 
-            $allMenus, 
+            $menuId,
+            $startDatetime,
+            $endDatetime,
+            $allMenus,
             $excludeId
         );
     }
     public function getBlockedPeriodsByDate(string $date): Collection
-    {   
+    {
         return $this->blockedPeriodRepository->getByDate($date);
     }
     public function getBlockedDatesInRange(string $startDate, string $endDate): array
@@ -149,6 +155,11 @@ class BlockedPeriodService implements BlockedPeriodServiceInterface
     {
         return $this->blockedPeriodRepository->getStatistics($filters);
     }
+
+    public function getBlockedPeriodStatistics(): array
+    {
+        return $this->getStatistics([]);
+    }
     public function isTimeBlocked(?int $menuId, string $datetime): bool
     {
         return $this->blockedPeriodRepository->isTimeBlocked($menuId, $datetime);
@@ -160,7 +171,7 @@ class BlockedPeriodService implements BlockedPeriodServiceInterface
             $businessHours = [
                 'start' => '08:00',
                 'end' => '22:00',
-                'interval' => 60 
+                'interval' => 60
             ];
         }
         $availableSlots = [];
@@ -194,7 +205,7 @@ class BlockedPeriodService implements BlockedPeriodServiceInterface
         $errors = [];
         $startDate = Carbon::parse($data['start_date']);
         $endDate = Carbon::parse($data['end_date']);
-        $recurringType = $data['recurring_type']; 
+        $recurringType = $data['recurring_type'];
         $recurringInterval = $data['recurring_interval'] ?? 1;
         $current = $startDate->copy();
         while ($current->lte($endDate)) {

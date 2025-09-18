@@ -43,7 +43,7 @@
             Route::get('test',function () {
                 return response()->json(['message' => 'Test endpoint']);
             });
-            
+
             // Public endpoints (no authentication required)
             Route::prefix('public')->group(function () {
                 // Public menu access
@@ -185,10 +185,14 @@
 
                     // Announcement
                     Route::get('announcements/statistics', [AnnouncementController::class, 'statistics']);
-                    Route::apiResource('announcements', AnnouncementController::class);
+                    Route::get('announcements', [AnnouncementController::class, 'index']);
+                    Route::post('announcements', [AnnouncementController::class, 'store']);
+                    Route::delete('announcements/{id}', [AnnouncementController::class, 'destroy']);
+                    // Route::apiResource('announcements', AnnouncementController::class);
                     Route::patch('announcements/{id}/toggle-status', [AnnouncementController::class, 'toggleStatus']);
                     Route::patch('announcements/bulk-toggle-status', [AnnouncementController::class, 'bulkToggleStatus']);
                     Route::delete('announcements/bulk-delete', [AnnouncementController::class, 'bulkDelete']);
+                    Route::patch('announcements/{id}', [AnnouncementController::class, 'update']);
 
 
                     // Admin Questionnaire Management
@@ -275,7 +279,7 @@
 
                     // Blocked Period Management
                     Route::prefix('blocked-periods')->group(function () {
-                        Route::get('/statistics', [ApiAdminBlockedPeriodController::class, 'getStatistics']);
+                        Route::get('/statistics', [ApiAdminBlockedPeriodController::class, 'statistics']);
                         Route::get('/search', [ApiAdminBlockedPeriodController::class, 'search']);
                         Route::get('/', [ApiAdminBlockedPeriodController::class, 'index']);
                         Route::post('/', [ApiAdminBlockedPeriodController::class, 'store']);

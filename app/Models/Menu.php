@@ -12,13 +12,14 @@ class Menu extends Model
         'photo_path',
         'display_order',
         'is_active',
-        'color', 
+        'color',
     ];
     protected $casts = [
         'price' => 'decimal:2',
         'is_active' => 'boolean',
     ];
-    protected $with = ['translations']; 
+    // Load all translations, not filtered by locale
+    protected $with = ['translations'];
     protected function getTranslatableFields(): array
     {
         return ['name', 'description'];
