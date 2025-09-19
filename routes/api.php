@@ -40,7 +40,7 @@
         ->middleware(['apiSetLocale'])
         ->group(function () {
 
-            Route::get('test',function () {
+            Route::get('test', function () {
                 return response()->json(['message' => 'Test endpoint']);
             });
 
@@ -254,11 +254,13 @@
                         Route::get('/', [ApiAdminFaqController::class, 'index']);
                         Route::post('/', [ApiAdminFaqController::class, 'store']);
                         Route::get('/active', [ApiAdminFaqController::class, 'getActiveFaqs']);
+                        Route::get('/statistics', [ApiAdminFaqController::class, 'statistics']);
                         Route::post('/reorder', [ApiAdminFaqController::class, 'reorder']);
                         Route::get('/{id}', [ApiAdminFaqController::class, 'show']);
                         Route::patch('/{id}', [ApiAdminFaqController::class, 'update']);
                         Route::delete('/{id}', [ApiAdminFaqController::class, 'destroy']);
                         Route::patch('/{id}/toggle-status', [ApiAdminFaqController::class, 'toggleStatus']);
+                        Route::patch('/bulk-toggle-status', [ApiAdminFaqController::class, 'bulkToggleStatus']);
                     });
 
                     // Payment Management

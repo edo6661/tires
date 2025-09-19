@@ -29,6 +29,12 @@ class QuestionnaireController extends Controller
     public function index(Request $request): JsonResponse
     {
         try {
+             // Validate query parameters
+            $request->validate([
+                'per_page' => 'nullable|integer|min:1|max:100',
+                'paginate' => 'sometimes|in:true,false',
+                'cursor' => 'nullable|string',
+            ]);
             $perPage = min($request->get('per_page', 15), 100);
 
             if ($request->has('paginate') && $request->get('paginate') !== 'false') {

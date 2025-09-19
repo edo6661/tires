@@ -7,6 +7,7 @@ use App\Models\Faq;
 use App\Repositories\FaqRepositoryInterface;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Pagination\LengthAwarePaginator;
+use Illuminate\Contracts\Pagination\CursorPaginator;
 
 class FaqService implements FaqServiceInterface
 {
@@ -65,5 +66,21 @@ class FaqService implements FaqServiceInterface
     public function reorderFaqs(array $orderData): bool
     {
         return $this->faqRepository->reorder($orderData);
+    }
+
+    public function getPaginatedFaqsWithCursor(int $perPage = 15, ?string $cursor = null, array $filters = []): CursorPaginator
+    {
+        return $this->faqRepository->getPaginatedWithCursor($perPage, $cursor, $filters);
+    }
+
+    public function getFilteredFaqs(array $filters, int $perPage = 15): Collection
+    {
+        $paginated = $this->faqRepository->getPaginatedWithFilters($filters, $perPage);
+        return collect($paginated->items());
+    }
+
+    public function getFaqStatistics(): array
+    {
+        return $this->faqRepository->getStatistics([]);
     }
 }

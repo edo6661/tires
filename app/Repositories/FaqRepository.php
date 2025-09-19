@@ -6,6 +6,8 @@ use App\Models\Faq;
 use App\Repositories\FaqRepositoryInterface;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Pagination\LengthAwarePaginator;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Contracts\Pagination\CursorPaginator;
 
 class FaqRepository implements FaqRepositoryInterface
 {
@@ -83,5 +85,51 @@ class FaqRepository implements FaqRepositoryInterface
                 ->update(['display_order' => $order['display_order']]);
         }
         return true;
+    }
+
+    public function getPaginatedWithCursor(int $perPage = 15, ?string $cursor = null, array $filters = []): CursorPaginator
+    {
+        $query = $this->model->newQuery();
+        $query = $this->applyFilters($query, $filters);
+        return $query->orderBy('display_order', 'asc')
+            ->orderBy('id', 'desc')
+            ->cursorPaginate($perPage, ['*'], 'cursor', $cursor);
+    }
+
+    public function getPaginatedWithFilters(array $filters, int $perPage = 15): LengthAwarePaginator
+    {
+        $query = $this->model->newQuery();
+        $query = $this->applyFilters($query, $filters);
+        return $query->orderBy('display_order', 'asc')->paginate($perPage);
+    }
+
+    public function getStatistics(array $filters = []): array
+    {
+        $query = $this->model->newQuery();
+        $query = $this->applyFilters($query, $filters);
+
+        return [
+            'total' => $query->count(),
+            'active' => (clone $query)->where('is_active', true)->count(),
+            'inactive' => (clone $query)->where('is_active', false)->count(),
+        ];
+    }
+
+    private function applyFilters(Builder $query, array $filters): Builder
+    {
+        if (!empty($filters['status'])) {
+            $isActive = $filters['status'] === 'active';
+            $query->where('is_active', $isActive);
+        }
+
+        if (!empty($filters['search'])) {
+            $search = $filters['search'];
+            $query->where(function ($q) use ($search) {
+                $q->where('question', 'like', "%{$search}%")
+                  ->orWhere('answer', 'like', "%{$search}%");
+            });
+        }
+
+        return $query;
     }
 }
