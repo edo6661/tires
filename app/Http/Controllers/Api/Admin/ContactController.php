@@ -5,176 +5,96 @@ namespace App\Http\Controllers\Api\Admin;
 use App\Http\Controllers\Controller;
 use App\Services\ContactServiceInterface;
 use App\Http\Traits\ApiResponseTrait;
+use App\Http\Resources\ContactResource;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Support\Facades\App;
 
 /**
+ * @mixin \Illuminate\Http\Request
  * @tags Admin - Contact Management
  */
 class ContactController extends Controller
 {
     use ApiResponseTrait;
 
-    public function __construct(protected ContactServiceInterface $contactService)
-    {
-    }
+    public function __construct(
+        protected ContactServiceInterface $contactService
+    ) {}
 
     /**
-     * Get contact statistics overview
-     *
-     * Returns counts for total, pending, replied contacts and today's count
-     *
-     * @return JsonResponse
-     */
-    public function getStatistics(): JsonResponse
-    {
-        try {
-            $statistics = $this->contactService->getContactStats();
-
-            return $this->successResponse([
-                'statistics' => $statistics
-            ], 'Contact statistics retrieved successfully');
-        } catch (\Exception $e) {
-            return $this->errorResponse(
-                'Failed to retrieve contact statistics',
-                500,
-                [
-                    [
-                        'field' => 'general',
-                        'tag' => 'statistics_error',
-                        'value' => $e->getMessage(),
-                        'message' => 'Statistics retrieval failed'
-                    ]
-                ]
-            );
-        }
-    }
-
-    /**
-     * Search contacts with enhanced filtering
-     *
-     * @param Request $request
-     * @return JsonResponse
-     */
-    public function search(Request $request): JsonResponse
-    {
-        try {
-            $validated = $request->validate([
-                'search' => 'nullable|string|max:255',
-                'status' => 'nullable|string|in:pending,replied,all',
-                'start_date' => 'nullable|date_format:Y-m-d',
-                'end_date' => 'nullable|date_format:Y-m-d|after_or_equal:start_date',
-                'per_page' => 'nullable|integer|min:1|max:100',
-                'page' => 'nullable|integer|min:1'
-            ]);
-
-            $filters = [];
-
-            if ($request->filled('search')) {
-                $filters['search'] = $validated['search'];
-            }
-
-            if ($request->filled('status') && $validated['status'] !== 'all') {
-                $filters['status'] = $validated['status'];
-            }
-
-            if ($request->filled('start_date')) {
-                $filters['start_date'] = $validated['start_date'];
-            }
-
-            if ($request->filled('end_date')) {
-                $filters['end_date'] = $validated['end_date'];
-            }
-
-            $filters['per_page'] = $validated['per_page'] ?? 15;
-            $contacts = $this->contactService->getFilteredContacts($filters);
-            $stats = $this->contactService->getContactStats();
-
-            return $this->successResponse([
-                'contacts' => $contacts,
-                'statistics' => $stats,
-                'filters' => $filters,
-                'search_term' => $validated['search'] ?? null,
-                'results_count' => $contacts->total(),
-                'pagination_info' => [
-                    'current_page' => $contacts->currentPage(),
-                    'per_page' => $contacts->perPage(),
-                    'total' => $contacts->total(),
-                    'last_page' => $contacts->lastPage()
-                ]
-            ], 'Contact search completed successfully');
-        } catch (\Illuminate\Validation\ValidationException $e) {
-            return $this->errorResponse(
-                'Validation failed',
-                422,
-                collect($e->errors())->map(function ($messages, $field) {
-                    return [
-                        'field' => $field,
-                        'tag' => 'validation_error',
-                        'value' => request($field),
-                        'message' => $messages[0]
-                    ];
-                })->values()->toArray()
-            );
-        } catch (\Exception $e) {
-            return $this->errorResponse(
-                'Contact search failed',
-                500,
-                [
-                    [
-                        'field' => 'general',
-                        'tag' => 'search_error',
-                        'value' => $e->getMessage(),
-                        'message' => 'Search operation failed'
-                    ]
-                ]
-            );
-        }
-    }
-
-    /**
-     * Display a listing of contacts
+     * List All Contacts (paginate / non-paginate) with filtering and search
      */
     public function index(Request $request): JsonResponse
     {
         try {
-            $validated = $request->validate([
-                'status' => 'nullable|string|in:pending,replied,all',
+            // Validate query parameters
+            $request->validate([
+                'per_page' => 'nullable|integer|min:1|max:100',
+                'paginate' => 'nullable|string',
+                'cursor' => 'nullable|string',
+                'status' => 'nullable|in:pending,replied,all',
                 'start_date' => 'nullable|date_format:Y-m-d',
                 'end_date' => 'nullable|date_format:Y-m-d|after_or_equal:start_date',
-                'search' => 'nullable|string|max:255',
-                'per_page' => 'nullable|integer|min:1|max:100'
+                'search' => 'nullable|string|max:255'
             ]);
 
-            $filters = array_filter($validated, function($value) {
-                return $value !== null && $value !== '';
+            $perPage = min($request->get('per_page', 15), 100);
+            $locale = App::getLocale();
+
+            // Get filters from request
+            $filters = [
+                'status' => $request->get('status'),
+                'start_date' => $request->get('start_date'),
+                'end_date' => $request->get('end_date'),
+                'search' => $request->get('search')
+            ];
+
+            // Remove empty filters
+            $filters = array_filter($filters, function ($value) {
+                return $value !== null && $value !== '' && $value !== 'all';
             });
 
-            // Remove 'all' status as it means no filter
-            if (isset($filters['status']) && $filters['status'] === 'all') {
-                unset($filters['status']);
-            }
+            if ($request->has('paginate') && $request->get('paginate') !== 'false') {
+                // Paginated response with cursor and filters
+                $cursor = $request->get('cursor');
+                $contacts = $this->contactService->getPaginatedContactsWithCursor($perPage, $cursor, $filters);
+                $collection = ContactResource::collection($contacts);
 
-            if (!empty($filters)) {
-                $filters['per_page'] = $validated['per_page'] ?? 15;
-                $contacts = $this->contactService->getFilteredContacts($filters);
+                $cursorInfo = $this->generateCursor($contacts);
+
+                return $this->successResponseWithCursor(
+                    $collection->resolve(),
+                    $cursorInfo,
+                    'Contacts retrieved successfully'
+                );
             } else {
-                $contacts = $this->contactService->getPaginatedContacts($validated['per_page'] ?? 15);
+                // Simple response without pagination but with filters
+                if (!empty($filters)) {
+                    $filters['per_page'] = $perPage;
+                    $contacts = $this->contactService->getFilteredContacts($filters);
+                } else {
+                    $contacts = $this->contactService->getPaginatedContacts($perPage);
+                }
+                $collection = ContactResource::collection($contacts);
+
+                $stats = $this->contactService->getContactStats();
+
+                return $this->successResponse([
+                    'contacts' => [
+                        $collection->resolve(),
+                        'filters_applied' => $filters,
+                        'total_filtered' => $contacts->total()
+                    ],
+                    'statistics' => $stats,
+                    'pagination_info' => [
+                        'current_page' => $contacts->currentPage(),
+                        'per_page' => $contacts->perPage(),
+                        'total' => $contacts->total(),
+                        'last_page' => $contacts->lastPage()
+                    ]
+                ], 'Contacts retrieved successfully');
             }
-
-            $stats = $this->contactService->getContactStats();
-
-            return $this->successResponse([
-                'contacts' => $contacts,
-                'statistics' => $stats,
-                'filters' => $filters,
-                'pagination_info' => [
-                    'current_page' => $contacts->currentPage(),
-                    'per_page' => $contacts->perPage(),
-                    'total' => $contacts->total(),
-                    'last_page' => $contacts->lastPage()
-                ]
-            ], 'Contacts retrieved successfully');
         } catch (\Illuminate\Validation\ValidationException $e) {
             return $this->errorResponse(
                 'Validation failed',
@@ -189,7 +109,18 @@ class ContactController extends Controller
                 })->values()->toArray()
             );
         } catch (\Exception $e) {
-            return $this->errorResponse('Failed to retrieve contacts: ' . $e->getMessage(), 500);
+            return $this->errorResponse(
+                'Failed to retrieve contacts',
+                500,
+                [
+                    [
+                        'field' => 'general',
+                        'tag' => 'server_error',
+                        'value' => $e->getMessage(),
+                        'message' => 'An unexpected error occurred'
+                    ]
+                ]
+            );
         }
     }
 
@@ -198,17 +129,23 @@ class ContactController extends Controller
      */
     public function show(int $id): JsonResponse
     {
-        try {
-            $contact = $this->contactService->findContact($id);
+        $contact = $this->contactService->findContact($id);
 
-            if (!$contact) {
-                return $this->errorResponse('Contact not found', 404);
-            }
-
-            return $this->successResponse($contact, 'Contact retrieved successfully');
-        } catch (\Exception $e) {
-            return $this->errorResponse('Failed to retrieve contact: ' . $e->getMessage(), 500);
+        if (!$contact) {
+            return $this->errorResponse('Contact not found', 404, [
+                [
+                    'field' => 'general',
+                    'tag' => 'not_found',
+                    'value' => null,
+                    'message' => 'Contact not found'
+                ]
+            ]);
         }
+
+        return $this->successResponse(
+            new ContactResource($contact),
+            'Contact retrieved successfully'
+        );
     }
 
     /**
@@ -225,14 +162,44 @@ class ContactController extends Controller
             $contact = $this->contactService->updateContact($id, $validatedData);
 
             if (!$contact) {
-                return $this->errorResponse('Contact not found', 404);
+                return $this->errorResponse('Contact not found', 404, [
+                    [
+                        'field' => 'general',
+                        'tag' => 'not_found',
+                        'value' => null,
+                        'message' => 'Contact not found'
+                    ]
+                ]);
             }
 
-            return $this->successResponse($contact, 'Contact updated successfully');
+            return $this->successResponse(
+                new ContactResource($contact),
+                'Contact updated successfully'
+            );
         } catch (\Illuminate\Validation\ValidationException $e) {
-            return $this->validationErrorResponse($e->errors());
+            return $this->errorResponse(
+                'Validation failed',
+                422,
+                collect($e->errors())->map(function ($messages, $field) {
+                    return [
+                        'field' => $field,
+                        'tag' => 'validation_error',
+                        'value' => request($field),
+                        'message' => $messages[0]
+                    ];
+                })->values()->toArray()
+            );
         } catch (\Exception $e) {
-            return $this->errorResponse('Failed to update contact: ' . $e->getMessage(), 500);
+            return $this->errorResponse(
+                'Failed to update contact',
+                500,
+                [[
+                    'field' => 'general',
+                    'tag' => 'server_error',
+                    'value' => $e->getMessage(),
+                    'message' => 'An unexpected error occurred'
+                ]]
+            );
         }
     }
 
@@ -245,12 +212,54 @@ class ContactController extends Controller
             $deleted = $this->contactService->deleteContact($id);
 
             if (!$deleted) {
-                return $this->errorResponse('Contact not found', 404);
+                return $this->errorResponse('Contact not found', 404, [
+                    [
+                        'field' => 'general',
+                        'tag' => 'not_found',
+                        'value' => null,
+                        'message' => 'Contact not found'
+                    ]
+                ]);
             }
 
             return $this->successResponse(null, 'Contact deleted successfully');
         } catch (\Exception $e) {
-            return $this->errorResponse('Failed to delete contact: ' . $e->getMessage(), 500);
+            return $this->errorResponse(
+                'Failed to delete contact',
+                500,
+                [[
+                    'field' => 'general',
+                    'tag' => 'server_error',
+                    'value' => $e->getMessage(),
+                    'message' => 'An unexpected error occurred'
+                ]]
+            );
+        }
+    }
+
+    /**
+     * Get contact statistics
+     */
+    public function statistics(): JsonResponse
+    {
+        try {
+            $stats = $this->contactService->getContactStats();
+
+            return $this->successResponse(
+                $stats,
+                'Contact statistics retrieved successfully'
+            );
+        } catch (\Exception $e) {
+            return $this->errorResponse(
+                'Failed to retrieve contact statistics',
+                500,
+                [[
+                    'field' => 'general',
+                    'tag' => 'server_error',
+                    'value' => $e->getMessage(),
+                    'message' => 'An unexpected error occurred'
+                ]]
+            );
         }
     }
 
@@ -267,14 +276,47 @@ class ContactController extends Controller
             $success = $this->contactService->replyToContact($id, $request->admin_reply);
 
             if (!$success) {
-                return $this->errorResponse('Contact not found or reply failed', 404);
+                return $this->errorResponse('Contact not found or reply failed', 404, [
+                    [
+                        'field' => 'general',
+                        'tag' => 'not_found',
+                        'value' => null,
+                        'message' => 'Contact not found or reply failed'
+                    ]
+                ]);
             }
 
-            return $this->successResponse(null, 'Reply sent successfully');
+            // Get updated contact
+            $contact = $this->contactService->findContact($id);
+
+            return $this->successResponse(
+                new ContactResource($contact),
+                'Reply sent successfully'
+            );
         } catch (\Illuminate\Validation\ValidationException $e) {
-            return $this->validationErrorResponse($e->errors());
+            return $this->errorResponse(
+                'Validation failed',
+                422,
+                collect($e->errors())->map(function ($messages, $field) {
+                    return [
+                        'field' => $field,
+                        'tag' => 'validation_error',
+                        'value' => request($field),
+                        'message' => $messages[0]
+                    ];
+                })->values()->toArray()
+            );
         } catch (\Exception $e) {
-            return $this->errorResponse('Failed to send reply: ' . $e->getMessage(), 500);
+            return $this->errorResponse(
+                'Failed to send reply',
+                500,
+                [[
+                    'field' => 'general',
+                    'tag' => 'server_error',
+                    'value' => $e->getMessage(),
+                    'message' => 'An unexpected error occurred'
+                ]]
+            );
         }
     }
 
@@ -289,17 +331,52 @@ class ContactController extends Controller
                 'ids.*' => 'integer|exists:contacts,id',
             ]);
 
-            $success = $this->contactService->bulkDeleteContacts($request->ids);
+            $deletedCount = 0;
+            $errors = [];
 
-            if (!$success) {
-                return $this->errorResponse('Bulk delete operation failed', 400);
+            foreach ($request->get('ids') as $id) {
+                try {
+                    $deleted = $this->contactService->deleteContact($id);
+                    if ($deleted) {
+                        $deletedCount++;
+                    }
+                } catch (\Exception $e) {
+                    $errors[] = [
+                        'id' => $id,
+                        'error' => $e->getMessage()
+                    ];
+                }
             }
 
-            return $this->successResponse(null, 'Contacts deleted successfully');
+            return $this->successResponse([
+                'deleted_count' => $deletedCount,
+                'total_requested' => count($request->get('ids')),
+                'errors' => $errors
+            ], "Successfully deleted {$deletedCount} contacts");
         } catch (\Illuminate\Validation\ValidationException $e) {
-            return $this->validationErrorResponse($e->errors());
+            return $this->errorResponse(
+                'Validation failed',
+                422,
+                collect($e->errors())->map(function ($messages, $field) {
+                    return [
+                        'field' => $field,
+                        'tag' => 'validation_error',
+                        'value' => request($field),
+                        'message' => $messages[0]
+                    ];
+                })->values()->toArray()
+            );
         } catch (\Exception $e) {
-            return $this->errorResponse('Failed to delete contacts: ' . $e->getMessage(), 500);
+            return $this->errorResponse(
+                'Failed to bulk delete contacts',
+                500,
+                [[
+                    'field' => 'general',
+                    'tag' => 'server_error',
+                    'value' => $e->getMessage(),
+                    'message' => 'An unexpected error occurred'
+                ]]
+            );
         }
     }
 
@@ -316,25 +393,62 @@ class ContactController extends Controller
             ]);
 
             $successCount = 0;
+            $errors = [];
+
             foreach ($request->ids as $id) {
-                $success = $this->contactService->replyToContact($id, $request->admin_reply);
-                if ($success) {
-                    $successCount++;
+                try {
+                    $success = $this->contactService->replyToContact($id, $request->admin_reply);
+                    if ($success) {
+                        $successCount++;
+                    }
+                } catch (\Exception $e) {
+                    $errors[] = [
+                        'id' => $id,
+                        'error' => $e->getMessage()
+                    ];
                 }
             }
 
             if ($successCount === 0) {
-                return $this->errorResponse('No contacts were updated', 400);
+                return $this->errorResponse('No contacts were updated', 400, [
+                    [
+                        'field' => 'general',
+                        'tag' => 'update_failed',
+                        'value' => null,
+                        'message' => 'No contacts were updated'
+                    ]
+                ]);
             }
 
             return $this->successResponse([
                 'updated_count' => $successCount,
-                'total_count' => count($request->ids)
+                'total_count' => count($request->ids),
+                'errors' => $errors
             ], "Successfully replied to {$successCount} contacts");
         } catch (\Illuminate\Validation\ValidationException $e) {
-            return $this->validationErrorResponse($e->errors());
+            return $this->errorResponse(
+                'Validation failed',
+                422,
+                collect($e->errors())->map(function ($messages, $field) {
+                    return [
+                        'field' => $field,
+                        'tag' => 'validation_error',
+                        'value' => request($field),
+                        'message' => $messages[0]
+                    ];
+                })->values()->toArray()
+            );
         } catch (\Exception $e) {
-            return $this->errorResponse('Failed to mark contacts as replied: ' . $e->getMessage(), 500);
+            return $this->errorResponse(
+                'Failed to mark contacts as replied',
+                500,
+                [[
+                    'field' => 'general',
+                    'tag' => 'server_error',
+                    'value' => $e->getMessage(),
+                    'message' => 'An unexpected error occurred'
+                ]]
+            );
         }
     }
 }

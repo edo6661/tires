@@ -4,11 +4,13 @@ namespace App\Services;
 use App\Models\Contact;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Pagination\LengthAwarePaginator;
+use Illuminate\Contracts\Pagination\CursorPaginator;
 
 interface ContactServiceInterface
 {
     public function getAllContacts(): Collection;
     public function getPaginatedContacts(int $perPage = 15): LengthAwarePaginator;
+    public function getPaginatedContactsWithCursor(int $perPage = 15, ?string $cursor = null, array $filters = []): CursorPaginator;
     public function getContactStats(): array;
     public function findContact(int $id): ?Contact;
     public function createContact(array $data): Contact;

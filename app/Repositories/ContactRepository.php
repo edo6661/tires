@@ -118,4 +118,35 @@ class ContactRepository implements ContactRepositoryInterface
         return $query->orderBy('created_at', 'desc')
                      ->paginate($filters['per_page'] ?? 15);
     }
+
+    public function getPaginatedWithCursor(int $perPage = 15, ?string $cursor = null, array $filters = []): \Illuminate\Contracts\Pagination\CursorPaginator
+    {
+        $query = $this->model->with('user');
+
+        if (!empty($filters['status'])) {
+            $query->where('status', $filters['status']);
+        }
+
+        if (!empty($filters['start_date'])) {
+            $query->whereDate('created_at', '>=', $filters['start_date']);
+        }
+
+        if (!empty($filters['end_date'])) {
+            $query->whereDate('created_at', '<=', $filters['end_date']);
+        }
+
+        if (!empty($filters['search'])) {
+            $search = $filters['search'];
+            $query->where(function ($q) use ($search) {
+                $q->where('full_name', 'like', "%{$search}%")
+                  ->orWhere('email', 'like', "%{$search}%")
+                  ->orWhere('subject', 'like', "%{$search}%")
+                  ->orWhere('message', 'like', "%{$search}%");
+            });
+        }
+
+        return $query->orderBy('created_at', 'desc')
+                     ->orderBy('id', 'desc')
+                     ->cursorPaginate($perPage, ['*'], 'cursor', $cursor);
+    }
 }

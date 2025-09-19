@@ -4,11 +4,13 @@ namespace App\Repositories;
 use App\Models\Contact;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Pagination\LengthAwarePaginator;
+use Illuminate\Contracts\Pagination\CursorPaginator;
 
 interface ContactRepositoryInterface
 {
     public function getAll(): Collection;
     public function getPaginated(int $perPage = 15): LengthAwarePaginator;
+    public function getPaginatedWithCursor(int $perPage = 15, ?string $cursor = null, array $filters = []): CursorPaginator;
     public function getContactStats(): array;
     public function findById(int $id): ?Contact;
     public function create(array $data): Contact;

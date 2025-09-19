@@ -56,7 +56,7 @@ class ContactService implements ContactServiceInterface
 
          $contact = $this->contactRepository->update($id, $filteredData);
          if ($contact && isset($data['admin_reply']) && !empty($data['admin_reply'])) {
-            event(new ContactReplied($contact)); 
+            event(new ContactReplied($contact));
         }
         return $contact;
     }
@@ -111,5 +111,10 @@ class ContactService implements ContactServiceInterface
     public function getFilteredContacts(array $filters): LengthAwarePaginator
     {
         return $this->contactRepository->getFiltered($filters);
+    }
+
+    public function getPaginatedContactsWithCursor(int $perPage = 15, ?string $cursor = null, array $filters = []): \Illuminate\Contracts\Pagination\CursorPaginator
+    {
+        return $this->contactRepository->getPaginatedWithCursor($perPage, $cursor, $filters);
     }
 }
