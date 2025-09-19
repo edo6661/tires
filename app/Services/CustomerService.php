@@ -39,10 +39,11 @@ class CustomerService implements CustomerServiceInterface
         $tireStorage = $this->getCustomerTireStorage($id, $customer['user_id']);
         $stats = $this->getCustomerStats($id, $customer['user_id']);
 
+        // Convert collections to arrays for proper JSON serialization
         return [
             'customer' => $customer,
-            'reservation_history' => $reservationHistory,
-            'tire_storage' => $tireStorage,
+            'reservation_history' => $reservationHistory->toArray(),
+            'tire_storage' => $tireStorage->toArray(),
             'stats' => $stats
         ];
     }
@@ -77,9 +78,24 @@ class CustomerService implements CustomerServiceInterface
         return $this->customerRepository->getDormantCustomersWithCursor($perPage, $cursor);
     }
 
+
     public function getCustomerReservationHistory(int $customerId, ?int $userId = null): Collection
     {
-        return $this->customerRepository->getCustomerReservationHistory($customerId, $userId);
+        $reservations = $this->customerRepository->getCustomerReservationHistory($customerId, $userId);
+
+        // Transform reservations to include formatted menu data using MenuResource
+        return $reservations->map(function ($reservation) {
+            // Create a copy of the reservation as an array
+            $reservationArray = $reservation->toArray();
+
+            if ($reservation->menu) {
+                // Use MenuResource to format menu data
+                $menuResource = new \App\Http\Resources\MenuResource($reservation->menu);
+                $reservationArray['menu'] = $menuResource->resolve();
+            }
+
+            return $reservationArray;
+        });
     }
 
     public function getCustomerTireStorage(int $customerId, ?int $userId = null): Collection
