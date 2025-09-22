@@ -30,7 +30,7 @@ class CustomerController extends Controller
             // Validate query parameters
             $request->validate([
                 'per_page' => 'nullable|integer|min:1|max:100',
-                'paginate' => 'nullable|string',
+                'paginate' => 'sometimes|in:true,false',
                 'cursor' => 'nullable|string',
                 'customer_type' => 'nullable|in:first_time,repeat,dormant,all',
                 'search' => 'nullable|string|max:255'

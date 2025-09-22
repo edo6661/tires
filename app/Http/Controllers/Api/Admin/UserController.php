@@ -12,7 +12,7 @@ use App\Services\UserServiceInterface;
 use Illuminate\Contracts\Pagination\CursorPaginator;
 
 /**
- * 
+ *
  */
 class UserController extends Controller
 {
@@ -28,6 +28,12 @@ class UserController extends Controller
     public function index(Request $request): JsonResponse
     {
         try {
+            // validate request
+            $request->validate([
+                'per_page' => 'nullable|integer|min:1|max:100',
+                'paginate' => 'sometimes|in:true,false',
+                'cursor' => 'nullable|string'
+            ]);
             $perPage = min($request->get('per_page', 15), 100);
 
             if ($request->has('paginate') && $request->get('paginate') !== 'false') {

@@ -29,6 +29,14 @@ class MenuController extends Controller
     public function index(MenuIndexRequest $request): JsonResponse
     {
         try {
+            // request validation
+            $request->validate([
+                'per_page' => 'nullable|integer|min:1|max:100',
+                'cursor' => 'nullable|string',
+                'paginate' => 'sometimes|in:true,false',
+                'locale' => 'sometimes|string|in:en,ja'
+            ]);
+
             $perPage = min($request->get('per_page', 5), 100);
             $locale = App::getLocale();
 
@@ -162,5 +170,4 @@ class MenuController extends Controller
             );
         }
     }
-
 }

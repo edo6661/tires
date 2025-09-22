@@ -27,6 +27,12 @@ class TireStorageController extends Controller
     public function index(Request $request): JsonResponse
     {
         try {
+            // validate request
+            $request->validate([
+                'per_page' => 'nullable|integer|min:1|max:100',
+                'cursor' => 'nullable|string',
+                'paginate' => 'sometimes|in:true,false',
+            ]);
             $perPage = min($request->get('per_page', 15), 100);
 
             if ($request->boolean('paginate', true)) {
@@ -198,7 +204,7 @@ class TireStorageController extends Controller
         );
     }
 
-    
+
     public function bulkEnd(Request $request): JsonResponse
     {
         $ids = $request->input('ids', []);

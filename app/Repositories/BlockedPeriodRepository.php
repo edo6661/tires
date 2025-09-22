@@ -52,6 +52,7 @@ class BlockedPeriodRepository implements BlockedPeriodRepositoryInterface
         if (!empty($filters['menu_id'])) {
             $query->where('menu_id', $filters['menu_id']);
         }
+        // Add handling for all_menus filter
         if (isset($filters['all_menus'])) {
             $query->where('all_menus', $filters['all_menus']);
         }
@@ -81,7 +82,10 @@ class BlockedPeriodRepository implements BlockedPeriodRepositoryInterface
             $query->where(function ($q) use ($search) {
                 $q->where('reason', 'like', "%{$search}%")
                   ->orWhereHas('menu', function ($menuQuery) use ($search) {
-                      $menuQuery->where('name', 'like', "%{$search}%");
+                      // Fixed: Search in menu translations instead of directly on menu
+                      $menuQuery->whereHas('translations', function ($translationQuery) use ($search) {
+                          $translationQuery->where('name', 'like', "%{$search}%");
+                      });
                   });
             });
         }

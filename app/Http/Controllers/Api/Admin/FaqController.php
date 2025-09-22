@@ -32,7 +32,7 @@ class FaqController extends Controller
             // Validate query parameters
             $request->validate([
                 'per_page' => 'nullable|integer|min:1|max:100',
-                'paginate' => 'nullable|string',
+                'paginate' => 'sometimes|in:true,false',
                 'cursor' => 'nullable|string',
                 'status' => 'nullable|in:active,inactive',
                 'search' => 'nullable|string|max:255'

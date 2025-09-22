@@ -36,6 +36,13 @@ class ReservationController extends Controller
     public function index(Request $request): JsonResponse
     {
         try {
+            // Validate query parameters
+            $request->validate([
+                'per_page' => 'nullable|integer|min:1|max:100',
+                'cursor' => 'nullable|string',
+                'paginate' => 'sometimes|in:true,false',
+            ]);
+
             $perPage = min($request->get('per_page', 10), 100);
 
             if ($request->has('paginate') && $request->get('paginate') !== 'false') {
@@ -376,9 +383,9 @@ class ReservationController extends Controller
             return response()->json([
                 'status' => 'success',
                 'data' => $calendarData,
-                    // 'current_month' => $currentMonth->format('F Y'),
-                    // 'previous_month' => $currentMonth->copy()->subMonth()->format('Y-m'),
-                    // 'next_month' => $currentMonth->copy()->addMonth()->format('Y-m')
+                // 'current_month' => $currentMonth->format('F Y'),
+                // 'previous_month' => $currentMonth->copy()->subMonth()->format('Y-m'),
+                // 'next_month' => $currentMonth->copy()->addMonth()->format('Y-m')
             ]);
         } catch (\Exception $e) {
             return response()->json([

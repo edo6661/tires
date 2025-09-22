@@ -27,19 +27,29 @@ class BlockedPeriodController extends Controller
     /**
      * List All Blocked Periods (paginate / non-paginate) with filtering and search
      */
+
+    //  Filter by "all menus" blocks:
+    // When all_menus=1 is passed as a query parameter, only blocked periods that block all menus will be returned
+    // When all_menus=0 is passed, only blocked periods that block specific menus will be returned
+    // Filter by specific menu:
+    // When menu_id=X is passed, only blocked periods for that specific menu will be returned
+    // Combined filtering:
+    // Multiple filters can be used together (e.g., all_menus=0&menu_id=5 to get blocks for menu ID 5 only)
+    // Search functionality:
+    // The search now correctly looks through menu translations, allowing users to search for blocked periods by menu name or reason
     public function index(Request $request): JsonResponse
     {
         try {
             // Validate query parameters
             $request->validate([
                 'per_page' => 'nullable|integer|min:1|max:100',
-                'paginate' => 'nullable|string',
+                'paginate' => 'sometimes|in:true,false',
                 'cursor' => 'nullable|string',
                 'status' => 'nullable|in:active,upcoming,expired,all',
                 'menu_id' => 'nullable|integer|exists:menus,id',
                 'start_date' => 'nullable|date_format:Y-m-d',
                 'end_date' => 'nullable|date_format:Y-m-d|after_or_equal:start_date',
-                'all_menus' => 'nullable|boolean',
+                'all_menus' => 'sometimes|in:true,false',
                 'search' => 'nullable|string|max:255'
             ]);
 
