@@ -240,7 +240,7 @@ class ContactController extends Controller
     /**
      * Get contact statistics
      */
-    public function statistics(): JsonResponse
+    public function getStatistics(): JsonResponse
     {
         try {
             $stats = $this->contactService->getContactStats();
