@@ -26,7 +26,7 @@ class BusinessSettingRequest extends FormRequest
             'website_url' => 'nullable|url|max:255',
             'site_name' => 'nullable|string|max:255',
             'shop_description' => 'nullable|string',
-            'top_image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+            // 'top_image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
             'site_public' => 'boolean',
             'reply_email' => 'nullable|email|max:255',
             'terms_of_use' => 'nullable|string',

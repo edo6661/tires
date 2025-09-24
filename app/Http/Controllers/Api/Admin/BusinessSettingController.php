@@ -18,9 +18,7 @@ class BusinessSettingController extends Controller
 {
     use ApiResponseTrait;
 
-    public function __construct(protected BusinessSettingServiceInterface $businessSettingService)
-    {
-    }
+    public function __construct(protected BusinessSettingServiceInterface $businessSettingService) {}
 
     /**
      * Display business settings
@@ -71,20 +69,6 @@ class BusinessSettingController extends Controller
     {
         try {
             $data = $request->validated();
-
-            // Handle file upload if present
-            if ($request->hasFile('top_image')) {
-                $businessSettings = $this->businessSettingService->getBusinessSettings();
-
-                // Delete old image if exists
-                if ($businessSettings && $businessSettings->top_image_path) {
-                    Storage::disk('s3')->delete($businessSettings->top_image_path);
-                }
-
-                // Store new image
-                $imagePath = $request->file('top_image')->store('business-images', 's3');
-                $data['top_image_path'] = $imagePath;
-            }
 
             // Process business hours
             if (isset($data['business_hours'])) {
@@ -168,6 +152,41 @@ class BusinessSettingController extends Controller
             ], 'Top image URL retrieved successfully');
         } catch (\Exception $e) {
             return $this->errorResponse('Failed to retrieve top image: ' . $e->getMessage(), 500);
+        }
+    }
+
+    /**
+     * Update only top image
+     */
+    public function updateTopImage(Request $request): JsonResponse
+    {
+        try {
+            $request->validate([
+                'top_image' => 'required|image|mimes:jpeg,png,jpg,webp|max:2048',
+            ]);
+
+            $businessSettings = $this->businessSettingService->getBusinessSettings();
+
+            // Hapus gambar lama jika ada
+            if ($businessSettings && $businessSettings->top_image_path) {
+                Storage::disk('s3')->delete($businessSettings->top_image_path);
+            }
+
+            // Upload gambar baru
+            $imagePath = $request->file('top_image')->store('business-images', 's3');
+
+            $updatedSettings = $this->businessSettingService->updateBusinessSettings([
+                'top_image_path' => $imagePath,
+            ]);
+
+            return $this->successResponse(
+                new BusinessSettingResource($updatedSettings),
+                'Top image updated successfully'
+            );
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            return $this->validationErrorResponse($e->errors());
+        } catch (\Exception $e) {
+            return $this->errorResponse('Failed to update top image: ' . $e->getMessage(), 500);
         }
     }
 

@@ -247,6 +247,7 @@
                         Route::patch('/business-hours', [ApiAdminBusinessSettingController::class, 'updateBusinessHours']);
                         // Route::get('/{id}/edit', [ApiAdminBusinessSettingController::class, 'edit']);
                         Route::patch('/update', [ApiAdminBusinessSettingController::class, 'update']);
+                         Route::patch('/top-image', [ApiAdminBusinessSettingController::class, 'updateTopImage']);
                     });
 
                     // FAQ Management
