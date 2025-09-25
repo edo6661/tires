@@ -2,14 +2,15 @@
 
 namespace App\Http\Controllers\Api\Admin;
 
-use App\Http\Controllers\Controller;
-use App\Services\BusinessSettingServiceInterface;
-use App\Http\Traits\ApiResponseTrait;
-use App\Http\Resources\BusinessSettingResource;
-use App\Http\Requests\BusinessSettingRequest;
+use Illuminate\Support\Facades\Validator;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
+use App\Http\Controllers\Controller;
+use App\Http\Traits\ApiResponseTrait;
 use Illuminate\Support\Facades\Storage;
+use App\Http\Requests\BusinessSettingRequest;
+use App\Http\Resources\BusinessSettingResource;
+use App\Services\BusinessSettingServiceInterface;
 
 /**
  * @tags Admin - Business Setting Management
@@ -161,9 +162,32 @@ class BusinessSettingController extends Controller
     public function updateTopImage(Request $request): JsonResponse
     {
         try {
-            $request->validate([
-                'top_image' => 'required|image|mimes:jpeg,png,jpg,webp|max:2048',
+
+            // Validasi dengan pesan error yang lebih spesifik
+            $validator = Validator::make($request->all(), [
+                'top_image' => 'required|file|image|mimes:jpeg,png,jpg,webp|max:2048',
+            ], [
+                'top_image.required' => 'Top image file is required',
+                'top_image.file' => 'Top image must be a valid file',
+                'top_image.image' => 'Top image must be an image file',
+                'top_image.mimes' => 'Top image must be a file of type: jpeg, png, jpg, webp',
+                'top_image.max' => 'Top image size must not exceed 2MB',
             ]);
+
+            if ($validator->fails()) {
+                return $this->errorResponse(
+                    'Validation failed',
+                    422,
+                    collect($validator->errors())->map(function ($messages, $field) {
+                        return [
+                            'field' => $field,
+                            'tag' => 'validation_error',
+                            'value' => null,
+                            'message' => $messages[0]
+                        ];
+                    })->values()->toArray()
+                );
+            }
 
             $businessSettings = $this->businessSettingService->getBusinessSettings();
 
@@ -183,10 +207,21 @@ class BusinessSettingController extends Controller
                 new BusinessSettingResource($updatedSettings),
                 'Top image updated successfully'
             );
-        } catch (\Illuminate\Validation\ValidationException $e) {
-            return $this->validationErrorResponse($e->errors());
         } catch (\Exception $e) {
-            return $this->errorResponse('Failed to update top image: ' . $e->getMessage(), 500);
+
+
+            return $this->errorResponse(
+                'Failed to update top image: ' . $e->getMessage(),
+                500,
+                [
+                    [
+                        'field' => 'general',
+                        'tag' => 'upload_error',
+                        'value' => null,
+                        'message' => 'Image upload failed'
+                    ]
+                ]
+            );
         }
     }
 

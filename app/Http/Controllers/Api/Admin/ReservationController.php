@@ -446,7 +446,8 @@ class ReservationController extends Controller
                 'month' => 'nullable|date_format:Y-m',
                 'view' => 'nullable|in:month,week,day',
                 'menu_id' => 'nullable|integer|exists:menus,id',
-                'status' => 'nullable|in:pending,confirmed,completed,cancelled'
+                'status' => 'nullable|in:pending,confirmed,completed,cancelled',
+                'locale' => 'sometimes|string|in:en,ja'
             ]);
 
             if ($validator->fails()) {
@@ -457,6 +458,12 @@ class ReservationController extends Controller
             $view = $request->get('view', 'month');
             $menuId = $request->get('menu_id');
             $status = $request->get('status');
+            $requestedLocale = $request->get('locale');
+
+            // If locale is provided, pass it to downstream resources via header for consistency
+            if (!empty($requestedLocale)) {
+                $request->headers->set('X-Locale', $requestedLocale);
+            }
 
             $currentMonth = Carbon::createFromFormat('Y-m', $month);
 
@@ -506,15 +513,21 @@ class ReservationController extends Controller
                     'is_current_month' => $current->month === $currentMonth->month,
                     'is_today' => $current->isToday(),
                     'day_name' => $current->format('l'),
-                    'reservations' => $dayReservations->map(function ($reservation) {
+                    'reservations' => $dayReservations->map(function ($reservation) use ($request) {
+                        // Safely access menu and compute locale-aware details
+                        $menu = $reservation->menu;
+                        $requiredTime = $menu->required_time ?? 60;
                         return [
                             'id' => $reservation->id,
                             'reservation_number' => $reservation->reservation_number,
                             'customer_name' => $reservation->user ? $reservation->user->full_name : $reservation->full_name,
                             'time' => $reservation->reservation_datetime->format('H:i'),
-                            'end_time' => $reservation->reservation_datetime->copy()->addMinutes($reservation->menu->required_time ?? 60)->format('H:i'),
-                            'menu_name' => $reservation->menu->name ?? 'Unknown Menu',
-                            'menu_color' => $reservation->menu->color ?? '#3B82F6',
+                            'end_time' => $reservation->reservation_datetime->copy()->addMinutes($requiredTime)->format('H:i'),
+                            // Keep legacy flat fields for compatibility
+                            'menu_name' => $menu?->name,
+                            'menu_color' => $menu?->color ?? '#3B82F6',
+                            // New: full menu object with translations and locale-aware fields
+                            'menu' => $menu ? (new \App\Http\Resources\MenuResource($menu))->toArray($request) : null,
                             'status' => $reservation->status,
                             'people_count' => $reservation->number_of_people,
                             'amount' => $reservation->amount
