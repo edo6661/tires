@@ -571,36 +571,62 @@ class ReservationController extends Controller
     /**
      * Get reservations for list view with filtering and pagination
      */
+    /**
+     * Get reservations for list view with filtering and cursor pagination
+     */
     public function getListReservations(Request $request): JsonResponse
     {
         try {
+            // Validate query parameters
             $validator = Validator::make($request->all(), [
                 'search' => 'nullable|string|max:255',
                 'menu_id' => 'nullable|integer|exists:menus,id',
                 'status' => 'nullable|in:pending,confirmed,completed,cancelled',
                 'date_from' => 'nullable|date_format:Y-m-d',
                 'date_to' => 'nullable|date_format:Y-m-d|after_or_equal:date_from',
-                'per_page' => 'nullable|integer|min:5|max:100',
-                'page' => 'nullable|integer|min:1',
+                'per_page' => 'sometimes|integer|min:1|max:100',
+                'paginate' => 'sometimes|in:true,false',
+                'cursor' => 'sometimes|string',
+                'locale' => 'sometimes|string|in:en,ja',
                 'sort_by' => 'nullable|in:reservation_datetime,created_at,customer_name,status',
                 'sort_order' => 'nullable|in:asc,desc'
             ]);
 
             if ($validator->fails()) {
-                return $this->validationErrorResponse($validator->errors()->toArray());
+                return $this->errorResponse(
+                    'Validation failed',
+                    422,
+                    collect($validator->errors())->map(function ($messages, $field) {
+                        return [
+                            'field' => $field,
+                            'tag' => 'validation_error',
+                            'value' => request($field),
+                            'message' => $messages[0]
+                        ];
+                    })->values()->toArray()
+                );
             }
 
+            // Handle locale
+            $requestedLocale = $request->get('locale');
+            if ($requestedLocale) {
+                $request->headers->set('X-Locale', $requestedLocale);
+                app()->setLocale($requestedLocale);
+            }
+
+            // Extract validated parameters
             $search = $request->get('search');
             $menuId = $request->get('menu_id');
             $status = $request->get('status');
             $dateFrom = $request->get('date_from');
             $dateTo = $request->get('date_to');
             $perPage = min($request->get('per_page', 15), 100);
+            $cursor = $request->get('cursor');
             $sortBy = $request->get('sort_by', 'reservation_datetime');
             $sortOrder = $request->get('sort_order', 'desc');
 
             // Build query with filters
-            $query = \App\Models\Reservation::with(['user', 'menu'])
+            $query = \App\Models\Reservation::with(['user', 'menu.translations'])
                 ->when($search, function ($q) use ($search) {
                     $q->where(function ($subQuery) use ($search) {
                         $subQuery->where('reservation_number', 'like', "%{$search}%")
@@ -634,90 +660,136 @@ class ReservationController extends Controller
                 $query->orderBy($sortBy, $sortOrder);
             }
 
-            $reservations = $query->paginate($perPage);
+            // Add secondary sort by id for consistent cursor pagination
+            $query->orderBy('id', $sortOrder);
 
-            // Transform data for list view
-            $transformedData = $reservations->getCollection()->map(function ($reservation) {
-                return [
-                    'id' => $reservation->id,
-                    'reservation_number' => $reservation->reservation_number,
-                    'customer' => [
-                        'name' => $reservation->user ? $reservation->user->full_name : $reservation->full_name,
-                        'email' => $reservation->user ? $reservation->user->email : $reservation->email,
-                        'phone' => $reservation->user ? $reservation->user->phone_number : $reservation->phone_number,
-                        'type' => $reservation->user ? 'registered' : 'guest'
-                    ],
-                    'date_time' => [
-                        'date' => $reservation->reservation_datetime->format('M d, Y'),
-                        'time' => $reservation->reservation_datetime->format('H:i'),
-                        'datetime' => $reservation->reservation_datetime->format('Y-m-d H:i:s'),
-                        'day_name' => $reservation->reservation_datetime->format('l')
-                    ],
-                    'menu' => [
-                        'id' => $reservation->menu_id,
-                        'name' => $reservation->menu->name ?? 'Unknown Menu',
-                        'required_time' => $reservation->menu->required_time ?? 60,
-                        'color' => $reservation->menu->color ?? '#3B82F6'
-                    ],
-                    'people_count' => $reservation->number_of_people,
-                    'amount' => $reservation->amount,
-                    'status' => $reservation->status,
-                    'notes' => $reservation->notes,
-                    'created_at' => $reservation->created_at->format('Y-m-d H:i:s'),
-                    'updated_at' => $reservation->updated_at->format('Y-m-d H:i:s')
-                ];
-            });
+            if ($request->has('paginate') && $request->get('paginate') !== 'false') {
+                // Paginated response with cursor
+                $reservations = $query->cursorPaginate($perPage, ['*'], 'cursor', $cursor);
 
-            // Get filter options
-            $filterOptions = [
-                'menus' => $this->menuService->getActiveMenus()->map(function ($menu) {
+                // Transform data for response
+                $transformedData = $reservations->getCollection()->map(function ($reservation) use ($request) {
+                    $menu = $reservation->menu;
                     return [
-                        'id' => $menu->id,
-                        'name' => $menu->name
+                        'id' => $reservation->id,
+                        'reservation_id' => $reservation->id,
+                        'reservation_number' => $reservation->reservation_number,
+                        'customer' => [
+                            'name' => $reservation->user ? $reservation->user->full_name : $reservation->full_name,
+                            'email' => $reservation->user ? $reservation->user->email : $reservation->email,
+                            'phone' => $reservation->user ? $reservation->user->phone_number : $reservation->phone_number,
+                            'type' => $reservation->user ? 'registered' : 'guest'
+                        ],
+                        // toIso
+                        'date_time' => $reservation->reservation_datetime->toIsoString(),
+                        // Full menu object dengan translations seperti MenuResource
+                        'menu' => $menu ? (new \App\Http\Resources\MenuResource($menu))->toArray($request) : null,
+                        'people_count' => $reservation->number_of_people,
+                        'amount' => [
+                            'raw' => $reservation->amount,
+                            'formatted' => number_format($reservation->amount, 2)
+                        ],
+                        'status' => $reservation->status,
+                        'notes' => $reservation->notes,
+                        'customer_info' => [
+                            'full_name' => $reservation->user ? $reservation->user->full_name : $reservation->full_name,
+                            'full_name_kana' => $reservation->user ? $reservation->user->full_name_kana : $reservation->full_name_kana,
+                            'email' => $reservation->user ? $reservation->user->email : $reservation->email,
+                            'phone_number' => $reservation->user ? $reservation->user->phone_number : $reservation->phone_number,
+                            'is_guest' => !$reservation->user
+                        ],
+                        'user' => $reservation->user ? [
+                            'id' => $reservation->user->id,
+                            'full_name' => $reservation->user->full_name,
+                            'email' => $reservation->user->email,
+                            'phone_number' => $reservation->user->phone_number
+                        ] : null,
+                        'created_at' => $reservation->created_at->toISOString(),
+                        'updated_at' => $reservation->updated_at->toISOString(),
+                        'meta' => [
+                            'locale' => $requestedLocale ?? app()->getLocale()
+                        ]
                     ];
-                }),
-                'statuses' => [
-                    ['value' => 'pending', 'label' => 'Pending'],
-                    ['value' => 'confirmed', 'label' => 'Confirmed'],
-                    ['value' => 'completed', 'label' => 'Completed'],
-                    ['value' => 'cancelled', 'label' => 'Cancelled']
-                ]
-            ];
+                })->values();
 
-            return $this->successResponse([
-                'reservations' => $transformedData,
-                'pagination' => [
-                    'current_page' => $reservations->currentPage(),
-                    'per_page' => $reservations->perPage(),
-                    'total' => $reservations->total(),
-                    'last_page' => $reservations->lastPage(),
-                    'from' => $reservations->firstItem(),
-                    'to' => $reservations->lastItem(),
-                    'has_more_pages' => $reservations->hasMorePages()
-                ],
-                'filters' => [
-                    'current' => [
-                        'search' => $search,
-                        'menu_id' => $menuId,
-                        'status' => $status,
-                        'date_from' => $dateFrom,
-                        'date_to' => $dateTo,
-                        'sort_by' => $sortBy,
-                        'sort_order' => $sortOrder
-                    ],
-                    'options' => $filterOptions
-                ],
-                'statistics' => [
-                    'total_results' => $reservations->total(),
-                    'showing' => $reservations->count(),
-                    'from' => $reservations->firstItem() ?? 0,
-                    'to' => $reservations->lastItem() ?? 0
-                ]
-            ], 'List reservations retrieved successfully');
+                // Generate cursor info
+                $cursorInfo = $this->generateCursor($reservations);
+
+                return $this->successResponseWithCursor(
+                    $transformedData->toArray(),
+                    $cursorInfo,
+                    'List reservations retrieved successfully'
+                );
+            } else {
+                // Simple response without pagination
+                $reservations = $query->get();
+
+                // Transform data for response
+                $transformedData = $reservations->map(function ($reservation) use ($request) {
+                    $menu = $reservation->menu;
+                    return [
+                        'id' => $reservation->id,
+                        'reservation_id' => $reservation->id,
+                        'reservation_number' => $reservation->reservation_number,
+                        'customer' => [
+                            'name' => $reservation->user ? $reservation->user->full_name : $reservation->full_name,
+                            'email' => $reservation->user ? $reservation->user->email : $reservation->email,
+                            'phone' => $reservation->user ? $reservation->user->phone_number : $reservation->phone_number,
+                            'type' => $reservation->user ? 'registered' : 'guest'
+                        ],
+                        'date_time' => [
+                            'date' => $reservation->reservation_datetime->format('M d, Y'),
+                            'time' => $reservation->reservation_datetime->format('H:i'),
+                            'datetime' => $reservation->reservation_datetime->format('Y-m-d H:i:s'),
+                            'day_name' => $reservation->reservation_datetime->format('l')
+                        ],
+                        // Full menu object dengan translations seperti MenuResource
+                        'menu' => $menu ? (new \App\Http\Resources\MenuResource($menu))->toArray($request) : null,
+                        'people_count' => $reservation->number_of_people,
+                        'amount' => [
+                            'raw' => $reservation->amount,
+                            'formatted' => number_format($reservation->amount, 2)
+                        ],
+                        'status' => $reservation->status,
+                        'notes' => $reservation->notes,
+                        'customer_info' => [
+                            'full_name' => $reservation->user ? $reservation->user->full_name : $reservation->full_name,
+                            'full_name_kana' => $reservation->user ? $reservation->user->full_name_kana : $reservation->full_name_kana,
+                            'email' => $reservation->user ? $reservation->user->email : $reservation->email,
+                            'phone_number' => $reservation->user ? $reservation->user->phone_number : $reservation->phone_number,
+                            'is_guest' => !$reservation->user
+                        ],
+                        'user' => $reservation->user ? [
+                            'id' => $reservation->user->id,
+                            'full_name' => $reservation->user->full_name,
+                            'email' => $reservation->user->email,
+                            'phone_number' => $reservation->user->phone_number
+                        ] : null,
+                        'created_at' => $reservation->created_at->toISOString(),
+                        'updated_at' => $reservation->updated_at->toISOString(),
+                        'meta' => [
+                            'locale' => $requestedLocale ?? app()->getLocale()
+                        ]
+                    ];
+                })->values();
+
+                return $this->successResponse(
+                    $transformedData->toArray(),
+                    'List reservations retrieved successfully'
+                );
+            }
         } catch (\Exception $e) {
             return $this->errorResponse(
-                'Failed to retrieve list reservations: ' . $e->getMessage(),
-                500
+                'Failed to retrieve list reservations',
+                500,
+                [
+                    [
+                        'field' => 'general',
+                        'tag' => 'retrieval_failed',
+                        'value' => $e->getMessage(),
+                        'message' => 'List reservations retrieval failed'
+                    ]
+                ]
             );
         }
     }
