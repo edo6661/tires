@@ -520,7 +520,12 @@ class ReservationController extends Controller
                         return [
                             'id' => $reservation->id,
                             'reservation_number' => $reservation->reservation_number,
-                            'customer_name' => $reservation->user ? $reservation->user->full_name : $reservation->full_name,
+                            'customer' => [
+                                'name' => $reservation->user ? $reservation->user->full_name : $reservation->full_name,
+                                'email' => $reservation->user ? $reservation->user->email : $reservation->email,
+                                'phone' => $reservation->user ? $reservation->user->phone_number : $reservation->phone_number,
+                                'type' => $reservation->user ? 'registered' : 'guest'
+                            ],
                             'time' => $reservation->reservation_datetime->format('H:i'),
                             'end_time' => $reservation->reservation_datetime->copy()->addMinutes($requiredTime)->format('H:i'),
                             // Keep legacy flat fields for compatibility
@@ -530,7 +535,20 @@ class ReservationController extends Controller
                             'menu' => $menu ? (new \App\Http\Resources\MenuResource($menu))->toArray($request) : null,
                             'status' => $reservation->status,
                             'people_count' => $reservation->number_of_people,
-                            'amount' => $reservation->amount
+                            'amount' => $reservation->amount,
+                            'customer_info' => [
+                                'full_name' => $reservation->user ? $reservation->user->full_name : $reservation->full_name,
+                                'full_name_kana' => $reservation->user ? $reservation->user->full_name_kana : $reservation->full_name_kana,
+                                'email' => $reservation->user ? $reservation->user->email : $reservation->email,
+                                'phone_number' => $reservation->user ? $reservation->user->phone_number : $reservation->phone_number,
+                                'is_guest' => !$reservation->user
+                            ],
+                            'user' => $reservation->user ? [
+                                'id' => $reservation->user->id,
+                                'full_name' => $reservation->user->full_name,
+                                'email' => $reservation->user->email,
+                                'phone_number' => $reservation->user->phone_number
+                            ] : null,
                         ];
                     })->values(),
                     'total_reservations' => $dayReservations->count()
