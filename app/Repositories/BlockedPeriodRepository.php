@@ -80,11 +80,11 @@ class BlockedPeriodRepository implements BlockedPeriodRepositoryInterface
         if (!empty($filters['search'])) {
             $search = $filters['search'];
             $query->where(function ($q) use ($search) {
-                $q->where('reason', 'like', "%{$search}%")
+                $q->where('reason', 'ILIKE', "%{$search}%")
                   ->orWhereHas('menu', function ($menuQuery) use ($search) {
                       // Fixed: Search in menu translations instead of directly on menu
                       $menuQuery->whereHas('translations', function ($translationQuery) use ($search) {
-                          $translationQuery->where('name', 'like', "%{$search}%");
+                          $translationQuery->where('name', 'ILIKE', "%{$search}%");
                       });
                   });
             });

@@ -94,9 +94,9 @@ class CustomerRepository implements CustomerRepositoryInterface
         if (!empty($filters['search'])) {
             $search = '%' . $filters['search'] . '%';
             $query->where(function ($q) use ($search) {
-                $q->where('full_name', 'LIKE', $search)
-                    ->orWhere('email', 'LIKE', $search)
-                    ->orWhere('phone_number', 'LIKE', $search);
+                $q->where('full_name', 'ILIKE', $search)
+                    ->orWhere('email', 'ILIKE', $search)
+                    ->orWhere('phone_number', 'ILIKE', $search);
             });
         }
 
@@ -255,9 +255,9 @@ class CustomerRepository implements CustomerRepositoryInterface
         return $this->buildCustomerQuery()
             ->where(function ($q) use ($search) {
                 $searchTerm = '%' . $search . '%';
-                $q->where('full_name', 'LIKE', $searchTerm)
-                    ->orWhere('email', 'LIKE', $searchTerm)
-                    ->orWhere('phone_number', 'LIKE', $searchTerm);
+                $q->where('full_name', 'ILIKE', $searchTerm)
+                    ->orWhere('email', 'ILIKE', $searchTerm)
+                    ->orWhere('phone_number', 'ILIKE', $searchTerm);
             })
             ->get();
     }
@@ -308,9 +308,9 @@ class CustomerRepository implements CustomerRepositoryInterface
         return $this->buildCustomerQuery()
             ->where(function ($q) use ($searchQuery) {
                 $search = '%' . $searchQuery . '%';
-                $q->where('full_name', 'LIKE', $search)
-                    ->orWhere('email', 'LIKE', $search)
-                    ->orWhere('phone_number', 'LIKE', $search);
+                $q->where('full_name', 'ILIKE', $search)
+                    ->orWhere('email', 'ILIKE', $search)
+                    ->orWhere('phone_number', 'ILIKE', $search);
             })
             ->orderBy('latest_reservation', 'desc')
             ->take($perPage)

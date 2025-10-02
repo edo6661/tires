@@ -2,17 +2,19 @@
 
 namespace App\Http\Controllers\Api\Admin;
 
+use Carbon\Carbon;
+use Illuminate\Http\Request;
+use Illuminate\Http\JsonResponse;
+use App\Http\Requests\MenuRequest;
+use Illuminate\Support\Facades\App;
 use App\Http\Controllers\Controller;
-use App\Http\Traits\ApiResponseTrait;
-use App\Http\Middleware\ApiSetLocale;
 use App\Http\Resources\MenuResource;
+use Illuminate\Support\Facades\Validator;
+use App\Http\Middleware\ApiSetLocale;
+use App\Http\Traits\ApiResponseTrait;
 use App\Services\MenuServiceInterface;
 use App\Http\Requests\MenuIndexRequest;
-use App\Http\Requests\MenuRequest;
-use Illuminate\Http\JsonResponse;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\App;
-use Carbon\Carbon;
+
 
 /**
  * @mixin \Illuminate\Http\Request
@@ -142,31 +144,151 @@ class MenuController extends Controller
     public function index(MenuIndexRequest $request): JsonResponse
     {
         try {
-            $perPage = min($request->get('per_page', 5), 100);
-            $locale = App::getLocale();
+            // Validate query parameters
+            $validator = Validator::make($request->all(), [
+                'search' => 'nullable|string|max:255',
+                'status' => 'nullable|in:active,inactive,all',
+                'min_price' => 'nullable|numeric|min:0',
+                'max_price' => 'nullable|numeric|min:0',
+                'per_page' => 'sometimes|integer|min:1|max:100',
+                'paginate' => 'sometimes|in:true,false',
+                'cursor' => 'sometimes|string',
+                'locale' => 'sometimes|string|in:en,ja',
+                'sort_by' => 'nullable|in:display_order,name,price,created_at,updated_at',
+                'sort_order' => 'nullable|in:asc,desc'
+            ]);
+
+            if ($validator->fails()) {
+                return $this->errorResponse(
+                    'Validation failed',
+                    422,
+                    collect($validator->errors())->map(function ($messages, $field) {
+                        return [
+                            'field' => $field,
+                            'tag' => 'validation_error',
+                            'value' => request($field),
+                            'message' => $messages[0]
+                        ];
+                    })->values()->toArray()
+                );
+            }
+
+            // Handle locale
+            $requestedLocale = $request->get('locale');
+            if ($requestedLocale) {
+                $request->headers->set('X-Locale', $requestedLocale);
+                app()->setLocale($requestedLocale);
+            }
+
+            // Extract validated parameters
+            $search = $request->get('search');
+            $status = $request->get('status');
+            $minPrice = $request->get('min_price');
+            $maxPrice = $request->get('max_price');
+            $perPage = min($request->get('per_page', 15), 100);
+            $cursor = $request->get('cursor');
+            $sortBy = $request->get('sort_by', 'display_order');
+            $sortOrder = $request->get('sort_order', 'asc');
+
+            // Build query with filters
+            $query = \App\Models\Menu::with(['translations'])
+                ->when($search, function ($q) use ($search) {
+                    $q->whereHas('translations', function ($translationQuery) use ($search) {
+                        $translationQuery->where('name', 'ILIKE', "%{$search}%")
+                            ->orWhere('description', 'ILIKE', "%{$search}%");
+                    });
+                })
+                ->when($status && $status !== 'all', function ($q) use ($status) {
+                    $q->where('is_active', $status === 'active');
+                })
+                ->when($minPrice, function ($q) use ($minPrice) {
+                    $q->where('price', '>=', $minPrice);
+                })
+                ->when($maxPrice, function ($q) use ($maxPrice) {
+                    $q->where('price', '<=', $maxPrice);
+                });
+
+            // Apply sorting
+            $query->orderBy($sortBy, $sortOrder);
+
+            // Add secondary sort by id for consistent cursor pagination
+            $query->orderBy('id', $sortOrder);
 
             if ($request->has('paginate') && $request->get('paginate') !== 'false') {
-                $cursor = $request->get('cursor');
                 // Paginated response with cursor
-                $menus = $this->menuService->getPaginatedMenusWithCursor($perPage, $cursor);
-                $collection = MenuResource::collection($menus);
+                $menus = $query->cursorPaginate($perPage, ['*'], 'cursor', $cursor);
+
+                // Transform data using MenuResource
+                $transformedData = $menus->getCollection()->map(function ($menu) use ($request) {
+                    return (new MenuResource($menu))->toArray($request);
+                })->values();
 
                 // Generate cursor info
-                $cursor = $this->generateCursor($menus);
+                $cursorInfo = $this->generateCursor($menus);
+
+                // Get filter options for UI
+                $filterOptions = $this->getFilterOptions();
 
                 return $this->successResponseWithCursor(
-                    $collection->resolve(),
-                    $cursor,
-                    'Menus retrieved successfully'
+                    $transformedData->toArray(),
+                    $cursorInfo,
+                    'Menus retrieved successfully',
+                    200,
+                    [
+                        'filters' => [
+                            'current' => [
+                                'search' => $search,
+                                'status' => $status,
+                                'min_price' => $minPrice,
+                                'max_price' => $maxPrice,
+                                'sort_by' => $sortBy,
+                                'sort_order' => $sortOrder
+                            ],
+                            'options' => $filterOptions
+                        ],
+                        'statistics' => [
+                            'total_results' => $menus->count(),
+                            'showing' => $menus->count(),
+                            'from' => 1,
+                            'to' => $menus->count()
+                        ]
+                    ]
                 );
             } else {
                 // Simple response without pagination
-                $menus = $this->menuService->getActiveMenus();
-                $collection = MenuResource::collection($menus);
+                $menus = $query->get();
+
+                // Transform data using MenuResource
+                $transformedData = $menus->map(function ($menu) use ($request) {
+                    return (new MenuResource($menu))->toArray($request);
+                })->values();
+
+                // Get filter options for UI
+                $filterOptions = $this->getFilterOptions();
 
                 return $this->successResponse(
-                    $collection->resolve(),
-                    'Menus retrieved successfully'
+                    $transformedData->toArray(),
+                    'Menus retrieved successfully',
+                    200,
+                    [
+                        'filters' => [
+                            'current' => [
+                                'search' => $search,
+                                'status' => $status,
+                                'min_price' => $minPrice,
+                                'max_price' => $maxPrice,
+                                'sort_by' => $sortBy,
+                                'sort_order' => $sortOrder
+                            ],
+                            'options' => $filterOptions
+                        ],
+                        'statistics' => [
+                            'total_results' => $menus->count(),
+                            'showing' => $menus->count(),
+                            'from' => 1,
+                            'to' => $menus->count()
+                        ]
+                    ]
                 );
             }
         } catch (\Exception $e) {
@@ -176,14 +298,40 @@ class MenuController extends Controller
                 [
                     [
                         'field' => 'general',
-                        'tag' => 'server_error',
+                        'tag' => 'retrieval_failed',
                         'value' => $e->getMessage(),
-                        'message' => 'An unexpected error occurred'
+                        'message' => 'Menus retrieval failed'
                     ]
-                ],
-                500
+                ]
             );
         }
+    }
+
+    /**
+     * Get filter options for menu list
+     */
+    private function getFilterOptions(): array
+    {
+        return [
+            'statuses' => [
+                ['value' => 'all', 'label' => 'All Statuses'],
+                ['value' => 'active', 'label' => 'Active'],
+                ['value' => 'inactive', 'label' => 'Inactive']
+            ],
+            'sort_options' => [
+                ['value' => 'display_order', 'label' => 'Display Order'],
+                ['value' => 'name', 'label' => 'Name'],
+                ['value' => 'price', 'label' => 'Price'],
+                ['value' => 'created_at', 'label' => 'Created Date'],
+                ['value' => 'updated_at', 'label' => 'Updated Date']
+            ],
+            'price_ranges' => [
+                ['label' => 'Under $1,000', 'min' => 0, 'max' => 1000],
+                ['label' => '$1,000 - $3,000', 'min' => 1000, 'max' => 3000],
+                ['label' => '$3,000 - $5,000', 'min' => 3000, 'max' => 5000],
+                ['label' => 'Over $5,000', 'min' => 5000, 'max' => null]
+            ]
+        ];
     }
 
     public function show(int $id): JsonResponse
@@ -718,15 +866,15 @@ class MenuController extends Controller
     /**
      * Helper method to generate cursor information
      */
-    private function generateCursorInfo(array $result, int $limit): array
-    {
-        return [
-            'limit' => $limit, // Ubah dari per_page ke limit
-            'has_more' => $result['has_more'] ?? false,
-            'next_cursor' => $result['next_cursor'] ?? null,
-            'count' => count($result['data']),
-        ];
-    }
+    // private function generateCursorInfo(array $result, int $limit): array
+    // {
+    //     return [
+    //         'limit' => $limit, // Ubah dari per_page ke limit
+    //         'has_more' => $result['has_more'] ?? false,
+    //         'next_cursor' => $result['next_cursor'] ?? null,
+    //         'count' => count($result['data']),
+    //     ];
+    // }
 
     /**
      * Create cursor from timestamp (and optionally ID)

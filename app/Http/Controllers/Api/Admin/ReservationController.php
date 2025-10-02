@@ -647,14 +647,14 @@ class ReservationController extends Controller
             $query = \App\Models\Reservation::with(['user', 'menu.translations'])
                 ->when($search, function ($q) use ($search) {
                     $q->where(function ($subQuery) use ($search) {
-                        $subQuery->where('reservation_number', 'like', "%{$search}%")
-                            ->orWhere('full_name', 'like', "%{$search}%")
-                            ->orWhere('email', 'like', "%{$search}%")
-                            ->orWhere('phone_number', 'like', "%{$search}%")
+                        $subQuery->where('reservation_number', 'ILIKE', "%{$search}%")
+                            ->orWhere('full_name', 'ILIKE', "%{$search}%")
+                            ->orWhere('email', 'ILIKE', "%{$search}%")
+                            ->orWhere('phone_number', 'ILIKE', "%{$search}%")
                             ->orWhereHas('user', function ($userQuery) use ($search) {
-                                $userQuery->where('full_name', 'like', "%{$search}%")
-                                    ->orWhere('email', 'like', "%{$search}%")
-                                    ->orWhere('phone_number', 'like', "%{$search}%");
+                                $userQuery->where('full_name', 'ILIKE', "%{$search}%")
+                                    ->orWhere('email', 'ILIKE', "%{$search}%")
+                                    ->orWhere('phone_number', 'ILIKE', "%{$search}%");
                             });
                     });
                 })
