@@ -9,6 +9,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Resources\UserResource;
 use App\Http\Traits\ApiResponseTrait;
 use App\Services\UserServiceInterface;
+use Illuminate\Support\Facades\Validator;
 use Illuminate\Contracts\Pagination\CursorPaginator;
 
 /**
@@ -28,35 +29,171 @@ class UserController extends Controller
     public function index(Request $request): JsonResponse
     {
         try {
-            // validate request
-            $request->validate([
-                'per_page' => 'nullable|integer|min:1|max:100',
+            // Validate query parameters
+            $validator = Validator::make($request->all(), [
+                'search' => 'nullable|string|max:255',
+                'status' => 'nullable|in:active,inactive,verified,unverified,all',
+                'role' => 'nullable|in:admin,customer,all',
+                'per_page' => 'sometimes|integer|min:1|max:100',
                 'paginate' => 'sometimes|in:true,false',
-                'cursor' => 'nullable|string'
+                'cursor' => 'sometimes|string',
+                'locale' => 'sometimes|string|in:en,ja',
+                'sort_by' => 'nullable|in:full_name,email,created_at,updated_at,last_login_at',
+                'sort_order' => 'nullable|in:asc,desc'
             ]);
+
+            if ($validator->fails()) {
+                return $this->errorResponse(
+                    'Validation failed',
+                    422,
+                    collect($validator->errors())->map(function ($messages, $field) {
+                        return [
+                            'field' => $field,
+                            'tag' => 'validation_error',
+                            'value' => request($field),
+                            'message' => $messages[0]
+                        ];
+                    })->values()->toArray()
+                );
+            }
+
+            // Handle locale
+            $requestedLocale = $request->get('locale');
+            if ($requestedLocale) {
+                $request->headers->set('X-Locale', $requestedLocale);
+                app()->setLocale($requestedLocale);
+            }
+
+            // Extract validated parameters
+            $search = $request->get('search');
+            $status = $request->get('status');
+            $role = $request->get('role');
+            $createdFrom = $request->get('created_from');
+            $createdTo = $request->get('created_to');
             $perPage = min($request->get('per_page', 15), 100);
+            $cursor = $request->get('cursor');
+            $sortBy = $request->get('sort_by', 'created_at');
+            $sortOrder = $request->get('sort_order', 'desc');
+
+            // Build query with filters
+            $query = \App\Models\User::query()
+                ->when($search, function ($q) use ($search) {
+                    $q->where(function ($subQuery) use ($search) {
+                        $subQuery->where('full_name', 'like', "%{$search}%")
+                            ->orWhere('full_name_kana', 'like', "%{$search}%")
+                            ->orWhere('email', 'like', "%{$search}%")
+                            ->orWhere('phone_number', 'like', "%{$search}%");
+                    });
+                })
+                ->when($status && $status !== 'all', function ($q) use ($status) {
+                    switch ($status) {
+                        case 'active':
+                            $q->where('is_active', true);
+                            break;
+                        case 'inactive':
+                            $q->where('is_active', false);
+                            break;
+                        case 'verified':
+                            $q->whereNotNull('email_verified_at');
+                            break;
+                        case 'unverified':
+                            $q->whereNull('email_verified_at');
+                            break;
+                    }
+                })
+                ->when($role && $role !== 'all', function ($q) use ($role) {
+                    $q->where('role', $role);
+                })
+                ->when($createdFrom, function ($q) use ($createdFrom) {
+                    $q->whereDate('created_at', '>=', $createdFrom);
+                })
+                ->when($createdTo, function ($q) use ($createdTo) {
+                    $q->whereDate('created_at', '<=', $createdTo);
+                });
+
+            // Apply sorting
+            $query->orderBy($sortBy, $sortOrder);
+
+            // Add secondary sort by id for consistent cursor pagination
+            $query->orderBy('id', $sortOrder);
 
             if ($request->has('paginate') && $request->get('paginate') !== 'false') {
                 // Paginated response with cursor
-                $cursor = $request->get('cursor');
-                $users = $this->userService->getPaginatedUsersWithCursor($perPage, $cursor);
-                $collection = UserResource::collection($users);
+                $users = $query->cursorPaginate($perPage, ['*'], 'cursor', $cursor);
 
+                // Transform data using UserResource
+                $transformedData = $users->getCollection()->map(function ($user) use ($request) {
+                    return (new UserResource($user))->toArray($request);
+                })->values();
+
+                // Generate cursor info
                 $cursorInfo = $this->generateCursor($users);
 
+                // Get filter options for UI
+                $filterOptions = $this->getFilterOptions();
+
                 return $this->successResponseWithCursor(
-                    $collection->resolve(),
+                    $transformedData->toArray(),
                     $cursorInfo,
-                    'Users retrieved successfully'
+                    'Users retrieved successfully',
+                    200,
+                    [
+                        'filters' => [
+                            'current' => [
+                                'search' => $search,
+                                'status' => $status,
+                                'role' => $role,
+                                'created_from' => $createdFrom,
+                                'created_to' => $createdTo,
+                                'sort_by' => $sortBy,
+                                'sort_order' => $sortOrder
+                            ],
+                            'options' => $filterOptions
+                        ],
+                        'statistics' => [
+                            'total_results' => $users->count(),
+                            'showing' => $users->count(),
+                            'from' => 1,
+                            'to' => $users->count()
+                        ]
+                    ]
                 );
             } else {
                 // Simple response without pagination
-                $users = $this->userService->getAllUsers();
-                $collection = UserResource::collection($users);
+                $users = $query->get();
+
+                // Transform data using UserResource
+                $transformedData = $users->map(function ($user) use ($request) {
+                    return (new UserResource($user))->toArray($request);
+                })->values();
+
+                // Get filter options for UI
+                $filterOptions = $this->getFilterOptions();
 
                 return $this->successResponse(
-                    $collection->resolve(),
-                    'Users retrieved successfully'
+                    $transformedData->toArray(),
+                    'Users retrieved successfully',
+                    200,
+                    [
+                        'filters' => [
+                            'current' => [
+                                'search' => $search,
+                                'status' => $status,
+                                'role' => $role,
+                                'created_from' => $createdFrom,
+                                'created_to' => $createdTo,
+                                'sort_by' => $sortBy,
+                                'sort_order' => $sortOrder
+                            ],
+                            'options' => $filterOptions
+                        ],
+                        'statistics' => [
+                            'total_results' => $users->count(),
+                            'showing' => $users->count(),
+                            'from' => 1,
+                            'to' => $users->count()
+                        ]
+                    ]
                 );
             }
         } catch (\Exception $e) {
@@ -66,9 +203,9 @@ class UserController extends Controller
                 [
                     [
                         'field' => 'general',
-                        'tag' => 'server_error',
+                        'tag' => 'retrieval_failed',
                         'value' => $e->getMessage(),
-                        'message' => 'An unexpected error occurred'
+                        'message' => 'Users retrieval failed'
                     ]
                 ]
             );
@@ -477,5 +614,33 @@ class UserController extends Controller
                 ]
             );
         }
+    }
+
+    /**
+     * Get filter options for user list
+     */
+    private function getFilterOptions(): array
+    {
+        return [
+            'statuses' => [
+                ['value' => 'all', 'label' => 'All Statuses'],
+                ['value' => 'active', 'label' => 'Active'],
+                ['value' => 'inactive', 'label' => 'Inactive'],
+                ['value' => 'verified', 'label' => 'Email Verified'],
+                ['value' => 'unverified', 'label' => 'Email Unverified']
+            ],
+            'roles' => [
+                ['value' => 'all', 'label' => 'All Roles'],
+                ['value' => 'admin', 'label' => 'Admin'],
+                ['value' => 'customer', 'label' => 'Customer']
+            ],
+            'sort_options' => [
+                ['value' => 'full_name', 'label' => 'Name'],
+                ['value' => 'email', 'label' => 'Email'],
+                ['value' => 'created_at', 'label' => 'Created Date'],
+                ['value' => 'updated_at', 'label' => 'Updated Date'],
+                ['value' => 'last_login_at', 'label' => 'Last Login']
+            ]
+        ];
     }
 }
