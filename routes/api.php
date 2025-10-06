@@ -154,7 +154,7 @@
                     Route::get('menus/statistics', [AdminMenuController::class, 'getStatistics']);
                     Route::apiResource('menus', AdminMenuController::class);
                     Route::patch('menus/{id}/toggle-status', [AdminMenuController::class, 'toggleStatus']);
-                    Route::delete('menus/bulk-delete', [AdminMenuController::class, 'bulkDelete']);
+                    Route::patch('menus/bulk-delete', [AdminMenuController::class, 'bulkDelete']);
                     Route::patch('menus/bulk-update-status', [AdminMenuController::class, 'bulkUpdateStatus']);
                     Route::get('menus/search', [AdminMenuController::class, 'search']);
                     Route::post('menus/calculate-end-time', [AdminMenuController::class, 'calculateEndTime']);
@@ -164,7 +164,7 @@
                     // Tire Storage Management
                     Route::apiResource('storages', TireStorageController::class);
                     Route::patch('/storages/{id}/end', [TireStorageController::class, 'end']);
-                    Route::delete('/storages/bulk-delete', [TireStorageController::class, 'bulkDelete']);
+                    Route::patch('/storages/bulk-delete', [TireStorageController::class, 'bulkDelete']);
                     Route::patch('/storages/bulk-end', [TireStorageController::class, 'bulkEnd']);
 
 
@@ -191,7 +191,7 @@
                     // Route::apiResource('announcements', AnnouncementController::class);
                     Route::patch('announcements/{id}/toggle-status', [AnnouncementController::class, 'toggleStatus']);
                     Route::patch('announcements/bulk-toggle-status', [AnnouncementController::class, 'bulkToggleStatus']);
-                    Route::delete('announcements/bulk-delete', [AnnouncementController::class, 'bulkDelete']);
+                    Route::patch('announcements/bulk-delete', [AnnouncementController::class, 'bulkDelete']);
                     Route::patch('announcements/{id}', [AnnouncementController::class, 'update']);
 
 
@@ -220,7 +220,7 @@
                         Route::patch('/{id}', [ApiAdminContactController::class, 'update']);
                         Route::delete('/{id}', [ApiAdminContactController::class, 'destroy']);
                         Route::post('/{id}/reply', [ApiAdminContactController::class, 'reply']);
-                        Route::delete('/bulk-delete', [ApiAdminContactController::class, 'bulkDelete']);
+                        Route::patch('/bulk-delete', [ApiAdminContactController::class, 'bulkDelete']);
                         Route::post('/mark-as-replied', [ApiAdminContactController::class, 'markAsReplied']);
                     });
 
@@ -292,7 +292,7 @@
                         Route::get('/available-slots', [ApiAdminBlockedPeriodController::class, 'getAvailableSlots']);
                         Route::post('/batch-check-conflicts', [ApiAdminBlockedPeriodController::class, 'batchCheckConflicts']);
                         Route::post('/export', [ApiAdminBlockedPeriodController::class, 'export']);
-                        Route::delete('/bulk-delete', [ApiAdminBlockedPeriodController::class, 'bulkDelete']);
+                        Route::patch('/bulk-delete', [ApiAdminBlockedPeriodController::class, 'bulkDelete']);
                         Route::get('/{id}', [ApiAdminBlockedPeriodController::class, 'show']);
                         Route::patch('/{id}', [ApiAdminBlockedPeriodController::class, 'update']);
                         Route::delete('/{id}', [ApiAdminBlockedPeriodController::class, 'destroy']);
