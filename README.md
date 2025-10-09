@@ -1,61 +1,195 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# Tire Storage Reservation System
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+A comprehensive web application for managing tire storage reservations and services, built with Laravel. This system allows customers to book tire storage services online while providing administrators with powerful tools to manage reservations, customers, and business operations.
 
-## About Laravel Test Branch
+## 🚗 About
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+Tire Pro Service is a professional tire service provider located in Iruma-shi, Saitama, Japan. Our system offers a complete solution for tire storage management, including online booking, reservation management, customer communication, and administrative oversight.
 
--   [Simple, fast routing engine](https://laravel.com/docs/routing).
--   [Powerful dependency injection container](https://laravel.com/docs/container).
--   Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
--   Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
--   Database agnostic [schema migrations](https://laravel.com/docs/migrations).
--   [Robust background job processing](https://laravel.com/docs/queues).
--   [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+### Key Features
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+- **Customer Portal**
+  - Online tire storage booking
+  - Reservation management
+  - Service inquiry system
+  - Multi-language support (English/Japanese)
+  - Real-time availability checking
 
-## Learning Laravel
+- **Admin Dashboard**
+  - Complete reservation management
+  - Customer management
+  - Business settings configuration
+  - Tire storage inventory tracking
+  - Payment processing
+  - Announcement system
+  - FAQ management
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+- **API Integration**
+  - RESTful API for external integrations
+  - Public endpoints for business information
+  - Authenticated endpoints for customer operations
+  - Admin API for system management
 
-You may also try the [Laravel Bootcamp](https://bootcamp.laravel.com), where you will be guided through building a modern Laravel application from scratch.
+- **Multi-language Support**
+  - English and Japanese localization
+  - Automatic locale detection
+  - Localized content management
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+## 🛠️ Tech Stack
 
-## Laravel Sponsors
+- **Backend**: Laravel 12.0 (PHP 8.2+)
+- **Frontend**: Alpine.js, Tailwind CSS
+- **Database**: MySQL/PostgreSQL
+- **Build Tool**: Vite
+- **Authentication**: Laravel Sanctum
+- **File Storage**: AWS S3
+- **Email**: Laravel Mail
+- **Calendar**: Spatie iCalendar Generator
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+## 📋 Requirements
 
-### Premium Partners
+- PHP 8.2 or higher
+- Composer
+- Node.js & npm
+- MySQL/PostgreSQL database
+- AWS S3 (optional, for file storage)
 
--   **[Vehikl](https://vehikl.com)**
--   **[Tighten Co.](https://tighten.co)**
--   **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
--   **[64 Robots](https://64robots.com)**
--   **[Curotec](https://www.curotec.com/services/technologies/laravel)**
--   **[DevSquad](https://devsquad.com/hire-laravel-developers)**
--   **[Redberry](https://redberry.international/laravel-development)**
--   **[Active Logic](https://activelogic.com)**
+## 🚀 Installation
 
-## Contributing
+1. **Clone the repository**
+   ```bash
+   git clone <repository-url>
+   cd tires
+   ```
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+2. **Install PHP dependencies**
+   ```bash
+   composer install
+   ```
 
-## Code of Conduct
+3. **Install Node.js dependencies**
+   ```bash
+   npm install
+   ```
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+4. **Environment Configuration**
+   ```bash
+   cp .env.example .env
+   php artisan key:generate
+   ```
 
-## Security Vulnerabilities
+   Configure your `.env` file with:
+   - Database credentials
+   - Mail settings
+   - AWS S3 credentials (if using)
+   - App URL and locale settings
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+5. **Database Setup**
+   ```bash
+   php artisan migrate
+   php artisan db:seed
+   ```
 
-## License
+6. **Build Assets**
+   ```bash
+   npm run build
+   # or for development
+   npm run dev
+   ```
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+7. **Start the Application**
+   ```bash
+   php artisan serve
+   ```
+
+## 📖 Usage
+
+### For Customers
+
+1. **Browse Services**: Visit the homepage to view available tire storage services
+2. **Make a Reservation**: Select a service and follow the booking process
+3. **Manage Reservations**: Access your dashboard to view and manage bookings
+4. **Contact Support**: Use the inquiry form for questions or support
+
+### For Administrators
+
+1. **Access Admin Panel**: Navigate to `/admin` and login with admin credentials
+2. **Manage Reservations**: View, edit, and process customer reservations
+3. **Configure Business Settings**: Update business hours, contact info, and policies
+4. **Manage Content**: Create announcements, FAQs, and menu items
+
+## 🔗 API Documentation
+
+### Public Endpoints
+- Business settings and company information
+- Service menus and pricing
+- Contact form submission
+
+### Authenticated Endpoints
+- Customer reservation management
+- Tire storage operations
+- Profile management
+
+### Admin Endpoints
+- Full system management
+- User administration
+- Content management
+
+Detailed API documentation is available in:
+- `PUBLIC_API_ENDPOINTS.md`
+- `ADMIN_API_ENDPOINTS.md`
+- `RESERVATION_API_USAGE.md`
+
+## 🌐 Localization
+
+The application supports English and Japanese languages. Locale is automatically detected based on browser preferences or can be manually set via URL prefix (`/en/` or `/jp/`).
+
+## 📧 Email Notifications
+
+The system sends automated emails for:
+- Booking confirmations
+- Reservation updates
+- Admin notifications
+- Password resets
+
+## 🔒 Security Features
+
+- Laravel Sanctum for API authentication
+- CSRF protection
+- Input validation and sanitization
+- Role-based access control
+- Secure password hashing
+
+## 🧪 Testing
+
+Run the test suite:
+```bash
+php artisan test
+```
+
+## 🤝 Contributing
+
+1. Fork the repository
+2. Create a feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit your changes (`git commit -m 'Add amazing feature'`)
+4. Push to the branch (`git push origin feature/amazing-feature`)
+5. Open a Pull Request
+
+## 📝 License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+## 📞 Support
+
+For support and inquiries:
+- **Address**: 2095-8 Miyadera, Iruma-shi, Saitama 358-0014, Japan
+- **Phone**: 04-2937-5296
+- **Email**: Contact through the inquiry form
+
+## 🙏 Acknowledgments
+
+- Laravel Framework
+- Alpine.js
+- Tailwind CSS
+- Font Awesome
+- All contributors and supporters
