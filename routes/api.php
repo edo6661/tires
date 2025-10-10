@@ -152,10 +152,10 @@ Route::prefix('v1')
 
                 //  Menu Management
                 Route::get('menus/statistics', [AdminMenuController::class, 'getStatistics']);
-                Route::apiResource('menus', AdminMenuController::class);
-                Route::patch('menus/{id}/toggle-status', [AdminMenuController::class, 'toggleStatus']);
                 Route::patch('menus/bulk-delete', [AdminMenuController::class, 'bulkDelete']);
                 Route::patch('menus/bulk-update-status', [AdminMenuController::class, 'bulkUpdateStatus']);
+                Route::patch('menus/{id}/toggle-status', [AdminMenuController::class, 'toggleStatus']);
+                Route::apiResource('menus', AdminMenuController::class)->except(['update', 'store']);
                 Route::get('menus/search', [AdminMenuController::class, 'search']);
                 Route::post('menus/calculate-end-time', [AdminMenuController::class, 'calculateEndTime']);
                 Route::get('menus/{id}/available-slots', [AdminMenuController::class, 'getAvailableSlots']);

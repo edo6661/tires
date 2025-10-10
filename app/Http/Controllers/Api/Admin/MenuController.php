@@ -6,6 +6,8 @@ use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 use App\Http\Requests\MenuRequest;
+use App\Http\Requests\BulkDeleteMenuRequest;
+use App\Http\Requests\BulkUpdateStatusRequest;
 use Illuminate\Support\Facades\App;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\MenuResource;
@@ -442,9 +444,10 @@ class MenuController extends Controller
         }
     }
 
-    public function destroy(int $id): JsonResponse
+    public function destroy($id): JsonResponse
     {
         try {
+            $id = (int) $id;
             $deleted = $this->menuService->deleteMenu($id);
 
             if (!$deleted) {
@@ -745,11 +748,33 @@ class MenuController extends Controller
     public function bulkDelete(Request $request): JsonResponse
     {
         try {
-            $validated = $request->validate([
+            // Explicit validation for bulk delete to avoid MenuRequest validation
+            $validator = Validator::make($request->all(), [
                 'ids' => 'required|array',
                 'ids.*' => 'integer|exists:menus,id',
+            ], [
+                'ids.required' => 'The IDs field is required.',
+                'ids.array' => 'The IDs must be an array.',
+                'ids.*.integer' => 'Each ID must be an integer.',
+                'ids.*.exists' => 'One or more selected menus do not exist.',
             ]);
 
+            if ($validator->fails()) {
+                return $this->errorResponse(
+                    'Validation failed',
+                    422,
+                    collect($validator->errors())->map(function ($messages, $field) {
+                        return [
+                            'field' => $field,
+                            'tag' => 'validation_error',
+                            'value' => request($field),
+                            'message' => $messages[0]
+                        ];
+                    })->values()->toArray()
+                );
+            }
+
+            $validated = $validator->validated();
             $success = $this->menuService->bulkDeleteMenus($validated['ids']);
 
             if (!$success) {
@@ -803,12 +828,36 @@ class MenuController extends Controller
     public function bulkUpdateStatus(Request $request): JsonResponse
     {
         try {
-            $validated = $request->validate([
+            // Explicit validation for bulk update status to avoid MenuRequest validation
+            $validator = Validator::make($request->all(), [
                 'ids' => 'required|array',
                 'ids.*' => 'integer|exists:menus,id',
                 'status' => 'required|boolean'
+            ], [
+                'ids.required' => 'The IDs field is required.',
+                'ids.array' => 'The IDs must be an array.',
+                'ids.*.integer' => 'Each ID must be an integer.',
+                'ids.*.exists' => 'One or more selected menus do not exist.',
+                'status.required' => 'The status field is required.',
+                'status.boolean' => 'The status must be true or false.',
             ]);
 
+            if ($validator->fails()) {
+                return $this->errorResponse(
+                    'Validation failed',
+                    422,
+                    collect($validator->errors())->map(function ($messages, $field) {
+                        return [
+                            'field' => $field,
+                            'tag' => 'validation_error',
+                            'value' => request($field),
+                            'message' => $messages[0]
+                        ];
+                    })->values()->toArray()
+                );
+            }
+
+            $validated = $validator->validated();
             $updated = $this->menuService->bulkUpdateMenuStatus(
                 $validated['ids'],
                 $validated['status']
