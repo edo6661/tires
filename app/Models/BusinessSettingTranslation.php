@@ -13,6 +13,7 @@ class BusinessSettingTranslation extends Model
         'business_setting_id',
         'locale',
         'shop_name',
+        'address',
         'access_information',
         'site_name',
         'shop_description',

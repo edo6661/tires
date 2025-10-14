@@ -10,8 +10,8 @@ class BusinessSettingResource extends JsonResource
 {
     public function toArray(Request $request): array
     {
-        // Check for X-Locale header first, then fall back to App::getLocale()
-        $locale = $request->header('X-Locale') ?? App::getLocale();
+        // Prefer explicit locale param, then X-Locale header, then App::getLocale()
+        $locale = $request->input('locale') ?? $request->header('X-Locale') ?? App::getLocale();
 
         return [
             'id' => $this->id,

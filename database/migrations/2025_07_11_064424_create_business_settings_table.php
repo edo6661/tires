@@ -13,32 +13,14 @@ return new class extends Migration
     {
         Schema::create('business_settings', function (Blueprint $table) {
             $table->id();
-            $table->string('shop_name');
             $table->string('phone_number');
-            $table->text('address');
-            $table->text('access_information')->nullable();
             $table->json('business_hours'); // ini json bang
             $table->string('website_url')->nullable();
-            $table->string('site_name')->nullable();
-            $table->text('shop_description')->nullable();
             $table->string('top_image_path')->nullable();
             $table->boolean('site_public')->default(true);
             $table->string('reply_email')->nullable();
-            $table->text('terms_of_use')->nullable();
-            $table->text('privacy_policy')->nullable();
             $table->string('google_analytics_id')->nullable();
             $table->timestamps();
-        });
-        Schema::table('business_settings', function (Blueprint $table) {
-            $table->dropColumn([
-                'shop_name',
-                'access_information',
-                'site_name',
-                'shop_description',
-                'terms_of_use',
-                'privacy_policy',
-                'address'
-            ]);
         });
     }
 

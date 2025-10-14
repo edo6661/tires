@@ -21,4 +21,5 @@ interface CustomerRepositoryInterface
     public function getCustomerTireStorage(int $customerId, ?int $userId = null): Collection;
     public function getCustomerStats(int $customerId, ?int $userId = null): array;
     public function searchCustomers(string $search): Collection;
+    public function findGuestByReservationId(int $reservationId): ?array;
 }

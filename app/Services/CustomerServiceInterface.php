@@ -11,6 +11,7 @@ interface CustomerServiceInterface
     public function getCustomers(array $filters = [], int $perPage = 15): LengthAwarePaginator;
     public function getPaginatedCustomersWithCursor(int $perPage = 15, ?string $cursor = null, array $filters = []): CursorPaginator;
     public function getCustomerDetail(int $id): ?array;
+    public function getGuestCustomerDetail(int $reservationId): ?array;
     public function getFirstTimeCustomers(): Collection;
     public function getRepeatCustomers(): Collection;
     public function getDormantCustomers(): Collection;

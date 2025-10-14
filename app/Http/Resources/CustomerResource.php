@@ -23,8 +23,10 @@ class CustomerResource extends JsonResource
         $data = is_object($this->resource) ? $this->resource : (object) $this->resource;
 
         return [
-            'id' => $data->customer_id ?? $data->id ?? null,
-            'user_id' => $data->user_id ?? null,
+            'id' => isset($data->customer_id)
+                ? (string) $data->customer_id
+                : (isset($data->id) ? (string) $data->id : null),
+            'user_id' => isset($data->user_id) ? (string) $data->user_id : null,
             'email' => $data->email ?? null,
             'full_name' => $data->full_name ?? null,
             'full_name_kana' => $data->full_name_kana ?? null,

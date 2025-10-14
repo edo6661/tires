@@ -42,7 +42,7 @@ class BlockedPeriodResource extends JsonResource
             'status' => $this->getStatus(),
 
             // Translations (if applicable in the future)
-            'translations' => (object)[],
+            // 'translations' => $this->translations ?? (object)[],
 
             'meta' => [
                 'locale' => $locale,

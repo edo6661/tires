@@ -132,6 +132,15 @@ class CustomerRepository implements CustomerRepositoryInterface
         return $customer ? (array) $customer : null;
     }
 
+    public function findGuestByReservationId(int $reservationId): ?array
+    {
+        $customer = $this->buildCustomerQuery()
+            ->where('customer_id', 'guest_' . $reservationId)
+            ->first();
+
+        return $customer ? (array) $customer : null;
+    }
+
     public function getFirstTimeCustomers(): Collection
     {
         $firstTimeUserIds = $this->getFirstTimeCustomerUserIds();

@@ -24,9 +24,13 @@ class BusinessSettingController extends Controller
     /**
      * Display business settings
      */
-    public function index(): JsonResponse
+    public function index(Request $request): JsonResponse
     {
         try {
+            // Validate query parameters
+            $request->validate([
+                'locale' => 'sometimes|string|in:en,ja',
+            ]);
             $businessSettings = $this->businessSettingService->getBusinessSettings();
 
             if (!$businessSettings) {
@@ -70,6 +74,32 @@ class BusinessSettingController extends Controller
     {
         try {
             $data = $request->validated();
+
+            // Map translatable fields into translations payload for current locale
+            $locale = $request->input('locale') ?? $request->header('X-Locale') ?? app()->getLocale();
+            $translatableFields = [
+                'shop_name',
+                'address',
+                'access_information',
+                'site_name',
+                'shop_description',
+                'terms_of_use',
+                'privacy_policy',
+            ];
+
+            $translationPayload = [];
+            foreach ($translatableFields as $field) {
+                if (array_key_exists($field, $data)) {
+                    $translationPayload[$field] = $data[$field];
+                    unset($data[$field]); // Remove from base payload to avoid base table update
+                }
+            }
+
+            if (!empty($translationPayload)) {
+                $data['translations'] = [
+                    $locale => $translationPayload
+                ];
+            }
 
             // Process business hours
             if (isset($data['business_hours'])) {

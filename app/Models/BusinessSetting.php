@@ -1,15 +1,14 @@
 <?php
 namespace App\Models;
-use App\Traits\Translatable; 
+use App\Traits\Translatable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Storage;
 class BusinessSetting extends Model
 {
-    use HasFactory, Translatable; 
+    use HasFactory, Translatable;
     protected $fillable = [
         'phone_number',
-        'address',
         'business_hours',
         'website_url',
         'top_image_path',

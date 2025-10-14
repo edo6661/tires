@@ -108,10 +108,41 @@ class CustomerController extends Controller
     /**
      * Display the specified customer
      */
-    public function show(int $id): JsonResponse
+    public function show(string $id): JsonResponse
     {
         try {
-            $customerDetail = $this->customerService->getCustomerDetail($id);
+            // Accept either numeric user_id or synthetic id like "guest_{reservationId}"
+            // guest_ prefix explicitly selects guest record by reservation id, avoiding collision with registered user id
+            if (str_starts_with($id, 'guest_')) {
+                $reservationId = substr($id, 6);
+                if (!ctype_digit((string) $reservationId)) {
+                    return $this->errorResponse('Invalid guest id format', 422, [[
+                        'field' => 'id',
+                        'tag' => 'validation_error',
+                        'value' => $id,
+                        'message' => 'guest id must be in format guest_{numericReservationId}'
+                    ]]);
+                }
+                $customerDetail = $this->customerService->getGuestCustomerDetail((int)$reservationId);
+                if (!$customerDetail) {
+                    return $this->errorResponse('Customer not found', 404);
+                }
+                return $this->successResponse($customerDetail, 'Customer details retrieved successfully');
+            }
+
+            $parsedId = $id;
+            if (!ctype_digit((string) $parsedId)) {
+                return $this->errorResponse('Invalid customer id format', 422, [[
+                    'field' => 'id',
+                    'tag' => 'validation_error',
+                    'value' => $id,
+                    'message' => 'The id must be a numeric user id or a guest_{id} string'
+                ]]);
+            }
+
+            $numericId = (int) $parsedId;
+
+            $customerDetail = $this->customerService->getCustomerDetail($numericId);
 
             if (!$customerDetail) {
                 return $this->errorResponse('Customer not found', 404, [

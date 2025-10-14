@@ -48,6 +48,29 @@ class CustomerService implements CustomerServiceInterface
         ];
     }
 
+    public function getGuestCustomerDetail(int $reservationId): ?array
+    {
+        // Explicitly fetch guest by reservation id to avoid collision with registered user id
+        $customer = $this->customerRepository->findGuestByReservationId($reservationId);
+
+        if (!$customer) {
+            return null;
+        }
+
+        $userId = $customer['user_id'] ?? null;
+
+        $reservationHistory = $this->getCustomerReservationHistory($reservationId, $userId);
+        $tireStorage = $this->getCustomerTireStorage($reservationId, $userId);
+        $stats = $this->getCustomerStats($reservationId, $userId);
+
+        return [
+            'customer' => $customer,
+            'reservation_history' => $reservationHistory->toArray(),
+            'tire_storage' => $tireStorage->toArray(),
+            'stats' => $stats
+        ];
+    }
+
     public function getFirstTimeCustomers(): Collection
     {
         return $this->customerRepository->getFirstTimeCustomers();
