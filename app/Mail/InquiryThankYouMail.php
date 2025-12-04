@@ -4,12 +4,13 @@ namespace App\Mail;
 
 use App\Models\Contact; // Tambahkan ini
 use Illuminate\Bus\Queueable;
+use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Mail\Mailable;
 use Illuminate\Mail\Mailables\Content;
 use Illuminate\Mail\Mailables\Envelope;
 use Illuminate\Queue\SerializesModels;
 
-class InquiryThankYouMail extends Mailable
+class InquiryThankYouMail extends Mailable implements ShouldQueue
 {
     use Queueable, SerializesModels;
 

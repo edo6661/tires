@@ -1,0 +1,155 @@
+# Use Case Schema for "Sistem Manajemen Bengkel Ban"
+# Format: YAML (Simplified - Package/Category Level Only)
+# Hanya menampilkan struktur tingkat tinggi tanpa detail use case individual
+
+metadata:
+  project: "Sistem Manajemen Bengkel Ban"
+  version: "1.0"
+  locales: ["en","ja"]
+  generated_at: "2025-11-06"
+
+actors:
+  - id: admin
+    name: Administrator
+    description: "Admin sistem, akses penuh ke semua fitur manajemen"
+  - id: customer
+    name: Customer
+    description: "User terdaftar (registered) yang melakukan reservasi & storage"
+  - id: guest
+    name: Guest
+    description: "Pengguna tanpa akun yang bisa melihat konten dan mengirim inquiry / reservasi (guest)"
+
+# ADMIN - Package Categories (tanpa detail use cases)
+admin_packages:
+  - id: user_management
+    name: "Manajemen Pengguna"
+    usecase_count: 7
+
+  - id: menu_management
+    name: "Manajemen Menu/Layanan"
+    usecase_count: 9
+
+  - id: reservation_management
+    name: "Manajemen Reservasi"
+    usecase_count: 12
+
+  - id: customer_management
+    name: "Manajemen Customer"
+    usecase_count: 6
+
+  - id: storage_management
+    name: "Manajemen Penyimpanan Ban"
+    usecase_count: 6
+
+  - id: contact_management
+    name: "Manajemen Kontak/Inquiry"
+    usecase_count: 6
+
+  - id: business_settings
+    name: "Pengaturan Bisnis"
+    usecase_count: 5
+
+  - id: content_management
+    name: "Manajemen Konten"
+    usecase_count: 4
+
+  - id: payment_management
+    name: "Manajemen Pembayaran"
+    usecase_count: 4
+
+  - id: dashboard_reports
+    name: "Dashboard & Laporan"
+    usecase_count: 5
+
+# CUSTOMER - Package Categories (tanpa detail use cases)
+customer_packages:
+  - id: profile
+    name: "Profile Management"
+    usecase_count: 5
+
+  - id: customer_reservations
+    name: "Reservasi (Customer)"
+    usecase_count: 7
+
+  - id: questionnaires_customer
+    name: "Questionnaires (Customer)"
+    usecase_count: 3
+
+  - id: storage_customer
+    name: "Tire Storage (Customer)"
+    usecase_count: 6
+
+  - id: contact_customer
+    name: "Inquiry/Contact (Customer)"
+    usecase_count: 3
+
+  - id: customer_dashboard
+    name: "Dashboard & Stats (Customer)"
+    usecase_count: 2
+
+# GUEST - Package Categories (tanpa detail use cases)
+guest_packages:
+  - id: guest_view
+    name: "Guest - Public View"
+    usecase_count: 4
+
+# Summary Statistics
+summary:
+  total_actors: 3
+  admin_packages: 10
+  customer_packages: 6
+  guest_packages: 1
+  admin_usecases: 64
+  customer_usecases: 26
+  guest_usecases: 4
+  total_usecases: 94
+
+# PlantUML helper snippet (simplified - package level only)
+plantuml_snippet: |
+  @startuml
+  !theme plain
+  skinparam packageStyle rectangle
+
+  actor Administrator as Admin
+  actor Customer
+  actor Guest
+
+  rectangle "Admin Panel" {
+    package "Manajemen Pengguna" #LightBlue
+    package "Manajemen Menu/Layanan" #LightGreen
+    package "Manajemen Reservasi" #LightYellow
+    package "Manajemen Customer" #LightPink
+    package "Manajemen Penyimpanan Ban" #LightCyan
+    package "Manajemen Kontak/Inquiry" #Lavender
+    package "Pengaturan Bisnis" #LightGoldenRodYellow
+    package "Manajemen Konten" #MistyRose
+    package "Manajemen Pembayaran" #Honeydew
+    package "Dashboard & Laporan" #AliceBlue
+  }
+
+  rectangle "Customer Area" {
+    package "Profile Management" #LightBlue
+    package "Reservasi (Customer)" #LightYellow
+    package "Questionnaires" #LightGreen
+    package "Tire Storage" #LightCyan
+    package "Inquiry/Contact" #Lavender
+    package "Dashboard & Stats" #AliceBlue
+  }
+
+  rectangle "Public Area" {
+    package "Guest - Public View" #WhiteSmoke
+  }
+
+  Admin --> "Manajemen Pengguna"
+  Admin --> "Manajemen Menu/Layanan"
+  Admin --> "Manajemen Reservasi"
+  Customer --> "Profile Management"
+  Customer --> "Reservasi (Customer)"
+  Guest --> "Guest - Public View"
+
+  @enduml
+
+# Usage notes
+# - Skema ini hanya menampilkan kategori/package tanpa detail use case
+# - Untuk detail use case lengkap, lihat file USECASE_ADMIN.md, USECASE_CUSTOMER.md, USECASE_GUEST.md
+# - usecase_count menunjukkan jumlah use case dalam setiap kategori

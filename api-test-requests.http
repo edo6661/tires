@@ -1,0 +1,701 @@
+###############################################################################
+# API Test Requests - Sistem Manajemen Bengkel Ban
+# Format: REST Client (VS Code Extension)
+#
+# Install: REST Client extension by Huachao Mao
+# Usage: Click "Send Request" di atas setiap request
+###############################################################################
+
+# Variables
+@baseUrl = http://localhost:8000/api/v1
+@token = your_auth_token_here
+@locale = ja
+
+###############################################################################
+# 1. PUBLIC API (No Auth Required)
+###############################################################################
+
+### 1.1 Get Active Menus
+GET {{baseUrl}}/menus?locale={{locale}}
+Accept: application/json
+Accept-Language: {{locale}}
+
+### 1.2 Get Menu Detail
+GET {{baseUrl}}/menus/1?locale={{locale}}
+Accept: application/json
+
+### 1.3 Get Business Info
+GET {{baseUrl}}/business-info?locale={{locale}}
+Accept: application/json
+
+### 1.4 Get Business Hours
+GET {{baseUrl}}/business-hours
+Accept: application/json
+
+### 1.5 Get FAQs
+GET {{baseUrl}}/faqs?locale={{locale}}&category=general
+Accept: application/json
+
+### 1.6 Get Announcements
+GET {{baseUrl}}/announcements?locale={{locale}}
+Accept: application/json
+
+### 1.7 Submit Contact/Inquiry (Guest)
+POST {{baseUrl}}/contacts
+Content-Type: application/json
+
+{
+  "full_name": "Test User",
+  "email": "test@example.com",
+  "phone_number": "081234567890",
+  "subject": "Test Inquiry",
+  "message": "This is a test inquiry message"
+}
+
+### 1.8 Check Availability (Public)
+POST {{baseUrl}}/reservations/check-availability
+Content-Type: application/json
+
+{
+  "menu_id": 1,
+  "date": "2025-11-15",
+  "time": "10:00"
+}
+
+###############################################################################
+# 2. AUTHENTICATION API
+###############################################################################
+
+### 2.1 Register Customer
+# @name register
+POST {{baseUrl}}/auth/register
+Content-Type: application/json
+
+{
+  "full_name": "John Doe",
+  "full_name_kana": "ジョン・ドウ",
+  "email": "john.doe@example.com",
+  "phone_number": "081234567890",
+  "password": "password123",
+  "password_confirmation": "password123",
+  "gender": "male",
+  "date_of_birth": "1990-01-01",
+  "company_name": "PT Example",
+  "department": "IT",
+  "home_address": "Jl. Example No. 123",
+  "company_address": "Jl. Company No. 456"
+}
+
+### 2.2 Login
+# @name login
+POST {{baseUrl}}/auth/login
+Content-Type: application/json
+
+{
+  "email": "john.doe@example.com",
+  "password": "password123"
+}
+
+### 2.3 Logout
+POST {{baseUrl}}/auth/logout
+Authorization: Bearer {{token}}
+Accept: application/json
+
+### 2.4 Forgot Password
+POST {{baseUrl}}/auth/forgot-password
+Content-Type: application/json
+
+{
+  "email": "john.doe@example.com"
+}
+
+### 2.5 Reset Password
+POST {{baseUrl}}/auth/reset-password
+Content-Type: application/json
+
+{
+  "email": "john.doe@example.com",
+  "token": "reset_token_here",
+  "password": "newpassword123",
+  "password_confirmation": "newpassword123"
+}
+
+### 2.6 Verify Email
+GET {{baseUrl}}/auth/verify-email/1/hash_here
+Accept: application/json
+
+###############################################################################
+# 3. CUSTOMER API (Auth Required)
+###############################################################################
+
+### 3.1 Get Customer Profile
+GET {{baseUrl}}/customer/profile
+Authorization: Bearer {{token}}
+Accept: application/json
+
+### 3.2 Update Profile
+PUT {{baseUrl}}/customer/profile
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "full_name": "John Doe Updated",
+  "full_name_kana": "ジョン・ドウ",
+  "phone_number": "081234567890",
+  "company_name": "PT Example Baru",
+  "department": "Marketing",
+  "home_address": "Jl. Baru No. 789"
+}
+
+### 3.3 Change Password
+POST {{baseUrl}}/customer/change-password
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "current_password": "password123",
+  "password": "newpassword456",
+  "password_confirmation": "newpassword456"
+}
+
+### 3.4 Delete Account
+DELETE {{baseUrl}}/customer/account
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "password": "password123"
+}
+
+### 3.5 Get Customer Dashboard
+GET {{baseUrl}}/customer/dashboard
+Authorization: Bearer {{token}}
+Accept: application/json
+
+### 3.6 Get Customer Statistics
+GET {{baseUrl}}/customer/statistics
+Authorization: Bearer {{token}}
+Accept: application/json
+
+### 3.7 Get Reservations List
+GET {{baseUrl}}/customer/reservations?per_page=10&status=confirmed
+Authorization: Bearer {{token}}
+Accept: application/json
+
+### 3.8 Get Reservation Detail
+GET {{baseUrl}}/customer/reservations/1
+Authorization: Bearer {{token}}
+Accept: application/json
+
+### 3.9 Create Reservation
+POST {{baseUrl}}/customer/reservations
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "menu_id": 1,
+  "reservation_datetime": "2025-11-15 10:00:00",
+  "number_of_people": 1,
+  "notes": "Mohon siapkan ban cadangan"
+}
+
+### 3.10 Update Reservation
+PUT {{baseUrl}}/customer/reservations/1
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "reservation_datetime": "2025-11-15 14:00:00",
+  "number_of_people": 1,
+  "notes": "Catatan diupdate"
+}
+
+### 3.11 Cancel Reservation
+DELETE {{baseUrl}}/customer/reservations/1
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "cancellation_reason": "Berhalangan hadir"
+}
+
+### 3.12 Get Reservation History
+GET {{baseUrl}}/customer/reservations/history?start_date=2025-01-01&end_date=2025-12-31
+Authorization: Bearer {{token}}
+Accept: application/json
+
+### 3.13 Get Upcoming Reservations
+GET {{baseUrl}}/customer/reservations/upcoming
+Authorization: Bearer {{token}}
+Accept: application/json
+
+### 3.14 Get Questionnaires
+GET {{baseUrl}}/customer/questionnaires?locale={{locale}}
+Authorization: Bearer {{token}}
+Accept: application/json
+
+### 3.15 Submit Questionnaire Responses
+POST {{baseUrl}}/customer/reservations/1/questionnaire-responses
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "responses": [
+    {
+      "questionnaire_id": 1,
+      "response": "Jawaban pertanyaan 1"
+    },
+    {
+      "questionnaire_id": 2,
+      "response": "Jawaban pertanyaan 2"
+    }
+  ]
+}
+
+### 3.16 Get Tire Storage List
+GET {{baseUrl}}/customer/tire-storages?status=active
+Authorization: Bearer {{token}}
+Accept: application/json
+
+### 3.17 Get Tire Storage Detail
+GET {{baseUrl}}/customer/tire-storages/1
+Authorization: Bearer {{token}}
+Accept: application/json
+
+### 3.18 Create Tire Storage
+POST {{baseUrl}}/customer/tire-storages
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "tire_type": "Bridgestone",
+  "tire_size": "195/65R15",
+  "quantity": 4,
+  "storage_location": "A-12",
+  "start_date": "2025-11-01",
+  "notes": "Ban musim dingin"
+}
+
+### 3.19 Update Tire Storage
+PUT {{baseUrl}}/customer/tire-storages/1
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "tire_type": "Bridgestone",
+  "tire_size": "195/65R15",
+  "quantity": 4,
+  "notes": "Ban musim dingin - updated"
+}
+
+### 3.20 Complete Tire Storage
+PATCH {{baseUrl}}/customer/tire-storages/1/complete
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "end_date": "2025-11-30"
+}
+
+### 3.21 Delete Tire Storage
+DELETE {{baseUrl}}/customer/tire-storages/1
+Authorization: Bearer {{token}}
+Accept: application/json
+
+### 3.22 Get Customer Contacts
+GET {{baseUrl}}/customer/contacts?status=new
+Authorization: Bearer {{token}}
+Accept: application/json
+
+### 3.23 Get Contact Detail
+GET {{baseUrl}}/customer/contacts/1
+Authorization: Bearer {{token}}
+Accept: application/json
+
+### 3.24 Submit Contact (Customer)
+POST {{baseUrl}}/customer/contacts
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "subject": "Pertanyaan layanan",
+  "message": "Saya ingin bertanya tentang layanan penyimpanan ban"
+}
+
+###############################################################################
+# 4. ADMIN API (Admin Auth Required)
+###############################################################################
+
+### 4.1 Get All Users
+GET {{baseUrl}}/admin/users?per_page=15&role=customer
+Authorization: Bearer {{token}}
+Accept: application/json
+
+### 4.2 Get User Detail
+GET {{baseUrl}}/admin/users/1
+Authorization: Bearer {{token}}
+Accept: application/json
+
+### 4.3 Create User
+POST {{baseUrl}}/admin/users
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "full_name": "New User",
+  "full_name_kana": "ニューユーザー",
+  "email": "newuser@example.com",
+  "phone_number": "081234567890",
+  "password": "password123",
+  "role": "customer",
+  "gender": "male",
+  "date_of_birth": "1990-01-01"
+}
+
+### 4.4 Update User
+PUT {{baseUrl}}/admin/users/1
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "full_name": "Updated User Name",
+  "phone_number": "081987654321",
+  "role": "customer"
+}
+
+### 4.5 Delete User
+DELETE {{baseUrl}}/admin/users/1
+Authorization: Bearer {{token}}
+Accept: application/json
+
+### 4.6 Reset User Password
+PATCH {{baseUrl}}/admin/users/1/reset-password
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "new_password": "newpassword123",
+  "send_email": true
+}
+
+### 4.7 Get All Menus (Admin)
+GET {{baseUrl}}/admin/menus?is_active=true&locale={{locale}}
+Authorization: Bearer {{token}}
+Accept: application/json
+
+### 4.8 Create Menu
+POST {{baseUrl}}/admin/menus
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "required_time": 30,
+  "price": "150000.00",
+  "display_order": 1,
+  "is_active": true,
+  "color": "#FF5733",
+  "translations": {
+    "en": {
+      "name": "Tire Change",
+      "description": "Complete tire change service"
+    },
+    "ja": {
+      "name": "タイヤ交換",
+      "description": "完全なタイヤ交換サービス"
+    }
+  }
+}
+
+### 4.9 Update Menu
+PUT {{baseUrl}}/admin/menus/1
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "required_time": 45,
+  "price": "200000.00",
+  "is_active": true,
+  "translations": {
+    "en": {
+      "name": "Premium Tire Change",
+      "description": "Premium tire change service with inspection"
+    }
+  }
+}
+
+### 4.10 Delete Menu
+DELETE {{baseUrl}}/admin/menus/1
+Authorization: Bearer {{token}}
+Accept: application/json
+
+### 4.11 Toggle Menu Status
+PATCH {{baseUrl}}/admin/menus/1/toggle-status
+Authorization: Bearer {{token}}
+Accept: application/json
+
+### 4.12 Bulk Update Menu Status
+PATCH {{baseUrl}}/admin/menus/bulk-update-status
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "menu_ids": [1, 2, 3],
+  "is_active": false
+}
+
+### 4.13 Get Menu Statistics
+GET {{baseUrl}}/admin/menus/statistics
+Authorization: Bearer {{token}}
+Accept: application/json
+
+### 4.14 Get Reservations List (Admin)
+GET {{baseUrl}}/admin/reservations/list?status=pending&start_date=2025-11-01
+Authorization: Bearer {{token}}
+Accept: application/json
+
+### 4.15 Get Reservation Calendar
+GET {{baseUrl}}/admin/reservations/calendar?start=2025-11-01&end=2025-11-30&view=month
+Authorization: Bearer {{token}}
+Accept: application/json
+
+### 4.16 Create Reservation (Admin)
+POST {{baseUrl}}/admin/reservations
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "user_id": 1,
+  "menu_id": 1,
+  "reservation_datetime": "2025-11-15 10:00:00",
+  "amount": "150000.00",
+  "status": "confirmed",
+  "notes": "Created by admin"
+}
+
+### 4.17 Confirm Reservation
+PATCH {{baseUrl}}/admin/reservations/1/confirm
+Authorization: Bearer {{token}}
+Accept: application/json
+
+### 4.18 Cancel Reservation (Admin)
+PATCH {{baseUrl}}/admin/reservations/1/cancel
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "cancellation_reason": "Customer request",
+  "send_notification": true
+}
+
+### 4.19 Complete Reservation
+PATCH {{baseUrl}}/admin/reservations/1/complete
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "actual_end_time": "2025-11-15 10:35:00",
+  "service_notes": "Service completed successfully",
+  "payment_status": "paid"
+}
+
+### 4.20 Bulk Update Reservation Status
+PATCH {{baseUrl}}/admin/reservations/bulk/status
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "reservation_ids": [1, 2, 3],
+  "status": "confirmed",
+  "send_notification": true
+}
+
+### 4.21 Get Reservation Statistics
+GET {{baseUrl}}/admin/reservations/statistics
+Authorization: Bearer {{token}}
+Accept: application/json
+
+### 4.22 Export Reservations
+GET {{baseUrl}}/admin/reservations/export?format=csv&start_date=2025-01-01&end_date=2025-12-31
+Authorization: Bearer {{token}}
+Accept: application/json
+
+### 4.23 Get Customers List
+GET {{baseUrl}}/admin/customers?customer_type=repeat&search=john
+Authorization: Bearer {{token}}
+Accept: application/json
+
+### 4.24 Get Customer Detail
+GET {{baseUrl}}/admin/customers/1
+Authorization: Bearer {{token}}
+Accept: application/json
+
+### 4.25 Get Customer Statistics
+GET {{baseUrl}}/admin/customers/statistics
+Authorization: Bearer {{token}}
+Accept: application/json
+
+### 4.26 Get Storage List (Admin)
+GET {{baseUrl}}/admin/storages?status=active
+Authorization: Bearer {{token}}
+Accept: application/json
+
+### 4.27 Create Storage (Admin)
+POST {{baseUrl}}/admin/storages
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "user_id": 1,
+  "tire_type": "Bridgestone",
+  "tire_size": "195/65R15",
+  "quantity": 4,
+  "storage_location": "A-12"
+}
+
+### 4.28 End Storage
+PATCH {{baseUrl}}/admin/storages/1/end
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "end_date": "2025-11-30"
+}
+
+### 4.29 Get Contacts List (Admin)
+GET {{baseUrl}}/admin/contacts?status=new
+Authorization: Bearer {{token}}
+Accept: application/json
+
+### 4.30 Reply to Contact
+PATCH {{baseUrl}}/admin/contacts/1/reply
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "admin_reply": "Thank you for your inquiry. We will process your request immediately."
+}
+
+### 4.31 Update Contact Status
+PATCH {{baseUrl}}/admin/contacts/1/status
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "status": "resolved"
+}
+
+### 4.32 Get Business Settings
+GET {{baseUrl}}/admin/business-settings?locale={{locale}}
+Authorization: Bearer {{token}}
+Accept: application/json
+
+### 4.33 Update Business Settings
+PUT {{baseUrl}}/admin/business-settings
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "locale": "ja",
+  "phone_number": "04-2937-5296",
+  "shop_name": "タイヤプロ",
+  "address": "東京都新宿区...",
+  "website_url": "https://tirepro.co.jp",
+  "site_public": true,
+  "business_hours": {
+    "monday": {"open": "09:00", "close": "18:00"},
+    "tuesday": {"open": "09:00", "close": "18:00"},
+    "sunday": {"closed": true}
+  }
+}
+
+### 4.34 Get Admin Dashboard
+GET {{baseUrl}}/admin/dashboard
+Authorization: Bearer {{token}}
+Accept: application/json
+
+### 4.35 Get Today Statistics
+GET {{baseUrl}}/admin/dashboard/today
+Authorization: Bearer {{token}}
+Accept: application/json
+
+### 4.36 Get FAQs (Admin)
+GET {{baseUrl}}/admin/faqs?locale={{locale}}
+Authorization: Bearer {{token}}
+Accept: application/json
+
+### 4.37 Create FAQ
+POST {{baseUrl}}/admin/faqs
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "category": "general",
+  "display_order": 1,
+  "is_active": true,
+  "translations": {
+    "en": {
+      "question": "What are your business hours?",
+      "answer": "We are open Monday to Saturday, 9 AM to 6 PM"
+    },
+    "ja": {
+      "question": "営業時間は何時ですか？",
+      "answer": "月曜日から土曜日まで、午前9時から午後6時まで営業しています"
+    }
+  }
+}
+
+### 4.38 Get Blocked Periods
+GET {{baseUrl}}/admin/blocked-periods?start_date=2025-11-01&end_date=2025-11-30
+Authorization: Bearer {{token}}
+Accept: application/json
+
+### 4.39 Create Blocked Period
+POST {{baseUrl}}/admin/blocked-periods
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "start_datetime": "2025-12-25 00:00:00",
+  "end_datetime": "2025-12-25 23:59:59",
+  "menu_id": null,
+  "is_all_day": true,
+  "translations": {
+    "en": {
+      "reason": "Christmas Holiday"
+    },
+    "ja": {
+      "reason": "クリスマス休暇"
+    }
+  }
+}
+
+### 4.40 Get Announcements (Admin)
+GET {{baseUrl}}/admin/announcements?locale={{locale}}
+Authorization: Bearer {{token}}
+Accept: application/json
+
+### 4.41 Create Announcement
+POST {{baseUrl}}/admin/announcements
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "priority": "high",
+  "is_active": true,
+  "published_at": "2025-11-01 00:00:00",
+  "expires_at": "2025-11-30 23:59:59",
+  "translations": {
+    "en": {
+      "title": "Special Winter Promotion",
+      "content": "Get 20% off on all tire change services this winter!"
+    },
+    "ja": {
+      "title": "冬の特別プロモーション",
+      "content": "この冬、すべてのタイヤ交換サービスが20％オフ！"
+    }
+  }
+}
+
+###############################################################################
+# END OF API TEST REQUESTS
+###############################################################################

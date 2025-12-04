@@ -1,0 +1,184 @@
+╔══════════════════════════════════════════════════════════════════╗
+║          RAILWAY QUEUE WORKER - QUICK REFERENCE                  ║
+╚══════════════════════════════════════════════════════════════════╝
+
+┌──────────────────────────────────────────────────────────────────┐
+│ 🎯 DEPLOYMENT SETUP                                              │
+└──────────────────────────────────────────────────────────────────┘
+
+Service Name: tires-queue-worker
+Repository:   edo6661/tires
+Branch:       main
+
+Start Command:
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+php artisan queue:work redis --tries=3 --timeout=90 --sleep=3 --max-jobs=1000
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+┌──────────────────────────────────────────────────────────────────┐
+│ 🔴 CRITICAL ENVIRONMENT VARIABLES                                │
+└──────────────────────────────────────────────────────────────────┘
+
+QUEUE_CONNECTION=redis
+REDIS_CLIENT=predis
+REDIS_HOST=shortline.proxy.rlwy.net
+REDIS_PASSWORD=dEVvfZXxWxwtLvnNAyWyRVtNxCAQFRRa
+REDIS_PORT=43828
+REDIS_URL=redis://default:dEVvfZXxWxwtLvnNAyWyRVtNxCAQFRRa@shortline.proxy.rlwy.net:43828
+
+DB_CONNECTION=pgsql
+DB_HOST=postgres-a1yd.railway.internal
+DB_PORT=5432
+DB_DATABASE=railway
+DB_USERNAME=postgres
+DB_PASSWORD=DvvJcYHhEulFutMesujhhcKFXNueHZpO
+
+MAIL_MAILER=smtp
+MAIL_HOST=smtp.gmail.com
+MAIL_PORT=587
+MAIL_USERNAME=sifactory16@gmail.com
+MAIL_PASSWORD=gbls pamd bhyo syyu
+MAIL_FROM_ADDRESS=sifactory16@gmail.com
+
+┌──────────────────────────────────────────────────────────────────┐
+│ ✅ VERIFICATION CHECKLIST                                        │
+└──────────────────────────────────────────────────────────────────┘
+
+□ Service created & deployed
+□ Start command set correctly
+□ All env variables copied
+□ Worker running (check logs)
+□ No connection errors
+□ Test email sent successfully
+□ Website response < 500ms
+□ No lag when booking
+□ Queue length decreasing
+
+┌──────────────────────────────────────────────────────────────────┐
+│ 📊 MONITORING COMMANDS                                           │
+└──────────────────────────────────────────────────────────────────┘
+
+# View logs (Railway CLI)
+railway logs -s tires-queue-worker --tail 100
+
+# Check service status
+railway service -s tires-queue-worker
+
+# Restart service
+railway service restart tires-queue-worker
+
+# Check queue length (Redis CLI)
+redis-cli -h shortline.proxy.rlwy.net -p 43828 -a dEVvfZXxWxwtLvnNAyWyRVtNxCAQFRRa
+> LLEN queues:default
+
+# Check failed jobs (via Artisan)
+php artisan queue:failed
+
+# Retry failed jobs
+php artisan queue:retry all
+
+┌──────────────────────────────────────────────────────────────────┐
+│ 🔥 EXPECTED LOG OUTPUT                                           │
+└──────────────────────────────────────────────────────────────────┘
+
+✅ GOOD:
+[2025-12-04 12:00:00] Processing: App\Mail\BookingConfirmationMail
+[2025-12-04 12:00:01] Processed: App\Mail\BookingConfirmationMail
+[2025-12-04 12:00:02] Processing: App\Mail\AdminBookingNotificationMail
+[2025-12-04 12:00:03] Processed: App\Mail\AdminBookingNotificationMail
+
+❌ BAD:
+Connection refused [tcp://shortline.proxy.rlwy.net:43828]
+Failed: App\Mail\BookingConfirmationMail
+Class "Predis\Client" not found
+
+┌──────────────────────────────────────────────────────────────────┐
+│ 🐛 COMMON ISSUES & FIXES                                         │
+└──────────────────────────────────────────────────────────────────┘
+
+Issue: Worker not starting
+Fix:   Check start command, verify env vars, restart service
+
+Issue: Redis connection refused
+Fix:   Verify REDIS_* variables match web service
+
+Issue: Jobs not processing
+Fix:   Check queue connection, restart worker, check Redis
+
+Issue: Memory leak
+Fix:   Add --max-jobs=500 --max-time=3600 to start command
+
+Issue: Failed jobs accumulating
+Fix:   php artisan queue:retry all
+
+┌──────────────────────────────────────────────────────────────────┐
+│ 🎓 HORIZON (OPTIONAL)                                            │
+└──────────────────────────────────────────────────────────────────┘
+
+Install:
+  composer require laravel/horizon
+  php artisan horizon:install
+  php artisan migrate
+
+Start Command:
+  php artisan horizon
+
+Dashboard:
+  https://tire.fts.biz.id/horizon
+
+Benefits:
+  ✅ Real-time monitoring
+  ✅ Failed jobs dashboard
+  ✅ Job throughput metrics
+  ✅ Auto-retry configuration
+  ✅ Better performance
+
+┌──────────────────────────────────────────────────────────────────┐
+│ 📞 QUICK TROUBLESHOOT                                            │
+└──────────────────────────────────────────────────────────────────┘
+
+Website still laggy?
+→ Check if queue worker is actually running
+→ railway logs -s tires-queue-worker
+
+Emails not sending?
+→ Check MAIL_* environment variables
+→ Test: php artisan tinker → Mail::raw('test', fn($m) => $m->to('test@test.com'))
+
+Jobs stuck in queue?
+→ Check QUEUE_CONNECTION=redis
+→ Check REDIS_* credentials
+→ Restart queue worker
+
+Worker keeps crashing?
+→ Check memory limits
+→ Add --max-jobs=500 parameter
+→ Check for infinite loops in jobs
+
+┌──────────────────────────────────────────────────────────────────┐
+│ 📁 FILES CREATED                                                 │
+└──────────────────────────────────────────────────────────────────┘
+
+✅ .env.queue-worker          - Environment variables template
+✅ DEPLOY_QUEUE_WORKER.md     - Step-by-step deployment guide
+✅ RAILWAY_QUEUE_SETUP.md     - Complete queue setup documentation
+✅ Procfile                   - Multi-process configuration
+✅ railway.json               - Railway deployment config
+✅ THIS FILE                  - Quick reference card
+
+┌──────────────────────────────────────────────────────────────────┐
+│ 🚀 NEXT STEPS                                                    │
+└──────────────────────────────────────────────────────────────────┘
+
+1. Copy .env.queue-worker to Railway dashboard
+2. Set start command
+3. Deploy service
+4. Monitor logs
+5. Test booking on website
+6. Verify no lag!
+
+╔══════════════════════════════════════════════════════════════════╗
+║  Need help? Check DEPLOY_QUEUE_WORKER.md for detailed steps     ║
+╚══════════════════════════════════════════════════════════════════╝
+
+Last Updated: December 4, 2025
