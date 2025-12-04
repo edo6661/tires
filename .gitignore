@@ -4,6 +4,8 @@
 .env.backup
 .env.production
 .env.before.prod
+.env.queue-worker
+envcuy.txt
 .phpactor.json
 .phpunit.result.cache
 /.fleet
