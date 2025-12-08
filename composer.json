@@ -9,7 +9,7 @@
     ],
     "license": "MIT",
     "require": {
-        "php": "^8.2",
+        "php": "^8.4",
         "aws/aws-sdk-php": "^3.351",
         "dedoc/scramble": "^0.12.31",
         "laravel/framework": "^12.0",
