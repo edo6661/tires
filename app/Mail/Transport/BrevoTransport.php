@@ -7,6 +7,9 @@ use Brevo\Client\Configuration;
 use Brevo\Client\Model\SendSmtpEmail;
 use Brevo\Client\Model\SendSmtpEmailSender;
 use Brevo\Client\Model\SendSmtpEmailTo;
+use Brevo\Client\Model\SendSmtpEmailCc;
+use Brevo\Client\Model\SendSmtpEmailBcc;
+use Brevo\Client\Model\SendSmtpEmailReplyTo;
 use Brevo\Client\Model\SendSmtpEmailAttachment;
 use GuzzleHttp\Client;
 use Illuminate\Mail\SentMessage;
@@ -15,6 +18,7 @@ use Symfony\Component\Mailer\SentMessage as SymfonySentMessage;
 use Symfony\Component\Mailer\Transport\TransportInterface;
 use Symfony\Component\Mime\MessageConverter;
 use Symfony\Component\Mime\Email;
+use Illuminate\Support\Facades\Log;
 
 class BrevoTransport implements TransportInterface
 {
@@ -44,57 +48,57 @@ class BrevoTransport implements TransportInterface
 
     $sendSmtpEmail = new SendSmtpEmail();
 
-    // Set sender
+    // 1. Set Sender (From)
     $from = $email->getFrom()[0] ?? null;
     if ($from) {
       $sender = new SendSmtpEmailSender([
-        'name' => $from->getName(),
+        'name' => $from->getName() ?: $from->getAddress(), // Fix: Fallback ke email jika nama kosong
         'email' => $from->getAddress()
       ]);
       $sendSmtpEmail->setSender($sender);
     }
 
-    // Set recipients
+    // 2. Set Recipients (To) - INI PERBAIKAN UTAMA
     $toAddresses = [];
     foreach ($email->getTo() as $address) {
       $toAddresses[] = new SendSmtpEmailTo([
         'email' => $address->getAddress(),
-        'name' => $address->getName()
+        'name' => $address->getName() ?: $address->getAddress() // Fix: Fallback ke email
       ]);
     }
     $sendSmtpEmail->setTo($toAddresses);
 
-    // Set CC
+    // 3. Set CC
     if ($email->getCc()) {
       $ccAddresses = [];
       foreach ($email->getCc() as $address) {
-        $ccAddresses[] = [
+        $ccAddresses[] = new SendSmtpEmailCc([
           'email' => $address->getAddress(),
-          'name' => $address->getName()
-        ];
+          'name' => $address->getName() ?: $address->getAddress() // Fix: Fallback
+        ]);
       }
       $sendSmtpEmail->setCc($ccAddresses);
     }
 
-    // Set BCC
+    // 4. Set BCC
     if ($email->getBcc()) {
       $bccAddresses = [];
       foreach ($email->getBcc() as $address) {
-        $bccAddresses[] = [
+        $bccAddresses[] = new SendSmtpEmailBcc([
           'email' => $address->getAddress(),
-          'name' => $address->getName()
-        ];
+          'name' => $address->getName() ?: $address->getAddress() // Fix: Fallback
+        ]);
       }
       $sendSmtpEmail->setBcc($bccAddresses);
     }
 
-    // Set Reply-To
+    // 5. Set Reply-To
     if ($email->getReplyTo()) {
       $replyTo = $email->getReplyTo()[0];
-      $sendSmtpEmail->setReplyTo([
+      $sendSmtpEmail->setReplyTo(new SendSmtpEmailReplyTo([
         'email' => $replyTo->getAddress(),
-        'name' => $replyTo->getName()
-      ]);
+        'name' => $replyTo->getName() ?: $replyTo->getAddress() // Fix: Fallback
+      ]));
     }
 
     // Set subject
@@ -115,7 +119,7 @@ class BrevoTransport implements TransportInterface
       foreach ($email->getAttachments() as $attachment) {
         $attachments[] = new SendSmtpEmailAttachment([
           'content' => base64_encode($attachment->getBody()),
-          'name' => $attachment->getFilename() ?? $attachment->getName()
+          'name' => $attachment->getFilename() ?? 'attachment'
         ]);
       }
       $sendSmtpEmail->setAttachment($attachments);
@@ -123,20 +127,20 @@ class BrevoTransport implements TransportInterface
 
     // Send email via Brevo API
     try {
-      $result = $this->api->sendTransacEmail($sendSmtpEmail);
+      $this->api->sendTransacEmail($sendSmtpEmail);
 
-      // Create a sent message with the message ID from Brevo
-      // If no envelope provided, create one from the email addresses
+      // Create a sent message envelope
       if (!$envelope) {
         $envelope = new Envelope(
           $email->getFrom()[0] ?? throw new \Exception('No sender address found'),
-          $email->getTo()
+          array_merge($email->getTo(), $email->getCc(), $email->getBcc())
         );
       }
 
       return new SymfonySentMessage($message, $envelope);
     } catch (\Exception $e) {
-      \Illuminate\Support\Facades\Log::error('Brevo email send error: ' . $e->getMessage());
+      Log::error('Brevo email send error: ' . $e->getMessage());
+      // Penting: Throw ulang errornya biar masuk ke failed_jobs Laravel
       throw $e;
     }
   }
