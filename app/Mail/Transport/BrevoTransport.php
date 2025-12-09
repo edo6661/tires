@@ -10,6 +10,7 @@ use Brevo\Client\Model\SendSmtpEmailTo;
 use Brevo\Client\Model\SendSmtpEmailAttachment;
 use GuzzleHttp\Client;
 use Illuminate\Mail\SentMessage;
+use Symfony\Component\Mailer\Envelope;
 use Symfony\Component\Mailer\SentMessage as SymfonySentMessage;
 use Symfony\Component\Mailer\Transport\TransportInterface;
 use Symfony\Component\Mime\MessageConverter;
@@ -37,7 +38,7 @@ class BrevoTransport implements TransportInterface
   /**
    * {@inheritdoc}
    */
-  public function send(\Symfony\Component\Mime\RawMessage $message, \Symfony\Component\Mime\Address $envelope = null): ?SymfonySentMessage
+  public function send(\Symfony\Component\Mime\RawMessage $message, Envelope $envelope = null): ?SymfonySentMessage
   {
     $email = MessageConverter::toEmail($message);
 
@@ -125,9 +126,17 @@ class BrevoTransport implements TransportInterface
       $result = $this->api->sendTransacEmail($sendSmtpEmail);
 
       // Create a sent message with the message ID from Brevo
-      return new SymfonySentMessage($message, $envelope ?? $email->getFrom()[0]->getAddress());
+      // If no envelope provided, create one from the email addresses
+      if (!$envelope) {
+        $envelope = new Envelope(
+          $email->getFrom()[0] ?? throw new \Exception('No sender address found'),
+          $email->getTo()
+        );
+      }
+
+      return new SymfonySentMessage($message, $envelope);
     } catch (\Exception $e) {
-      \Log::error('Brevo email send error: ' . $e->getMessage());
+      \Illuminate\Support\Facades\Log::error('Brevo email send error: ' . $e->getMessage());
       throw $e;
     }
   }
