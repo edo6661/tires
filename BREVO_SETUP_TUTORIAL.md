@@ -1,20 +1,25 @@
-# 📧 Tutorial Lengkap Migrasi dari Resend ke Brevo
+# 📧 Tutorial Lengkap Migrasi dari Resend ke Brevo API
 
 ## 🎯 Apa yang Sudah Dilakukan
 
-Proyek ini telah dimigrasi dari **Resend** ke **Brevo** untuk layanan email transaksional. Berikut perubahan yang telah diterapkan:
+Proyek ini telah dimigrasi dari **Resend** ke **Brevo API** untuk layanan email transaksional. Berikut perubahan yang telah diterapkan:
 
 ### ✅ Perubahan File
 
-1. **`.env`** - Konfigurasi email diubah dari Resend API ke Brevo SMTP
-2. **`config/mail.php`** - Default mailer diubah dari `resend` ke `smtp`
-3. **`composer.json`** - Package `resend/resend-php` telah dihapus
+1. **`composer.json`** - Package `resend/resend-php` dihapus, ditambahkan `getbrevo/brevo-php`
+2. **`.env`** - Konfigurasi email diubah menggunakan Brevo API Key
+3. **`config/mail.php`** - Default mailer diubah ke `brevo` dengan custom transport
+4. **`config/services.php`** - Ditambahkan konfigurasi Brevo API
+5. **`app/Mail/Transport/BrevoTransport.php`** - Custom mail transport untuk Brevo API (BARU)
+6. **`app/Providers/BrevoMailServiceProvider.php`** - Service provider untuk register Brevo transport (BARU)
+7. **`bootstrap/providers.php`** - Register BrevoMailServiceProvider
 
 ### 📝 Catatan Penting
 
 - ✅ Semua **email templates** tetap kompatibel (tidak perlu diubah)
 - ✅ Semua **Listeners** tetap kompatibel (tidak perlu diubah)
 - ✅ Semua **Mailable classes** tetap kompatibel (tidak perlu diubah)
+- ✅ Menggunakan **Brevo API** (bukan SMTP) untuk performa lebih baik
 
 ---
 
@@ -34,26 +39,26 @@ Proyek ini telah dimigrasi dari **Resend** ke **Brevo** untuk layanan email tran
 
 ---
 
-### 2️⃣ Mendapatkan SMTP Credentials
+### 2️⃣ Mendapatkan API Key
 
 Setelah login ke dashboard Brevo:
 
 1. **Klik nama profil Anda** di pojok kanan atas
 2. **Pilih "SMTP & API"** dari menu dropdown
-   - URL langsung: https://app.brevo.com/settings/keys/smtp
+   - URL langsung: https://app.brevo.com/settings/keys/api
 
-3. **Di tab "SMTP"**, Anda akan melihat:
-   ```
-   SMTP Server: smtp-relay.brevo.com
-   Port: 587 (TLS) atau 465 (SSL)
-   Login: email-login-anda@example.com
-   SMTP Key: (klik "Create a new SMTP key" jika belum ada)
-   ```
+3. **Di tab "API Keys"**, Anda akan melihat daftar API keys atau bisa create baru
 
-4. **Generate SMTP Key baru**:
-   - Klik tombol **"Create a new SMTP key"**
+4. **Generate API Key baru** (jika belum punya):
+   - Klik tombol **"Create a new API key"** atau **"Generate a new API key"**
    - Beri nama key (contoh: "Laravel Production" atau "Tire Xchange App")
    - **Copy dan simpan key ini dengan aman** (hanya ditampilkan sekali!)
+   - Format key: `xkeysib-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx-xxxxxxxxxxxxxxxx`
+
+> **💡 PENTING:**
+> - API Key ini berbeda dengan SMTP Key!
+> - Gunakan API Key (bukan SMTP Key) untuk implementasi ini
+> - API Key memberikan performa lebih baik daripada SMTP
 
 ---
 
@@ -102,26 +107,24 @@ Value: v=DMARC1; p=none
 Buka file `.env` dan update bagian email:
 
 ```env
-# Konfigurasi Email - Brevo SMTP
-MAIL_MAILER=smtp
-MAIL_HOST=smtp-relay.brevo.com
-MAIL_PORT=587
-MAIL_USERNAME=your-brevo-login@example.com    # Login yang ada di dashboard SMTP
-MAIL_PASSWORD=your-brevo-smtp-key-here        # SMTP Key yang baru di-generate
-MAIL_ENCRYPTION=tls
-MAIL_FROM_ADDRESS=no-reply@tire.fts.biz.id
+# Konfigurasi Email - Brevo API
+MAIL_MAILER=brevo
+BREVO_API_KEY=key_kamu
+MAIL_FROM_ADDRESS=email_kamu
 MAIL_FROM_NAME="${APP_NAME}"
 ```
 
 **Penjelasan parameter:**
-- `MAIL_MAILER=smtp` - Menggunakan SMTP protocol
-- `MAIL_HOST=smtp-relay.brevo.com` - Server SMTP Brevo (fixed, jangan diubah)
-- `MAIL_PORT=587` - Port untuk TLS (alternatif: 465 untuk SSL, atau 2525)
-- `MAIL_USERNAME` - Email login SMTP dari dashboard Brevo
-- `MAIL_PASSWORD` - SMTP Key (bukan password akun Brevo!)
-- `MAIL_ENCRYPTION=tls` - Gunakan TLS encryption (atau `ssl` jika pakai port 465)
+- `MAIL_MAILER=brevo` - Menggunakan custom Brevo transport
+- `BREVO_API_KEY` - API Key dari dashboard Brevo (BUKAN SMTP Key!)
 - `MAIL_FROM_ADDRESS` - Alamat email pengirim (harus verified di Brevo)
 - `MAIL_FROM_NAME` - Nama pengirim yang muncul di inbox penerima
+
+> **🚀 Keuntungan menggunakan API vs SMTP:**
+> - ✅ Lebih cepat - No SMTP handshake overhead
+> - ✅ Lebih reliable - Direct HTTP/REST API calls
+> - ✅ Better error handling - Detailed error messages
+> - ✅ Advanced features - Batch sending, scheduling, templates, etc.
 
 ---
 
@@ -134,6 +137,57 @@ php artisan config:clear
 php artisan cache:clear
 php artisan queue:restart  # Jika pakai queue
 ```
+
+---
+
+### 6️⃣ Arsitektur Implementasi Brevo API
+
+Proyek ini menggunakan **Custom Mail Transport** untuk integrasi dengan Brevo API:
+
+#### File-file Penting:
+
+1. **`app/Mail/Transport/BrevoTransport.php`**
+   - Custom transport yang implement `TransportInterface`
+   - Menggunakan Brevo PHP SDK (`getbrevo/brevo-php`)
+   - Mengirim email via REST API endpoint `/smtp/email`
+
+2. **`app/Providers/BrevoMailServiceProvider.php`**
+   - Register custom transport `brevo` ke Laravel Mail Manager
+   - Inject API key dari config
+
+3. **`config/mail.php`**
+   - Konfigurasi mailer `brevo` dengan transport custom
+
+4. **`config/services.php`**
+   - Menyimpan Brevo API key configuration
+
+#### Cara Kerja:
+
+```
+Laravel Mailable
+      ↓
+Mail Facade
+      ↓
+BrevoTransport (Custom)
+      ↓
+Brevo PHP SDK
+      ↓
+Brevo API (HTTPS REST)
+      ↓
+Email Delivered ✅
+```
+
+#### Contoh Penggunaan di Code:
+
+```php
+// Sudah otomatis menggunakan Brevo transport
+Mail::to('user@example.com')->send(new BookingConfirmationMail($reservation));
+
+// Atau dengan queue (recommended)
+Mail::to('user@example.com')->queue(new BookingConfirmationMail($reservation));
+```
+
+Tidak perlu ubah code apapun di Mailable classes atau Listeners yang sudah ada!
 
 ---
 
@@ -231,16 +285,14 @@ https://www.brevo.com/pricing/
 
 ## 🐛 Troubleshooting
 
-### Problem: Email tidak terkirim / timeout
+### Problem: Email tidak terkirim / API error
 
 **Solusi:**
-1. Cek SMTP credentials di `.env` sudah benar
-2. Pastikan port 587 tidak diblock oleh firewall/hosting
-3. Coba gunakan port alternatif: 2525 atau 465
-4. Pastikan `MAIL_ENCRYPTION` sesuai port:
-   - Port 587 → `MAIL_ENCRYPTION=tls`
-   - Port 465 → `MAIL_ENCRYPTION=ssl`
-   - Port 2525 → `MAIL_ENCRYPTION=tls`
+1. Cek BREVO_API_KEY di `.env` sudah benar
+2. Pastikan menggunakan **API Key**, bukan SMTP Key
+3. Verifikasi sender email di dashboard Brevo
+4. Clear Laravel config: `php artisan config:clear`
+5. Cek log error: `storage/logs/laravel.log`
 
 ### Problem: Email masuk spam
 
@@ -251,13 +303,14 @@ https://www.brevo.com/pricing/
 4. Hindari kata-kata spammy di subject/content
 5. Test email score: https://www.mail-tester.com/
 
-### Problem: Authentication failed
+### Problem: Authentication failed / Invalid API key
 
 **Solusi:**
-1. Pastikan menggunakan **SMTP Key**, bukan password akun
-2. Generate SMTP Key baru jika lupa
-3. Cek username = email login di dashboard SMTP
-4. Clear Laravel config: `php artisan config:clear`
+1. Pastikan menggunakan **API Key** (format: `xkeysib-xxxxx-xxxxx`)
+2. Bukan SMTP Key atau password akun
+3. Generate API Key baru jika lupa
+4. Copy paste dengan hati-hati (no extra spaces)
+5. Clear Laravel config: `php artisan config:clear`
 
 ### Problem: Sender not verified
 
@@ -272,8 +325,16 @@ https://www.brevo.com/pricing/
 **Solusi:**
 1. Cek quota di dashboard: **Account** > **Plan**
 2. Upgrade plan jika perlu
-3. Implementasi queue untuk email: `implements ShouldQueue`
+3. Implementasi queue untuk email: `implements ShouldQueue` (sudah ada)
 4. Add delay antara email: `->later(now()->addSeconds(5))`
+
+### Problem: Custom Transport not found
+
+**Solusi:**
+1. Pastikan `BrevoMailServiceProvider` sudah registered di `bootstrap/providers.php`
+2. Run `composer dump-autoload`
+3. Clear cache: `php artisan config:clear` dan `php artisan cache:clear`
+4. Restart queue workers: `php artisan queue:restart`
 
 ---
 
@@ -327,19 +388,20 @@ https://www.brevo.com/pricing/
 
 ## 🎓 Quick Reference
 
-### Port Options:
-| Port | Encryption | Use Case         |
-| ---- | ---------- | ---------------- |
-| 587  | TLS        | ✅ Recommended    |
-| 465  | SSL        | Alternative      |
-| 2525 | TLS        | Jika 587 blocked |
+### API Key Format:
+```
+xkeysib-[64 character string]-[16 character string]
+```
 
 ### Important URLs:
 - **Dashboard**: https://app.brevo.com/
-- **SMTP Settings**: https://app.brevo.com/settings/keys/smtp
+- **API Keys**: https://app.brevo.com/settings/keys/api
+- **SMTP Settings** (untuk reference): https://app.brevo.com/settings/keys/smtp
 - **Senders**: https://app.brevo.com/settings/senders
 - **Statistics**: https://app.brevo.com/statistics/email
 - **Transaction Logs**: https://app.brevo.com/sms-campaign/transactional-email
+- **API Documentation**: https://developers.brevo.com/
+- **API Reference**: https://developers.brevo.com/reference
 
 ### Artisan Commands:
 ```bash
@@ -357,6 +419,16 @@ php artisan queue:work --verbose
 php artisan tinker
 ```
 
+### Testing Email via Tinker:
+```php
+php artisan tinker
+
+Mail::raw('Test email dari Brevo API', function ($message) {
+    $message->to('your-email@example.com')
+            ->subject('Test Email Brevo API');
+});
+```
+
 ---
 
 ## ✅ Checklist Setup
@@ -364,15 +436,17 @@ php artisan tinker
 Gunakan checklist ini untuk memastikan setup Brevo sudah lengkap:
 
 - [ ] Akun Brevo sudah dibuat dan verified
-- [ ] SMTP Key sudah di-generate
-- [ ] Login SMTP sudah dicopy
-- [ ] File `.env` sudah diupdate dengan credentials Brevo
+- [ ] API Key sudah di-generate (bukan SMTP Key!)
+- [ ] File `.env` sudah diupdate dengan `BREVO_API_KEY`
 - [ ] Sender email sudah ditambahkan di Brevo
-- [ ] Domain sudah diverifikasi (SPF, DKIM, DMARC)
-- [ ] Cache Laravel sudah di-clear
+- [ ] Domain sudah diverifikasi (SPF, DKIM, DMARC) - opsional tapi recommended
+- [ ] Cache Laravel sudah di-clear (`php artisan config:clear`)
+- [ ] Composer dependencies sudah diinstall (`composer install`)
+- [ ] Custom BrevoTransport sudah dibuat
+- [ ] BrevoMailServiceProvider sudah registered
 - [ ] Test email sudah berhasil terkirim
 - [ ] Email tidak masuk spam
-- [ ] Queue workers sudah running
+- [ ] Queue workers sudah running (`php artisan queue:work`)
 - [ ] Monitoring dashboard sudah dicek
 
 ---

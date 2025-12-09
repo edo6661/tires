@@ -12,6 +12,7 @@
         "php": "^8.4",
         "aws/aws-sdk-php": "^3.351",
         "dedoc/scramble": "^0.12.31",
+        "getbrevo/brevo-php": "^2.0",
         "laravel/framework": "^12.0",
         "laravel/sanctum": "^4.2",
         "laravel/tinker": "^2.10.1",
