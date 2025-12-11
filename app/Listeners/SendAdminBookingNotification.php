@@ -21,7 +21,7 @@ class SendAdminBookingNotification implements ShouldQueue
     {
         $reservation = $event->reservation;
         $adminEmail = env('MAIL_FROM_ADDRESS');
-        $ccTosend = ['dikayo05@via.tokyo.jp', 'miftafree3@gmail.com', 'yonandaputra05@gmail.com', '1122140110@global.ac.id'];
+        $ccTosend = ['dikayo05@via.tokyo.jp', 'miftafree3@gmail.com', 'yonandaputra05@gmail.com', '1122140110@global.ac.id', 'info@x-change.pro', 'ts.change2020@gmail.com'];
 
         try {
             Mail::to($adminEmail)
