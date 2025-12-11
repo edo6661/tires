@@ -21,18 +21,17 @@ class SendAdminBookingNotification implements ShouldQueue
     {
         $reservation = $event->reservation;
         $adminEmail = env('MAIL_FROM_ADDRESS');
-        $managerEmail = '6rfkluh4@anonaddy.com';
-        $bossEmail = 'dikayo@via.tokyo.jp';
+        $ccEmails = config('mail.cc');
 
         try {
             Mail::to($adminEmail)
-                ->cc([$managerEmail, $bossEmail])
+                ->cc($ccEmails)
                 ->send(new AdminBookingNotificationMail($reservation));
 
             Log::info('Admin booking notification email sent successfully', [
                 'reservation_id' => $reservation->id,
                 'admin_email' => $adminEmail,
-                'cc_emails' => [$managerEmail, $bossEmail]
+                'cc_emails' => $ccEmails
             ]);
         } catch (\Exception $e) {
             Log::error('Failed to send admin booking notification email', [
