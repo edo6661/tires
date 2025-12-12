@@ -115,4 +115,15 @@ return [
         'name' => env('MAIL_FROM_NAME', 'Example'),
     ],
 
+    /*
+    |--------------------------------------------------------------------------
+    | Admin CC Emails
+    |--------------------------------------------------------------------------
+    |
+    | Emails to CC for all admin notifications.
+    |
+    */
+
+    'cc' => array_filter(explode(',', env('ADMIN_CC_EMAILS', ''))),
+
 ];
