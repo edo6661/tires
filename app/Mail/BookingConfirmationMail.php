@@ -4,14 +4,13 @@ namespace App\Mail;
 
 use App\Models\Reservation;
 use Illuminate\Bus\Queueable;
-use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Mail\Mailable;
 use Illuminate\Mail\Mailables\Content;
 use Illuminate\Mail\Mailables\Envelope;
 use Illuminate\Mail\Mailables\Attachment; // Import kelas Attachment
 use Illuminate\Queue\SerializesModels;
 
-class BookingConfirmationMail extends Mailable implements ShouldQueue
+class BookingConfirmationMail extends Mailable
 {
     use Queueable, SerializesModels;
 
@@ -64,7 +63,7 @@ class BookingConfirmationMail extends Mailable implements ShouldQueue
     {
         if ($this->icalData) {
             return [
-                Attachment::fromData(fn () => $this->icalData, 'invite.ics')
+                Attachment::fromData(fn() => $this->icalData, 'invite.ics')
                     ->withMime('text/calendar;charset=UTF-8;method=REQUEST'),
             ];
         }
