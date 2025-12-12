@@ -23,6 +23,8 @@ return [
     'duration_unit' => 'minutes',
 
     // Next Steps & Help
+    'check_spam_title' => 'Important: Check Your Email',
+    'check_spam_message' => 'Please check your spam/junk folder if you don\'t receive the confirmation email within a few minutes. Sometimes our emails might be filtered there.',
     'whats_next_title' => "What's Next?",
     'whats_next_items' => [
         'email_sent' => 'A confirmation email has been sent to your email address',
@@ -36,7 +38,7 @@ return [
         'email' => 'Email: support@reserva.com',
         'hours' => 'Business Hours: 9:00 AM - 6:00 PM (Mon-Fri)',
     ],
-    
+
     // Actions
     'action_view_reservations' => 'View My Reservations',
     'action_back_home' => 'Back to Home',

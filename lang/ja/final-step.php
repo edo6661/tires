@@ -23,6 +23,8 @@ return [
     'duration_unit' => '分',
 
     // Next Steps & Help
+    'check_spam_title' => '重要：メールをご確認ください',
+    'check_spam_message' => '数分以内に確認メールが届かない場合は、迷惑メール/スパムフォルダをご確認ください。メールがフィルタリングされている可能性があります。',
     'whats_next_title' => '今後の流れ',
     'whats_next_items' => [
         'email_sent' => 'ご登録のメールアドレスに確認メールを送信しました',
@@ -36,7 +38,7 @@ return [
         'email' => 'メール: support@reserva.com',
         'hours' => '営業時間: 9:00 - 18:00 (月-金)',
     ],
-    
+
     // Actions
     'action_view_reservations' => 'マイページで予約を確認',
     'action_back_home' => 'ホームに戻る',

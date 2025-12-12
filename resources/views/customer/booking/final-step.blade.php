@@ -17,7 +17,10 @@
                     </div>
                 </div>
 
-                <div x-show="!loading && bookingSuccess" class="space-y-6" x-transition:enter="transition ease-out duration-500" x-transition:enter-start="opacity-0 translate-y-4" x-transition:enter-end="opacity-100 translate-y-0">
+                <div x-show="!loading && bookingSuccess" class="space-y-6"
+                    x-transition:enter="transition ease-out duration-500"
+                    x-transition:enter-start="opacity-0 translate-y-4"
+                    x-transition:enter-end="opacity-100 translate-y-0">
                     <div class="bg-green-50 border border-green-200 rounded-lg p-4">
                         <div class="flex items-center justify-center">
                             <i class="fas fa-receipt text-green-600 mr-2"></i>
@@ -29,25 +32,66 @@
                     </div>
 
                     <div class="bg-sub rounded-lg p-6 text-left">
-                        <h2 class="text-heading-lg font-semibold text-main-text mb-4 text-center">{{ __('final-step.details_title') }}</h2>
+                        <h2 class="text-heading-lg font-semibold text-main-text mb-4 text-center">
+                            {{ __('final-step.details_title') }}</h2>
                         <div class="grid md:grid-cols-2 gap-6">
                             <div class="space-y-3">
-                                <h3 class="font-medium text-main-text border-b border-disabled pb-2 text-heading-md">{{ __('final-step.service_info_title') }}</h3>
+                                <h3 class="font-medium text-main-text border-b border-disabled pb-2 text-heading-md">
+                                    {{ __('final-step.service_info_title') }}</h3>
                                 <div class="space-y-2 text-body-md">
-                                    <div class="flex justify-between p-1"><span class="text-main-text/70">{{ __('final-step.labels.service') }}</span><span class="font-medium text-main-text text-right" x-text="finalBookingData.serviceName"></span></div>
-                                    <div class="flex justify-between p-1"><span class="text-main-text/70">{{ __('final-step.labels.date') }}</span><span class="font-medium text-main-text" x-text="formatBookingDate()"></span></div>
-                                    <div class="flex justify-between p-1"><span class="text-main-text/70">{{ __('final-step.labels.time') }}</span><span class="font-medium text-main-text" x-text="finalBookingData.time"></span></div>
-                                    <div class="flex justify-between p-1"><span class="text-main-text/70">{{ __('final-step.labels.duration') }}</span><span class="font-medium text-main-text" x-text="finalBookingData.duration + ' ' + translations.duration_unit"></span></div>
+                                    <div class="flex justify-between p-1"><span
+                                            class="text-main-text/70">{{ __('final-step.labels.service') }}</span><span
+                                            class="font-medium text-main-text text-right"
+                                            x-text="finalBookingData.serviceName"></span></div>
+                                    <div class="flex justify-between p-1"><span
+                                            class="text-main-text/70">{{ __('final-step.labels.date') }}</span><span
+                                            class="font-medium text-main-text" x-text="formatBookingDate()"></span>
+                                    </div>
+                                    <div class="flex justify-between p-1"><span
+                                            class="text-main-text/70">{{ __('final-step.labels.time') }}</span><span
+                                            class="font-medium text-main-text" x-text="finalBookingData.time"></span>
+                                    </div>
+                                    <div class="flex justify-between p-1"><span
+                                            class="text-main-text/70">{{ __('final-step.labels.duration') }}</span><span
+                                            class="font-medium text-main-text"
+                                            x-text="finalBookingData.duration + ' ' + translations.duration_unit"></span>
+                                    </div>
                                 </div>
                             </div>
                             <div class="space-y-3">
-                                <h3 class="font-medium text-main-text border-b border-disabled pb-2 text-heading-md">{{ __('final-step.customer_info_title') }}</h3>
+                                <h3 class="font-medium text-main-text border-b border-disabled pb-2 text-heading-md">
+                                    {{ __('final-step.customer_info_title') }}</h3>
                                 <div class="space-y-2 text-body-md">
-                                    <div class="flex justify-between p-1"><span class="text-main-text/70">{{ __('final-step.labels.name') }}</span><span class="font-medium text-main-text text-right" x-text="getCustomerName()"></span></div>
-                                    <div class="flex justify-between p-1"><span class="text-main-text/70">{{ __('final-step.labels.email') }}</span><span class="font-medium text-main-text text-right" x-text="getCustomerEmail()"></span></div>
-                                    <div class="flex justify-between p-1"><span class="text-main-text/70">{{ __('final-step.labels.phone') }}</span><span class="font-medium text-main-text" x-text="getCustomerPhone()"></span></div>
-                                    <div class="flex justify-between p-1"><span class="text-main-text/70">{{ __('final-step.labels.status') }}</span><span class="px-2 py-1 bg-brand/10 text-brand text-body-md rounded-full">{{ __('final-step.booking_status_pending') }}</span></div>
+                                    <div class="flex justify-between p-1"><span
+                                            class="text-main-text/70">{{ __('final-step.labels.name') }}</span><span
+                                            class="font-medium text-main-text text-right"
+                                            x-text="getCustomerName()"></span></div>
+                                    <div class="flex justify-between p-1"><span
+                                            class="text-main-text/70">{{ __('final-step.labels.email') }}</span><span
+                                            class="font-medium text-main-text text-right"
+                                            x-text="getCustomerEmail()"></span></div>
+                                    <div class="flex justify-between p-1"><span
+                                            class="text-main-text/70">{{ __('final-step.labels.phone') }}</span><span
+                                            class="font-medium text-main-text" x-text="getCustomerPhone()"></span></div>
+                                    <div class="flex justify-between p-1"><span
+                                            class="text-main-text/70">{{ __('final-step.labels.status') }}</span><span
+                                            class="px-2 py-1 bg-brand/10 text-brand text-body-md rounded-full">{{ __('final-step.booking_status_pending') }}</span>
+                                    </div>
                                 </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="bg-yellow-50 border-2 border-yellow-400 rounded-lg p-5 text-left mb-4">
+                        <div class="flex items-start">
+                            <div class="flex-shrink-0">
+                                <i class="fas fa-exclamation-triangle text-yellow-600 text-xl"></i>
+                            </div>
+                            <div class="ml-3">
+                                <h3 class="text-heading-lg font-bold text-yellow-800 mb-2">
+                                    {{ __('final-step.check_spam_title') }}</h3>
+                                <p class="text-body-lg text-yellow-900 leading-relaxed">
+                                    {{ __('final-step.check_spam_message') }}</p>
                             </div>
                         </div>
                     </div>
@@ -56,13 +100,14 @@
                         <div class="flex">
                             <div class="flex-shrink-0"><i class="fas fa-info-circle text-brand"></i></div>
                             <div class="ml-3">
-                                <h3 class="text-heading-md font-medium text-brand">{{ __("final-step.whats_next_title") }}</h3>
+                                <h3 class="text-heading-md font-medium text-brand">
+                                    {{ __('final-step.whats_next_title') }}</h3>
                                 <div class="mt-2 text-body-md text-main-text/80">
                                     <ul class="list-disc list-inside space-y-1">
-                                        <li>{{ __("final-step.whats_next_items.email_sent") }}</li>
-                                        <li>{{ __("final-step.whats_next_items.arrive_early") }}</li>
-                                        <li>{{ __("final-step.whats_next_items.bring_id") }}</li>
-                                        <li>{{ __("final-step.whats_next_items.contact_for_changes") }}</li>
+                                        <li>{{ __('final-step.whats_next_items.email_sent') }}</li>
+                                        <li>{{ __('final-step.whats_next_items.arrive_early') }}</li>
+                                        <li>{{ __('final-step.whats_next_items.bring_id') }}</li>
+                                        <li>{{ __('final-step.whats_next_items.contact_for_changes') }}</li>
                                     </ul>
                                 </div>
                             </div>
@@ -71,14 +116,16 @@
 
                     <div class="flex flex-col sm:flex-row gap-4 justify-center pt-6">
                         @auth
-                        <a href="{{ route('customer.reservation.index') }}" class="px-6 py-2 bg-brand hover:bg-link-hover text-white rounded-lg font-medium transition-all duration-300 text-center">
-                            <i class="fas fa-calendar-alt mr-2"></i>
-                            {{ __("final-step.action_view_reservations") }}
-                        </a>
+                            <a href="{{ route('customer.reservation.index') }}"
+                                class="px-6 py-2 bg-brand hover:bg-link-hover text-white rounded-lg font-medium transition-all duration-300 text-center">
+                                <i class="fas fa-calendar-alt mr-2"></i>
+                                {{ __('final-step.action_view_reservations') }}
+                            </a>
                         @endauth
-                        <a href="{{ route('home') }}" class="px-6 py-2 bg-main-button hover:bg-btn-main-hover text-white rounded-lg font-medium transition-all duration-300 text-center">
+                        <a href="{{ route('home') }}"
+                            class="px-6 py-2 bg-main-button hover:bg-btn-main-hover text-white rounded-lg font-medium transition-all duration-300 text-center">
                             <i class="fas fa-home mr-2"></i>
-                            {{ __("final-step.action_back_home") }}
+                            {{ __('final-step.action_back_home') }}
                         </a>
                     </div>
                 </div>
@@ -126,7 +173,7 @@
                     const storedData = sessionStorage.getItem('finalBookingData');
                     if (!storedData) {
                         this.loading = false;
-                        window.location.href = '{{ route("home") }}';
+                        window.location.href = '{{ route('home') }}';
                         return;
                     }
                     this.finalBookingData = JSON.parse(storedData);
@@ -138,8 +185,8 @@
                         const bookingPayload = {
                             menu_id: this.finalBookingData.menuId,
                             reservation_datetime: this.finalBookingData.datetime,
-                            number_of_people: 1, 
-                            amount: 0, 
+                            number_of_people: 1,
+                            amount: 0,
                             status: 'pending',
                             notes: 'Booking via website',
 
@@ -149,41 +196,42 @@
                             email: this.finalBookingData.guestInfo?.email || '',
                             phone_number: this.finalBookingData.guestInfo?.phone_number || '',
                             customer_type: 'guest',
-                            @else
+                        @else
                             user_id: {{ auth()->id() ?? 'null' }},
                             customer_type: 'existing',
-                            @endguest
-                        };
+                        @endguest
+                    };
 
-                        const response = await fetch('{{ route("booking.create-reservation") }}', {
-                            method: 'POST',
-                            headers: {
-                                'Content-Type': 'application/json',
-                                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '',
-                                'Accept': 'application/json',
-                            },
-                            body: JSON.stringify(bookingPayload)
-                        });
+                    const response = await fetch('{{ route('booking.create-reservation') }}', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute(
+                                'content') || '',
+                            'Accept': 'application/json',
+                        },
+                        body: JSON.stringify(bookingPayload)
+                    });
 
-                        const result = await response.json();
+                    const result = await response.json();
 
-                        if (response.ok && result.success) {
-                            this.bookingSuccess = true;
-                            this.reservationNumber = result.reservation_number || this.generateReservationNumber();
-                            sessionStorage.clear(); // Hapus semua data sesi booking
-                        } else {
-                            throw new Error(result.message || this.translations.error_generic);
-                        }
-                    } catch (error) {
-                        console.error('Booking failed:', error);
-                        this.bookingSuccess = false;
-                        this.errorMessage = error.message || this.translations.error_generic;
-                    } finally {
-                        this.loading = false;
+                    if (response.ok && result.success) {
+                        this.bookingSuccess = true;
+                        this.reservationNumber = result.reservation_number || this.generateReservationNumber();
+                        sessionStorage.clear(); // Hapus semua data sesi booking
+                    } else {
+                        throw new Error(result.message || this.translations.error_generic);
                     }
-                },
-                
-                generateReservationNumber() {
+                } catch (error) {
+                    console.error('Booking failed:', error);
+                    this.bookingSuccess = false;
+                    this.errorMessage = error.message || this.translations.error_generic;
+                } finally {
+                    this.loading = false;
+                }
+            },
+
+            generateReservationNumber() {
                     // Fallback jika API tidak mengembalikan nomor reservasi
                     const now = new Date();
                     const year = now.getFullYear();
@@ -197,27 +245,42 @@
                     if (!this.finalBookingData.date) return '';
                     const date = new Date(this.finalBookingData.date + 'T00:00:00');
                     return date.toLocaleDateString(this.translations.date_locale, {
-                        weekday: 'long', year: 'numeric', month: 'long', day: 'numeric'
+                        weekday: 'long',
+                        year: 'numeric',
+                        month: 'long',
+                        day: 'numeric'
                     });
                 },
 
                 getCustomerName() {
-                    @auth return '{{ auth()->user()->full_name ?? '' }}'; @else return this.finalBookingData.guestInfo?.full_name || ''; @endauth
-                },
-                getCustomerEmail() {
-                     @auth return '{{ auth()->user()->email ?? '' }}'; @else return this.finalBookingData.guestInfo?.email || ''; @endauth
-                },
-                getCustomerPhone() {
-                     @auth return '{{ auth()->user()->phone_number ?? '' }}'; @else return this.finalBookingData.guestInfo?.phone_number || ''; @endauth
-                },
+                    @auth
+                    return '{{ auth()->user()->full_name ?? '' }}';
+                @else
+                    return this.finalBookingData.guestInfo?.full_name || '';
+                @endauth
+        },
+        getCustomerEmail() {
+            @auth
+            return '{{ auth()->user()->email ?? '' }}';
+        @else
+            return this.finalBookingData.guestInfo?.email || '';
+        @endauth
+        },
+        getCustomerPhone() {
+            @auth
+            return '{{ auth()->user()->phone_number ?? '' }}';
+        @else
+            return this.finalBookingData.guestInfo?.phone_number || '';
+        @endauth
+        },
 
-                async retryBooking() {
-                    this.loading = true;
-                    this.bookingSuccess = false;
-                    this.errorMessage = '';
-                    await this.processBooking();
-                }
-            }
+        async retryBooking() {
+            this.loading = true;
+            this.bookingSuccess = false;
+            this.errorMessage = '';
+            await this.processBooking();
+        }
+        }
         }
     </script>
 </x-layouts.app>
