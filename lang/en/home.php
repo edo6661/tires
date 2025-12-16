@@ -8,6 +8,7 @@ return [
     'view_details' => 'View Details',
 
     // Sidebar
+    'shop_name' => 'Shop Name',
     'location' => 'Location',
     'business_hours' => 'Business Hours',
     'phone' => 'Phone',

@@ -7,6 +7,12 @@
         <div class="grid md:grid-cols-[250px_1fr] gap-10">
             <aside class="sm:sticky top-8 self-start text-main-text md:border-r md:border-disabled/50 md:pr-6 space-y-8">
                 <div>
+                    <p class="text-heading-md font-semibold mb-2 text-brand">{{ __('home.shop_name') }}</p>
+                    @if ($businessSettings && $businessSettings->shop_name)
+                        <p class="text-title-md font-bold text-brand">{{ $businessSettings->shop_name }}</p>
+                    @endif
+                </div>
+                <div>
                     <p class="text-heading-md font-semibold mb-2 text-brand">{{ __('home.location') }}</p>
                     @if ($businessSettings && $businessSettings->address)
                         <p class="text-body-md">{{ $businessSettings->address }}</p>

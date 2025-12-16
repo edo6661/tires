@@ -1,4 +1,5 @@
 <?php
+
 namespace Database\Seeders;
 
 use App\Models\BusinessSetting;
@@ -36,19 +37,19 @@ class BusinessSettingSeeder extends Seeder
 
             $translations = [
                 'en' => [
-                    'shop_name' => 'Tire Pro Service',
+                    'shop_name' => 'Tire Exchange',
                     'access_information' => 'Near Iruma Miyadera, about 5 minutes by car from Iruma IC.',
                     'address' => '2095-8 Miyadera, Iruma-shi, Saitama 358-0014, Japan', // diganti baru
-                    'site_name' => 'Tire Pro Service',
+                    'site_name' => 'Tire Exchange',
                     'shop_description' => 'We are a professional tire service provider with over 10 years of experience.',
                     'terms_of_use' => 'By using our services, you agree to comply with the applicable terms and conditions.',
                     'privacy_policy' => 'We respect your privacy and are committed to protecting the personal information you provide to us.',
                 ],
                 'ja' => [
-                    'shop_name' => 'タイヤプロサービス',
+                    'shop_name' => 'タイヤエクスチェンジ',
                     'address' => '〒358-0014 埼玉県入間市宮寺2095-8', // diganti baru
                     'access_information' => '入間市宮寺の近く、入間ICから車で約5分です。',
-                    'site_name' => 'タイヤプロサービス',
+                    'site_name' => 'タイヤエクスチェンジ',
                     'shop_description' => '私たちは10年以上の経験を持つプロのタイヤサービスプロバイダーです。',
                     'terms_of_use' => '当社のサービスをご利用になることにより、適用される利用規約に従うことに同意したことになります。',
                     'privacy_policy' => '私たちはお客様のプライバシーを尊重し、ご提供いただいた個人情報の保護に努めています。',

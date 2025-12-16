@@ -8,6 +8,7 @@ return [
     'view_details' => '詳細を見る',
 
     // Sidebar
+    'shop_name' => '店名',
     'location' => '所在地',
     'business_hours' => '営業時間',
     'phone' => '電話番号',
